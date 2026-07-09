@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/business.dart';
+import '../models/product.dart';
+import '../models/invoice.dart';
+import '../models/invoice_item.dart';
 import '../providers/business_provider.dart';
 import '../providers/auth_provider.dart';
 import '../providers/backup_provider.dart';
@@ -32,6 +35,129 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentStep = 0;
   bool _obscurePassword = true;
   bool _isCheckingBackup = false;
+
+  Future<void> _handleTestUserLogin() async {
+    setState(() {
+      _isCheckingBackup = true;
+    });
+    try {
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+      final productProvider = Provider.of<ProductProvider>(context, listen: false);
+      final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
+
+      // 1. Sign in as test user
+      await authProvider.signInAsTestUser();
+
+      // 2. Insert dummy business profile if not exists
+      final dbHelper = DbHelper();
+      final business = await dbHelper.getBusiness();
+      if (business == null) {
+        final newBusiness = Business(
+          name: "EasyToBill Debug Shop",
+          phone: "+91 99999 88888",
+          email: "testuser@easytobill.com",
+          address: "123 Test Street, Cyber City",
+          gstOrTin: "32AAAAA1111A1Z1",
+          upiId: "testuser@upi",
+          recoveryPasswordHash: CryptoUtils.hashPassword("1234"),
+          themeMode: "system",
+        );
+        await dbHelper.insertBusiness(newBusiness);
+      }
+      await businessProvider.loadBusiness();
+
+      // 3. Insert dummy products if not exists
+      final productsList = await dbHelper.getProducts();
+      if (productsList.isEmpty) {
+        final dummyProducts = [
+          Product(
+            name: "Premium Milk Shake",
+            barcode: "111111",
+            price: 120.0,
+            stockQuantity: 45,
+            lowStockThreshold: 10,
+            categoryName: "Beverages",
+          ),
+          Product(
+            name: "Chocolate Cake (1kg)",
+            barcode: "222222",
+            price: 650.0,
+            stockQuantity: 8,
+            lowStockThreshold: 5,
+            categoryName: "Bakery",
+          ),
+          Product(
+            name: "Mineral Water 1L",
+            barcode: "333333",
+            price: 20.0,
+            stockQuantity: 150,
+            lowStockThreshold: 20,
+            categoryName: "Beverages",
+          ),
+        ];
+        for (var p in dummyProducts) {
+          await dbHelper.insertProduct(p);
+        }
+      }
+      await productProvider.loadProducts();
+
+      // 4. Insert dummy invoices if not exists
+      final invoiceList = await dbHelper.getInvoices();
+      if (invoiceList.isEmpty) {
+        final currentProducts = await dbHelper.getProducts();
+        if (currentProducts.isNotEmpty) {
+          final firstProduct = currentProducts.first;
+          
+          final invoice1 = Invoice(
+            invoiceNumber: "INV-2026-0001",
+            dateTime: DateTime.now().subtract(const Duration(days: 1)),
+            totalAmount: firstProduct.price * 2,
+            taxAmount: 0.0,
+            discountAmount: 0.0,
+            grandTotal: firstProduct.price * 2,
+            paymentMethod: "UPI",
+            paymentStatus: "PAID",
+            customerPhone: "9876543210",
+            items: [
+              InvoiceItem(
+                productId: firstProduct.id ?? 1,
+                productName: firstProduct.name,
+                price: firstProduct.price,
+                quantity: 2,
+                subtotal: firstProduct.price * 2,
+              )
+            ],
+          );
+          
+          await dbHelper.checkout(invoice1);
+        }
+      }
+      await invoiceProvider.loadInvoices();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Logged in as Test User. Dummy store data loaded successfully!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error logging in as test user: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error setting up test user: $e")),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCheckingBackup = false;
+        });
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -373,7 +499,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                 if (_isCheckingBackup)
                   const CircularProgressIndicator()
-                else
+                else ...[
                   ElevatedButton.icon(
                     onPressed: () async {
                       final success = await authProvider.signIn();
@@ -395,6 +521,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: const [
+                      Expanded(child: Divider(endIndent: 10)),
+                      Text("OR", style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
+                      Expanded(child: Divider(indent: 10)),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  OutlinedButton.icon(
+                    onPressed: _handleTestUserLogin,
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    ),
+                    icon: const Icon(Icons.developer_mode_rounded, color: Color(0xFF2563EB)),
+                    label: const Text(
+                      "Sign In as Test User (Demo)",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
