@@ -164,6 +164,11 @@ class DbHelper {
     );
   }
 
+  Future<int> clearBusiness() async {
+    final db = await database;
+    return await db.delete('businesses');
+  }
+
   // ==========================================
   // CATEGORY OPERATIONS
   // ==========================================
@@ -469,5 +474,18 @@ class DbHelper {
       where: 'id = ?',
       whereArgs: [id],
     );
+  }
+
+  Future<void> clearDatabase() async {
+    final db = await database;
+    await db.transaction((txn) async {
+      await txn.delete('businesses');
+      await txn.delete('categories');
+      await txn.delete('products');
+      await txn.delete('invoices');
+      await txn.delete('invoice_items');
+      await txn.delete('stock_movements');
+      await txn.delete('printer_settings');
+    });
   }
 }

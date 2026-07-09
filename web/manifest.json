@@ -1,6 +1,6 @@
 {
-    "name": "billing_system_software",
-    "short_name": "billing_system_software",
+    "name": "EasyToBill",
+    "short_name": "EasyToBill",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
