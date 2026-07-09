@@ -305,92 +305,191 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
         );
       },
     );
-  }
-
-  Widget _buildCheckoutSection(
+  }  Widget _buildCheckoutSection(
     CartProvider cart,
     InvoiceProvider invoiceProvider,
     dynamic shop,
     String currency,
     ThemeData theme,
   ) {
+    final hasDiscount = cart.discountAmount > 0;
+    final hasTax = cart.taxRate > 0;
+
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       decoration: BoxDecoration(
         color: theme.cardColor,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 10,
-            offset: const Offset(0, -3),
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 20,
+            offset: const Offset(0, -4),
           )
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Subtotal / Discounts / Tax
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Subtotal (${cart.items.length} items)", style: TextStyle(color: theme.hintColor)),
-              Text("$currency${cart.totalAmount.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.w500)),
-            ],
-          ),
-          const SizedBox(height: 8),
-
-          // Custom overrides for discounts and taxes
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TextButton.icon(
-                onPressed: () => _showDiscountDialog(cart),
-                icon: const Icon(Icons.local_offer_outlined, size: 16),
-                label: Text(
-                  cart.discountAmount > 0 ? "Discount: -$currency${cart.discountAmount}" : "Apply Discount",
-                  style: const TextStyle(fontSize: 13),
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Subtotal row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Subtotal (${cart.items.length} items)",
+                  style: TextStyle(color: theme.hintColor, fontSize: 14, fontWeight: FontWeight.w500),
                 ),
-              ),
-              TextButton.icon(
-                onPressed: () => _showTaxDialog(cart),
-                icon: const Icon(Icons.receipt_outlined, size: 16),
-                label: Text(
-                  cart.taxRate > 0 ? "Tax: ${cart.taxRate}%" : "Add Tax/GST",
-                  style: const TextStyle(fontSize: 13),
+                Text(
+                  "$currency${cart.totalAmount.toStringAsFixed(2)}",
+                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                 ),
-              ),
-            ],
-          ),
-
-          const Divider(),
-
-          // Grand Total
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("Grand Total", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              Text(
-                "$currency${cart.grandTotal.toStringAsFixed(2)}",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.blueAccent),
-              ),
-            ],
-          ),
-
-          const SizedBox(height: 16),
-
-          // Proceed to checkout button
-          ElevatedButton(
-            onPressed: () => _showCheckoutModal(cart, invoiceProvider, shop, currency, theme),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blueAccent,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ],
             ),
-            child: const Text("PROCEED TO CHECKOUT", style: TextStyle(fontWeight: FontWeight.bold)),
-          ),
-        ],
+            const SizedBox(height: 12),
+
+            // Action Pills for Discount and Tax
+            Row(
+              children: [
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _showDiscountDialog(cart),
+                    borderRadius: BorderRadius.circular(12),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: hasDiscount 
+                            ? Colors.red.withOpacity(0.08) 
+                            : theme.dividerColor.withOpacity(0.05),
+                        border: Border.all(
+                          color: hasDiscount ? Colors.red.withOpacity(0.3) : theme.dividerColor.withOpacity(0.1),
+                          width: 1.5,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.local_offer_outlined,
+                            size: 16,
+                            color: hasDiscount ? Colors.red : theme.hintColor,
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              hasDiscount ? "Disc: -$currency${cart.discountAmount}" : "Apply Discount",
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: hasDiscount ? FontWeight.w600 : FontWeight.normal,
+                                color: hasDiscount ? Colors.red : theme.hintColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: InkWell(
+                    onTap: () => _showTaxDialog(cart),
+                    borderRadius: BorderRadius.circular(12),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: hasTax 
+                            ? Colors.blue.withOpacity(0.08) 
+                            : theme.dividerColor.withOpacity(0.05),
+                        border: Border.all(
+                          color: hasTax ? Colors.blue.withOpacity(0.3) : theme.dividerColor.withOpacity(0.1),
+                          width: 1.5,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.receipt_outlined,
+                            size: 16,
+                            color: hasTax ? Colors.blue : theme.hintColor,
+                          ),
+                          const SizedBox(width: 6),
+                          Flexible(
+                            child: Text(
+                              hasTax ? "Tax: ${cart.taxRate}%" : "Add Tax/GST",
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: hasTax ? FontWeight.w600 : FontWeight.normal,
+                                color: hasTax ? Colors.blue : theme.hintColor,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 16),
+
+            // Grand Total section
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "Grand Total",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+                Text(
+                  "$currency${cart.grandTotal.toStringAsFixed(2)}",
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
+                    color: theme.primaryColor,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 16),
+
+            // Proceed to checkout button
+            ElevatedButton(
+              onPressed: () => _showCheckoutModal(cart, invoiceProvider, shop, currency, theme),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.primaryColor,
+                foregroundColor: Colors.white,
+                elevation: 3,
+                shadowColor: theme.primaryColor.withOpacity(0.4),
+                padding: const EdgeInsets.symmetric(vertical: 18),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  Text(
+                    "PROCEED TO PAYMENT",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.8),
+                  ),
+                  SizedBox(width: 8),
+                  Icon(Icons.arrow_forward_rounded, size: 18),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -400,6 +499,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text("Apply Flat Discount"),
         content: TextField(
           controller: controller,
@@ -415,7 +515,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text("Cancel"),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               final amount = double.tryParse(controller.text) ?? 0.0;
               cart.setDiscountAmount(amount);
@@ -433,6 +533,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text("Set Tax Rate"),
         content: TextField(
           controller: controller,
@@ -448,7 +549,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
             onPressed: () => Navigator.pop(context),
             child: const Text("Cancel"),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () {
               final rate = double.tryParse(controller.text) ?? 0.0;
               cart.setTaxRate(rate);
@@ -479,7 +580,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
     _customerController.clear();
 
     final cashReceivedController = TextEditingController();
-    double changeAmount = 0.0;
+    double changeAmount = -cart.grandTotal;
 
     final invoiceNum = _generateInvoiceNumber();
 
@@ -496,7 +597,6 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
               invoiceNumber: invoiceNum,
             );
 
-            // Change calculation handler
             void updateChange(String val) {
               final rec = double.tryParse(val) ?? 0.0;
               setModalState(() {
@@ -507,7 +607,14 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
             return Container(
               decoration: BoxDecoration(
                 color: theme.canvasColor,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.15),
+                    blurRadius: 25,
+                    offset: const Offset(0, -5),
+                  )
+                ],
               ),
               padding: EdgeInsets.only(
                 top: 20,
@@ -524,64 +631,79 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text("POS Checkout Payment", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "POS Checkout Payment",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            Text(
+                              invoiceNum,
+                              style: TextStyle(color: theme.hintColor, fontSize: 12, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
                         IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () => Navigator.pop(context),
                         )
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 16),
 
                     // Customer details
                     TextField(
                       controller: _customerController,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: "Customer Mobile Number (Optional)",
-                        prefixIcon: Icon(Icons.person_outline),
-                        border: OutlineInputBorder(),
+                        prefixIcon: const Icon(Icons.phone_iphone_rounded),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
-                    // Payment Method selector chips
-                    const Text("Payment Method", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    const SizedBox(height: 8),
+                    // Payment Method title
+                    const Text(
+                      "Select Payment Method",
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 0.5),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Payment Method selector cards
                     Row(
                       children: [
-                        Expanded(
-                          child: ChoiceChip(
-                            label: const Text("CASH"),
-                            selected: selectedPayment == 'CASH',
-                            onSelected: (selected) {
-                              if (selected) setModalState(() => selectedPayment = 'CASH');
-                            },
-                          ),
+                        _buildPaymentMethodCard(
+                          title: "CASH",
+                          icon: Icons.payments_outlined,
+                          isSelected: selectedPayment == 'CASH',
+                          activeColor: const Color(0xFF10B981),
+                          onTap: () => setModalState(() => selectedPayment = 'CASH'),
+                          theme: theme,
                         ),
                         const SizedBox(width: 10),
-                        Expanded(
-                          child: ChoiceChip(
-                            label: const Text("UPI QR"),
-                            selected: selectedPayment == 'UPI',
-                            onSelected: (selected) {
-                              if (selected) setModalState(() => selectedPayment = 'UPI');
-                            },
-                          ),
+                        _buildPaymentMethodCard(
+                          title: "UPI QR",
+                          icon: Icons.qr_code_scanner_rounded,
+                          isSelected: selectedPayment == 'UPI',
+                          activeColor: Colors.blueAccent,
+                          onTap: () => setModalState(() => selectedPayment = 'UPI'),
+                          theme: theme,
                         ),
                         const SizedBox(width: 10),
-                        Expanded(
-                          child: ChoiceChip(
-                            label: const Text("CARD"),
-                            selected: selectedPayment == 'CARD',
-                            onSelected: (selected) {
-                              if (selected) setModalState(() => selectedPayment = 'CARD');
-                            },
-                          ),
+                        _buildPaymentMethodCard(
+                          title: "CARD",
+                          icon: Icons.credit_card_rounded,
+                          isSelected: selectedPayment == 'CARD',
+                          activeColor: Colors.purple,
+                          onTap: () => setModalState(() => selectedPayment = 'CARD'),
+                          theme: theme,
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 24),
 
                     // Dynamic inputs based on selection
                     if (selectedPayment == 'CASH') ...[
@@ -589,98 +711,228 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                         controller: cashReceivedController,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         onChanged: updateChange,
-                        decoration: const InputDecoration(
+                        decoration: InputDecoration(
                           labelText: "Cash Received",
                           prefixText: "₹ ",
-                          border: OutlineInputBorder(),
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
                         ),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                       ),
                       const SizedBox(height: 12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                      // Quick Cash Buttons
+                      const Text(
+                        "Quick Cash Suggestions",
+                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
                         children: [
-                          const Text("Balance Change:", style: TextStyle(fontSize: 15)),
-                          Text(
-                            "$currency${changeAmount >= 0 ? changeAmount.toStringAsFixed(2) : '0.00'}",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: changeAmount >= 0 ? Colors.green : Colors.red,
-                            ),
+                          _buildQuickCashButton(
+                            label: "Exact (${cart.grandTotal.toStringAsFixed(0)})",
+                            onTap: () {
+                              cashReceivedController.text = cart.grandTotal.toStringAsFixed(2);
+                              updateChange(cart.grandTotal.toStringAsFixed(2));
+                            },
+                            theme: theme,
+                          ),
+                          _buildQuickCashButton(
+                            label: "₹100",
+                            onTap: () {
+                              cashReceivedController.text = "100.00";
+                              updateChange("100.00");
+                            },
+                            theme: theme,
+                          ),
+                          _buildQuickCashButton(
+                            label: "₹200",
+                            onTap: () {
+                              cashReceivedController.text = "200.00";
+                              updateChange("200.00");
+                            },
+                            theme: theme,
+                          ),
+                          _buildQuickCashButton(
+                            label: "₹500",
+                            onTap: () {
+                              cashReceivedController.text = "500.00";
+                              updateChange("500.00");
+                            },
+                            theme: theme,
+                          ),
+                          _buildQuickCashButton(
+                            label: "Clear",
+                            onTap: () {
+                              cashReceivedController.clear();
+                              updateChange("0");
+                            },
+                            theme: theme,
                           ),
                         ],
                       ),
                       const SizedBox(height: 20),
+
+                      // Balance / Change Due banner
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 250),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: changeAmount >= 0 
+                              ? Colors.green.withOpacity(0.08) 
+                              : Colors.red.withOpacity(0.08),
+                          border: Border.all(
+                            color: changeAmount >= 0 ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3),
+                            width: 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              changeAmount >= 0 ? "Change Due to Customer:" : "Cash Shortage:",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: changeAmount >= 0 ? Colors.green : Colors.red,
+                              ),
+                            ),
+                            Text(
+                              "$currency${changeAmount.abs().toStringAsFixed(2)}",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: changeAmount >= 0 ? Colors.green : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                     ] else if (selectedPayment == 'UPI') ...[
                       if (upiString.isNotEmpty) ...[
                         const Text(
                           "Show QR Code to Customer:",
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                         ),
-                        const SizedBox(height: 10),
-                        // UPI QR code using custom library or standard image
+                        const SizedBox(height: 14),
                         Center(
                           child: Container(
-                            padding: const EdgeInsets.all(12),
+                            padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(color: Colors.grey.shade300),
+                              borderRadius: BorderRadius.circular(24),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.blueAccent.withOpacity(0.1),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 6),
+                                )
+                              ],
+                              border: Border.all(color: Colors.blueAccent.withOpacity(0.15), width: 2),
                             ),
-                            child: SizedBox(
-                              width: 160,
-                              height: 160,
-                              // Standard Image placeholder QR or render QR widget if available.
-                              // Since we imported qr or other tools, printing_bluetooth_thermal has qr helpers,
-                              // but to draw a clean QR Code in the UI, we can use a QR code widget or display the link.
-                              // Wait! The user will be wowed if we use an actual QR code generator widget.
-                              // Wait, is there a qr_flutter package? No, we didn't add it in pubspec.yaml.
-                              // But wait! We added `qr: ^3.0.2` in transitive dependencies or direct, or we can use raw Google chart API,
-                              // or generate/display a QR container using standard custom painters, or Google Charts QR API.
-                              // Using Google Charts QR API:
-                              // `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${Uri.encodeComponent(upiString)}`
-                              // This is simple, fast, and does NOT require complex local widgets. Since it's UPI checkout,
-                              // an internet connection is standard, but if they are offline we can fall back to the text/mac helper.
-                              // Let's use `Image.network` with qrserver api! That is incredibly clever, beautiful, and stable!
-                              child: Image.network(
-                                "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${Uri.encodeComponent(upiString)}",
-                                loadingBuilder: (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return const Center(child: CircularProgressIndicator());
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Center(
-                                    child: Icon(Icons.qr_code, size: 80, color: Colors.blueGrey),
-                                  );
-                                },
-                              ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 180,
+                                  height: 180,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(16),
+                                    color: Colors.grey.shade50,
+                                  ),
+                                  child: Image.network(
+                                    "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${Uri.encodeComponent(upiString)}",
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return const Center(child: CircularProgressIndicator());
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Center(
+                                        child: Icon(Icons.qr_code_2_rounded, size: 100, color: Colors.blueGrey),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(Icons.check_circle_rounded, color: Colors.blueAccent, size: 16),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      "Scan to Pay: $currency${cart.grandTotal.toStringAsFixed(2)}",
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.black87),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          "Amount: $currency${cart.grandTotal.toStringAsFixed(2)}",
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 16),
                         const Text(
                           "Verify the payment has reached your bank account before completing checkout.",
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 12, color: Colors.grey, fontStyle: FontStyle.italic),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 24),
                       ] else ...[
-                        const Center(child: Text("UPI configurations missing in settings")),
-                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.red.withOpacity(0.06),
+                            border: Border.all(color: Colors.red.withOpacity(0.2), width: 1.5),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Column(
+                            children: const [
+                              Icon(Icons.warning_amber_rounded, size: 40, color: Colors.red),
+                              SizedBox(height: 10),
+                              Text(
+                                "UPI configurations missing in settings",
+                                style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 24),
                       ],
+                    ] else if (selectedPayment == 'CARD') ...[
+                      Container(
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.purple.withOpacity(0.06),
+                          border: Border.all(color: Colors.purple.withOpacity(0.2), width: 1.5),
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          children: [
+                            const Icon(Icons.contactless_outlined, size: 50, color: Colors.purple),
+                            const SizedBox(height: 12),
+                            const Text(
+                              "Swipe, Dip, or Tap Card",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.purple),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              "Please initiate transaction for $currency${cart.grandTotal.toStringAsFixed(2)} on your physical card terminal.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 13, color: theme.hintColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
                     ],
 
                     // Complete checkout button
                     ElevatedButton(
                       onPressed: () async {
-                        // Validate Cash Received if payment is Cash
                         if (selectedPayment == 'CASH') {
                           final rec = double.tryParse(cashReceivedController.text) ?? 0.0;
                           if (rec < cart.grandTotal) {
@@ -691,7 +943,6 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           }
                         }
 
-                        // Build invoice items list
                         final List<InvoiceItem> items = List.from(cart.items);
 
                         final invoice = Invoice(
@@ -702,30 +953,25 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           discountAmount: cart.discountAmount,
                           grandTotal: cart.grandTotal,
                           paymentMethod: selectedPayment,
-                          paymentStatus: 'PAID', // mark paid immediately
+                          paymentStatus: 'PAID',
                           customerPhone: _customerController.text.trim(),
                           items: items,
                         );
 
-                        // Trigger DB insertion & stock decrement
                         final invoiceId = await invoiceProvider.checkout(invoice);
 
                         if (invoiceId > 0 && context.mounted) {
-                          // Fetch the created invoice with hydrated items
                           final finalInvoice = await DbHelper().getInvoiceById(invoiceId);
                           
                           if (context.mounted) {
-                            // Clear cart
                             cart.clear();
-                            Navigator.pop(context); // close bottom sheet
+                            Navigator.pop(context);
 
-                            // Prompt for receipt print or print automatically
                             if (finalInvoice != null) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 const SnackBar(content: Text("Checkout Completed!"), backgroundColor: Colors.green),
                               );
                               
-                              // Auto print option or show receipt modal
                               showModalBottomSheet(
                                 context: context,
                                 isScrollControlled: true,
@@ -739,10 +985,21 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        elevation: 2,
                       ),
-                      child: const Text("COMPLETE TRANSACTION", style: TextStyle(fontWeight: FontWeight.bold)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: const [
+                          Icon(Icons.check_circle_outline_rounded, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            "COMPLETE TRANSACTION",
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.8),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -751,6 +1008,80 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
           },
         );
       },
+    );
+  }
+
+  Widget _buildPaymentMethodCard({
+    required String title,
+    required IconData icon,
+    required bool isSelected,
+    required Color activeColor,
+    required VoidCallback onTap,
+    required ThemeData theme,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            color: isSelected ? activeColor.withOpacity(0.08) : theme.cardColor,
+            border: Border.all(
+              color: isSelected ? activeColor : theme.dividerColor.withOpacity(0.15),
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: activeColor.withOpacity(0.1),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    )
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: isSelected ? activeColor : theme.hintColor,
+                size: 28,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13,
+                  color: isSelected ? activeColor : theme.textTheme.bodyMedium?.color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickCashButton({
+    required String label,
+    required VoidCallback onTap,
+    required ThemeData theme,
+  }) {
+    return ElevatedButton(
+      onPressed: onTap,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: theme.dividerColor.withOpacity(0.06),
+        foregroundColor: theme.textTheme.bodyMedium?.color,
+        elevation: 0,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
     );
   }
 }
