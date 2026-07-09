@@ -544,8 +544,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               width: 1,
             ),
           ),
-          child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Material(
+              color: Colors.transparent,
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             leading: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -612,8 +616,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             onTap: () => _showInvoiceDetail(context, invoice),
           ),
-        );
-      }).toList(),
+        ),
+      ),
+    );
+  }).toList(),
     );
   }
 

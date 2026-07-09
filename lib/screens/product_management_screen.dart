@@ -21,6 +21,11 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) {
+        setState(() {});
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<ProductProvider>(context, listen: false);
       provider.loadProducts();
@@ -35,14 +40,32 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
     super.dispose();
   }
 
+  Color _getAvatarColorForLetter(String letter) {
+    if (letter.isEmpty) return const Color(0xFF3B82F6);
+    final int code = letter.codeUnitAt(0);
+    final List<Color> colors = [
+      const Color(0xFF2563EB), // Blue
+      const Color(0xFF10B981), // Emerald
+      const Color(0xFFF59E0B), // Amber
+      const Color(0xFFEF4444), // Red
+      const Color(0xFF8B5CF6), // Purple
+      const Color(0xFFEC4899), // Pink
+      const Color(0xFF06B6D4), // Cyan
+      const Color(0xFF14B8A6), // Teal
+    ];
+    return colors[code % colors.length];
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<ProductProvider>(context);
     final theme = Theme.of(context);
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text("Catalog Management", style: TextStyle(fontWeight: FontWeight.bold)),
+        elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.history_toggle_off_outlined),
@@ -57,6 +80,10 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
         ],
         bottom: TabBar(
           controller: _tabController,
+          indicatorColor: Colors.white,
+          indicatorWeight: 3,
+          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 15),
           tabs: const [
             Tab(text: "Products", icon: Icon(Icons.shopping_bag_outlined)),
             Tab(text: "Categories", icon: Icon(Icons.category_outlined)),
@@ -70,7 +97,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
           _buildCategoriesTab(provider, theme),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           if (_tabController.index == 0) {
             _showProductFormDialog(context, provider);
@@ -78,7 +105,10 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
             _showCategoryFormDialog(context, provider);
           }
         },
-        child: const Icon(Icons.add),
+        backgroundColor: const Color(0xFF2563EB),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: Text(_tabController.index == 0 ? "New Product" : "New Category"),
       ),
     );
   }
@@ -90,38 +120,36 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   Widget _buildProductsTab(ProductProvider provider, ThemeData theme) {
     return Column(
       children: [
-        // Search & Filter header
+        // Search header
         Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _searchController,
-                  onChanged: provider.setSearchQuery,
-                  decoration: InputDecoration(
-                    hintText: "Search products...",
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                ),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: TextField(
+            controller: _searchController,
+            onChanged: provider.setSearchQuery,
+            decoration: InputDecoration(
+              hintText: "Search by name or barcode...",
+              prefixIcon: const Icon(Icons.search_rounded),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
+                tooltip: "Scan Barcode to Search",
+                onPressed: () async {
+                  final scannedCode = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const BarcodeScannerScreen()),
+                  );
+                  if (scannedCode != null && scannedCode.isNotEmpty) {
+                    _searchController.text = scannedCode;
+                    provider.setSearchQuery(scannedCode);
+                  }
+                },
               ),
-              const SizedBox(width: 10),
-              // Category filter dropdown
-              DropdownButton<int?>(
-                value: provider.selectedCategoryId,
-                hint: const Text("All"),
-                underline: const SizedBox(),
-                icon: const Icon(Icons.filter_alt_outlined),
-                items: [
-                  const DropdownMenuItem<int?>(value: null, child: Text("All Categories")),
-                  ...provider.categories.map((c) => DropdownMenuItem<int?>(value: c.id, child: Text(c.name))),
-                ],
-                onChanged: provider.setSelectedCategoryId,
-              ),
-            ],
+            ),
           ),
         ),
+
+        // Horizontal Category filter chips
+        _buildCategoryFilterChips(provider),
+        const SizedBox(height: 8),
 
         // Products List
         Expanded(
@@ -132,51 +160,242 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.inventory_2_outlined, size: 64, color: theme.hintColor.withOpacity(0.3)),
+                          Icon(Icons.inventory_2_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
                           const SizedBox(height: 16),
-                          Text("No products found in catalog", style: TextStyle(color: theme.hintColor)),
+                          const Text(
+                            "No products found in catalog",
+                            style: TextStyle(color: Color(0xFF64748B), fontSize: 16, fontWeight: FontWeight.w500),
+                          ),
                         ],
                       ),
                     )
                   : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       itemCount: provider.filteredProducts.length,
                       itemBuilder: (context, index) {
                         final product = provider.filteredProducts[index];
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 10),
-                          child: ListTile(
-                            title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("SKU/Barcode: ${product.barcode}"),
-                                if (product.categoryName != null) Text("Category: ${product.categoryName}"),
-                              ],
-                            ),
-                            trailing: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Text("Price: ₹${product.price.toStringAsFixed(2)}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                                Text(
-                                  product.isTracked ? "Stock: ${product.stockQuantity}" : "Unlimited Stock",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: product.isTracked && product.stockQuantity <= product.lowStockThreshold
-                                        ? Colors.red
-                                        : theme.hintColor,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            onTap: () => _showProductFormDialog(context, provider, product: product),
-                          ),
-                        );
+                        return _buildProductCard(product, provider, theme);
                       },
                     ),
         ),
       ],
+    );
+  }
+
+  Widget _buildCategoryFilterChips(ProductProvider provider) {
+    return Container(
+      height: 40,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: provider.categories.length + 1,
+        itemBuilder: (context, index) {
+          final isAll = index == 0;
+          final category = isAll ? null : provider.categories[index - 1];
+          final isSelected = isAll 
+              ? provider.selectedCategoryId == null 
+              : provider.selectedCategoryId == category?.id;
+
+          return Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: ChoiceChip(
+              label: Text(isAll ? "All Products" : category!.name),
+              selected: isSelected,
+              onSelected: (selected) {
+                provider.setSelectedCategoryId(isAll ? null : category!.id);
+              },
+              selectedColor: const Color(0xFF2563EB).withOpacity(0.15),
+              labelStyle: TextStyle(
+                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+              ),
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+                side: BorderSide(
+                  color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+                  width: 1,
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildProductCard(Product product, ProductProvider provider, ThemeData theme) {
+    final hasLowStock = product.isTracked && product.stockQuantity <= product.lowStockThreshold;
+    final isOutOfStock = product.isTracked && product.stockQuantity == 0;
+    
+    Color stockBadgeColor;
+    Color stockTextColor;
+    String stockLabel;
+    
+    if (!product.isTracked) {
+      stockBadgeColor = const Color(0xFFF1F5F9);
+      stockTextColor = const Color(0xFF475569);
+      stockLabel = "Unlimited";
+    } else if (isOutOfStock) {
+      stockBadgeColor = const Color(0xFFFEF2F2);
+      stockTextColor = const Color(0xFFEF4444);
+      stockLabel = "Out of Stock";
+    } else if (hasLowStock) {
+      stockBadgeColor = const Color(0xFFFFF7ED);
+      stockTextColor = const Color(0xFFF97316);
+      stockLabel = "Low Stock: ${product.stockQuantity}";
+    } else {
+      stockBadgeColor = const Color(0xFFECFDF5);
+      stockTextColor = const Color(0xFF10B981);
+      stockLabel = "Stock: ${product.stockQuantity}";
+    }
+
+    final firstLetter = product.name.isNotEmpty ? product.name[0].toUpperCase() : '?';
+    final avatarColor = _getAvatarColorForLetter(firstLetter);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _showProductFormDialog(context, provider, product: product),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: avatarColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Center(
+                      child: Text(
+                        firstLetter,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: avatarColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF0F172A),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(Icons.qr_code, size: 12, color: Color(0xFF94A3B8)),
+                            const SizedBox(width: 4),
+                            Text(
+                              product.barcode,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF64748B),
+                                fontFamily: "monospace",
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            if (product.categoryName != null) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFEFF6FF),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  product.categoryName!,
+                                  style: const TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                    color: Color(0xFF2563EB),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: stockBadgeColor,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                stockLabel,
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: stockTextColor,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "₹${product.price.toStringAsFixed(2)}",
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                      if (product.costPrice > 0) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          "Cost: ₹${product.costPrice.toStringAsFixed(2)}",
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFF94A3B8),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -192,39 +411,127 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.category_outlined, size: 64, color: theme.hintColor.withOpacity(0.3)),
+                    Icon(Icons.category_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
                     const SizedBox(height: 16),
-                    Text("No categories added yet", style: TextStyle(color: theme.hintColor)),
+                    const Text(
+                      "No categories added yet",
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 16, fontWeight: FontWeight.w500),
+                    ),
                   ],
                 ),
               )
             : ListView.builder(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                 itemCount: provider.categories.length,
                 itemBuilder: (context, index) {
                   final category = provider.categories[index];
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    child: ListTile(
-                      title: Text(category.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(category.description.isNotEmpty ? category.description : "No description"),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit_outlined),
-                            onPressed: () => _showCategoryFormDialog(context, provider, category: category),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                            onPressed: () => _showCategoryDeleteDialog(context, provider, category.id!),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+                  return _buildCategoryCard(category, provider, theme);
                 },
               );
+  }
+
+  Widget _buildCategoryCard(Category category, ProductProvider provider, ThemeData theme) {
+    final productsCount = provider.products.where((p) => p.categoryId == category.id).length;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withOpacity(0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFF6FF),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(
+            Icons.folder_open_rounded,
+            color: Color(0xFF2563EB),
+            size: 22,
+          ),
+        ),
+        title: Text(
+          category.name,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFF0F172A),
+          ),
+        ),
+        subtitle: Text(
+          category.description.isNotEmpty ? category.description : "No description provided",
+          style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                "$productsCount ${productsCount == 1 ? 'item' : 'items'}",
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF475569),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert_rounded, color: Color(0xFF64748B)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              onSelected: (value) {
+                if (value == 'edit') {
+                  _showCategoryFormDialog(context, provider, category: category);
+                } else if (value == 'delete') {
+                  _showCategoryDeleteDialog(context, provider, category.id!);
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'edit',
+                  child: Row(
+                    children: [
+                      Icon(Icons.edit_outlined, size: 18, color: Color(0xFF475569)),
+                      SizedBox(width: 8),
+                      Text("Edit Category"),
+                    ],
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'delete',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_outline_rounded, size: 18, color: Colors.redAccent),
+                      SizedBox(width: 8),
+                      Text("Delete", style: TextStyle(color: Colors.redAccent)),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   // ==========================================
@@ -250,7 +557,25 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
         return StatefulBuilder(
           builder: (context, setModalState) {
             return AlertDialog(
-              title: Text(product == null ? "Add Product" : "Edit Product"),
+              backgroundColor: Colors.white,
+              surfaceTintColor: Colors.transparent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+              titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+              actionsPadding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+              title: Row(
+                children: [
+                  Icon(
+                    product == null ? Icons.add_shopping_cart_rounded : Icons.edit_note_rounded,
+                    color: const Color(0xFF2563EB),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    product == null ? "Add Product" : "Edit Product",
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                  ),
+                ],
+              ),
               content: Form(
                 key: formKey,
                 child: SingleChildScrollView(
@@ -259,21 +584,22 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                     children: [
                       TextFormField(
                         controller: nameController,
-                        decoration: const InputDecoration(labelText: "Product Name *"),
+                        decoration: const InputDecoration(
+                          labelText: "Product Name *",
+                          hintText: "Enter product name",
+                          prefixIcon: Icon(Icons.shopping_bag_outlined),
+                        ),
                         validator: (v) => v == null || v.trim().isEmpty ? "Name is required" : null,
                       ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: barcodeController,
-                              decoration: const InputDecoration(labelText: "Barcode / SKU *"),
-                              validator: (v) => v == null || v.trim().isEmpty ? "Barcode is required" : null,
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.qr_code_scanner),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: barcodeController,
+                        decoration: InputDecoration(
+                          labelText: "Barcode / SKU *",
+                          hintText: "Scan or enter barcode",
+                          prefixIcon: const Icon(Icons.qr_code),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
                             onPressed: () async {
                               final scannedCode = await Navigator.push(
                                 context,
@@ -286,64 +612,97 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                               }
                             },
                           ),
-                        ],
+                        ),
+                        validator: (v) => v == null || v.trim().isEmpty ? "Barcode is required" : null,
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 16),
                       DropdownButtonFormField<int?>(
                         value: selectedCatId,
-                        decoration: const InputDecoration(labelText: "Category"),
+                        decoration: const InputDecoration(
+                          labelText: "Category",
+                          prefixIcon: Icon(Icons.category_outlined),
+                        ),
                         items: [
                           const DropdownMenuItem<int?>(value: null, child: Text("None")),
                           ...provider.categories.map((c) => DropdownMenuItem<int?>(value: c.id, child: Text(c.name))),
                         ],
                         onChanged: (val) => setModalState(() => selectedCatId = val),
                       ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 16),
                       Row(
                         children: [
                           Expanded(
                             child: TextFormField(
                               controller: priceController,
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              decoration: const InputDecoration(labelText: "Selling Price *"),
+                              decoration: const InputDecoration(
+                                labelText: "Selling Price *",
+                                prefixText: "₹ ",
+                                prefixIcon: Icon(Icons.sell_outlined),
+                              ),
                               validator: (v) => v == null || double.tryParse(v) == null ? "Invalid price" : null,
                             ),
                           ),
-                          const SizedBox(width: 10),
+                          const SizedBox(width: 12),
                           Expanded(
                             child: TextFormField(
                               controller: costController,
                               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              decoration: const InputDecoration(labelText: "Cost Price"),
+                              decoration: const InputDecoration(
+                                labelText: "Cost Price",
+                                prefixText: "₹ ",
+                                prefixIcon: Icon(Icons.money_off_csred_outlined),
+                              ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 10),
-                      SwitchListTile(
-                        title: const Text("Track Inventory Stock"),
-                        value: isTracked,
-                        contentPadding: EdgeInsets.zero,
-                        onChanged: (val) => setModalState(() => isTracked = val),
+                      const SizedBox(height: 16),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                        ),
+                        child: SwitchListTile(
+                          title: const Text(
+                            "Track Inventory Stock",
+                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          ),
+                          subtitle: const Text(
+                            "Automatically monitor and update stock levels",
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          value: isTracked,
+                          activeColor: const Color(0xFF2563EB),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                          onChanged: (val) => setModalState(() => isTracked = val),
+                        ),
                       ),
                       if (isTracked) ...[
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 16),
                         Row(
                           children: [
                             Expanded(
                               child: TextFormField(
                                 controller: stockController,
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(labelText: "Current Stock"),
+                                decoration: const InputDecoration(
+                                  labelText: "Current Stock",
+                                  prefixIcon: Icon(Icons.inventory_2_outlined),
+                                ),
                                 validator: (v) => v == null || int.tryParse(v) == null ? "Invalid count" : null,
                               ),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 12),
                             Expanded(
                               child: TextFormField(
                                 controller: thresholdController,
                                 keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(labelText: "Low Threshold"),
+                                decoration: const InputDecoration(
+                                  labelText: "Low Threshold",
+                                  prefixIcon: Icon(Icons.warning_amber_rounded),
+                                ),
                                 validator: (v) => v == null || int.tryParse(v) == null ? "Invalid threshold" : null,
                               ),
                             ),
@@ -357,20 +716,26 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel"),
+                  child: const Text("Cancel", style: TextStyle(color: Color(0xFF64748B))),
                 ),
                 if (product != null)
                   TextButton(
                     onPressed: () async {
-                      final ok = await provider.deleteProduct(product.id!);
-                      if (context.mounted) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(ok ? "Product deleted" : "Delete failed")),
-                        );
+                      final confirm = await _showProductDeleteConfirmDialog(context);
+                      if (confirm == true) {
+                        final ok = await provider.deleteProduct(product.id!);
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(ok ? "Product deleted successfully" : "Delete failed"),
+                              backgroundColor: ok ? Colors.green : Colors.red,
+                            ),
+                          );
+                        }
                       }
                     },
-                    child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                    child: const Text("Delete", style: TextStyle(color: Colors.redAccent)),
                   ),
                 ElevatedButton(
                   onPressed: () async {
@@ -412,6 +777,11 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       );
                     }
                   },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF2563EB),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                  ),
                   child: const Text("Save"),
                 ),
               ],
@@ -419,6 +789,34 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
           },
         );
       },
+    );
+  }
+
+  Future<bool?> _showProductDeleteConfirmDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Delete Product?", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text("Are you sure you want to permanently delete this product? This action cannot be undone."),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text("Cancel", style: TextStyle(color: Color(0xFF64748B))),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -433,8 +831,27 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
 
     showDialog(
       context: context,
+      barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: Text(category == null ? "Add Category" : "Edit Category"),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+        title: Row(
+          children: [
+            Icon(
+              category == null ? Icons.create_new_folder_rounded : Icons.folder_shared_rounded,
+              color: const Color(0xFF2563EB),
+            ),
+            const SizedBox(width: 10),
+            Text(
+              category == null ? "Add Category" : "Edit Category",
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+          ],
+        ),
         content: Form(
           key: formKey,
           child: Column(
@@ -442,13 +859,21 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
             children: [
               TextFormField(
                 controller: nameController,
-                decoration: const InputDecoration(labelText: "Category Name *"),
+                decoration: const InputDecoration(
+                  labelText: "Category Name *",
+                  hintText: "e.g., Beverages, Snacks",
+                  prefixIcon: Icon(Icons.folder_open_rounded),
+                ),
                 validator: (v) => v == null || v.trim().isEmpty ? "Name is required" : null,
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: descController,
-                decoration: const InputDecoration(labelText: "Description"),
+                decoration: const InputDecoration(
+                  labelText: "Description",
+                  hintText: "Enter a brief description",
+                  prefixIcon: Icon(Icons.description_outlined),
+                ),
               ),
             ],
           ),
@@ -456,7 +881,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: const Text("Cancel", style: TextStyle(color: Color(0xFF64748B))),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -481,12 +906,17 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success ? "Category saved!" : "Failed. Name might be duplicate."),
+                    content: Text(success ? "Category saved successfully!" : "Failed. Name might be duplicate."),
                     backgroundColor: success ? Colors.green : Colors.red,
                   ),
                 );
               }
             },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF2563EB),
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
             child: const Text("Save"),
           ),
         ],
@@ -498,26 +928,37 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Delete Category?"),
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Delete Category?", style: TextStyle(fontWeight: FontWeight.bold)),
         content: const Text(
           "Deleting this category will set the category to 'None' for all related products. Product records themselves will NOT be deleted.",
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: const Text("Cancel", style: TextStyle(color: Color(0xFF64748B))),
           ),
-          TextButton(
+          ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
               final ok = await provider.deleteCategory(id);
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(ok ? "Category deleted" : "Delete failed")),
+                  SnackBar(
+                    content: Text(ok ? "Category deleted" : "Delete failed"),
+                    backgroundColor: ok ? Colors.green : Colors.red,
+                  ),
                 );
               }
             },
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              foregroundColor: Colors.white,
+              elevation: 0,
+            ),
+            child: const Text("Delete"),
           ),
         ],
       ),

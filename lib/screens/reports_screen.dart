@@ -173,35 +173,41 @@ class _ReportsScreenState extends State<ReportsScreen> {
                       final invoice = filteredInvoices[index];
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
-                        child: ListTile(
-                          title: Text(invoice.invoiceNumber, style: const TextStyle(fontWeight: FontWeight.bold)),
-                          subtitle: Text(DateFormat('dd MMM, hh:mm a').format(invoice.dateTime)),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                "$currency${invoice.grandTotal.toStringAsFixed(2)}",
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: ListTile(
+                              title: Text(invoice.invoiceNumber, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text(DateFormat('dd MMM, hh:mm a').format(invoice.dateTime)),
+                              trailing: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    "$currency${invoice.grandTotal.toStringAsFixed(2)}",
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                  ),
+                                  Text(
+                                    "${invoice.paymentMethod} - ${invoice.paymentStatus}",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: invoice.paymentMethod == 'CASH' ? Colors.green : Colors.blue,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                "${invoice.paymentMethod} - ${invoice.paymentStatus}",
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: invoice.paymentMethod == 'CASH' ? Colors.green : Colors.blue,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
+                              onTap: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) => InvoiceDetailSheet(invoice: invoice),
+                                );
+                              },
+                            ),
                           ),
-                          onTap: () {
-                            showModalBottomSheet(
-                              context: context,
-                              isScrollControlled: true,
-                              backgroundColor: Colors.transparent,
-                              builder: (context) => InvoiceDetailSheet(invoice: invoice),
-                            );
-                          },
                         ),
                       );
                     },

@@ -246,6 +246,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     icon: Icon(obscureText ? Icons.visibility_off : Icons.visibility),
                     onPressed: () => setDialogState(() => obscureText = !obscureText),
                   ),
+                  filled: true,
+                  fillColor: const Color(0xFFF8FAFC),
                 ),
               ),
             ],
@@ -627,7 +629,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ],
                     ),
                     padding: const EdgeInsets.all(24.0),
-                    child: _buildStepper(theme),
+                    child: Theme(
+                      data: theme.copyWith(
+                        inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+                          fillColor: const Color(0xFFF8FAFC),
+                        ),
+                      ),
+                      child: _buildStepper(theme),
+                    ),
                   ),
                   
                   const SizedBox(height: 24),
