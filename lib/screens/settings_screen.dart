@@ -10,6 +10,7 @@ import '../providers/invoice_provider.dart';
 import '../models/printer_settings.dart';
 import '../models/business.dart';
 import '../data/db_helper.dart';
+import '../utils/crypto_utils.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -581,6 +582,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onPressed: () async {
               final password = _passwordPromptController.text;
               if (password.isEmpty) return;
+
+              // Validate password against current business recovery password hash
+              final shop = Provider.of<BusinessProvider>(context, listen: false).business;
+              if (shop != null) {
+                final hash = CryptoUtils.hashPassword(password);
+                if (hash != shop.recoveryPasswordHash) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Incorrect Recovery Password / PIN!"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                  return;
+                }
+              }
+
               Navigator.pop(context); // Close dialog
 
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Syncing backup to Google Drive...")));

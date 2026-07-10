@@ -40,9 +40,11 @@ class ProductProvider extends ChangeNotifier {
 
   // Filtered lists
   List<Product> get filteredProducts {
+    final query = _searchQuery.trim().toLowerCase();
     return _products.where((product) {
-      final matchesSearch = product.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          product.barcode.contains(_searchQuery);
+      final matchesSearch = query.isEmpty ||
+          product.name.toLowerCase().contains(query) ||
+          product.barcode.contains(query);
       final matchesCategory = _selectedCategoryId == null || product.categoryId == _selectedCategoryId;
       return matchesSearch && matchesCategory;
     }).toList();

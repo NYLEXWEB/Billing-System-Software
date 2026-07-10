@@ -40,11 +40,20 @@ class DbHelper {
       version: 1,
       onCreate: _onCreate,
       onConfigure: _onConfigure,
+      onOpen: _onOpen,
     );
   }
 
   Future<void> _onConfigure(Database db) async {
     await db.execute('PRAGMA foreign_keys = ON');
+  }
+
+  Future<void> _onOpen(Database db) async {
+    // Optimizations: Create indexes if not exists to speed up joins and query filtering
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_products_category ON products(categoryId)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_invoices_datetime ON invoices(dateTime DESC)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_invoice_items_invoice ON invoice_items(invoiceId)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_stock_movements_product ON stock_movements(productId)');
   }
 
   Future<void> _onCreate(Database db, int version) async {

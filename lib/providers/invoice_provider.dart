@@ -60,26 +60,23 @@ class InvoiceProvider extends ChangeNotifier {
   // ==========================================
 
   double get salesToday {
-    final now = DateTime.now();
-    final todayStr = DateFormat('yyyy-MM-dd').format(now);
+    final today = DateTime.now();
     return _invoices
-        .where((inv) => DateFormat('yyyy-MM-dd').format(inv.dateTime) == todayStr)
+        .where((inv) => inv.dateTime.year == today.year && inv.dateTime.month == today.month && inv.dateTime.day == today.day)
         .fold(0.0, (sum, inv) => sum + inv.grandTotal);
   }
 
   double get salesThisMonth {
-    final now = DateTime.now();
-    final monthStr = DateFormat('yyyy-MM').format(now);
+    final today = DateTime.now();
     return _invoices
-        .where((inv) => DateFormat('yyyy-MM').format(inv.dateTime) == monthStr)
+        .where((inv) => inv.dateTime.year == today.year && inv.dateTime.month == today.month)
         .fold(0.0, (sum, inv) => sum + inv.grandTotal);
   }
 
   int get ordersTodayCount {
-    final now = DateTime.now();
-    final todayStr = DateFormat('yyyy-MM-dd').format(now);
+    final today = DateTime.now();
     return _invoices
-        .where((inv) => DateFormat('yyyy-MM-dd').format(inv.dateTime) == todayStr)
+        .where((inv) => inv.dateTime.year == today.year && inv.dateTime.month == today.month && inv.dateTime.day == today.day)
         .length;
   }
 
@@ -96,13 +93,17 @@ class InvoiceProvider extends ChangeNotifier {
     final List<DailySalesPoint> points = [];
     final now = DateTime.now();
 
-    for (int i = 6; i >= 0; i--) {
-      final targetDate = now.subtract(Duration(days: i));
-      final dateStr = DateFormat('yyyy-MM-dd').format(targetDate);
-      final label = DateFormat('E').format(targetDate); // e.g. "Mon"
+    final List<DateTime> targetDays = List.generate(7, (i) => now.subtract(Duration(days: 6 - i)));
+    final List<String> labels = targetDays.map((date) => DateFormat('E').format(date)).toList();
+    final List<String> dateStrs = targetDays.map((date) => DateFormat('yyyy-MM-dd').format(date)).toList();
+
+    for (int i = 0; i < 7; i++) {
+      final targetDate = targetDays[i];
+      final label = labels[i];
+      final dateStr = dateStrs[i];
 
       final daySales = _invoices
-          .where((inv) => DateFormat('yyyy-MM-dd').format(inv.dateTime) == dateStr)
+          .where((inv) => inv.dateTime.year == targetDate.year && inv.dateTime.month == targetDate.month && inv.dateTime.day == targetDate.day)
           .fold(0.0, (sum, inv) => sum + inv.grandTotal);
 
       points.add(DailySalesPoint(dateStr: dateStr, label: label, amount: daySales));

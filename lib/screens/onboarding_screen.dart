@@ -35,6 +35,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentStep = 0;
   bool _obscurePassword = true;
   bool _isCheckingBackup = false;
+  bool _hasCheckedBackup = false;
 
   Future<void> _handleTestUserLogin() async {
     setState(() {
@@ -162,12 +163,22 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      if (authProvider.isAuthenticated) {
-        _checkForBackup(authProvider);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final authProvider = Provider.of<AuthProvider>(context);
+    if (authProvider.isAuthenticated) {
+      if (!_hasCheckedBackup && !_isCheckingBackup) {
+        _hasCheckedBackup = true;
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _checkForBackup(authProvider);
+        });
       }
-    });
+    } else {
+      _hasCheckedBackup = false;
+    }
   }
 
   @override
