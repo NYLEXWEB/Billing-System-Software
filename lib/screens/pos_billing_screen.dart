@@ -1140,6 +1140,9 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                         final invoiceId = await invoiceProvider.checkout(invoice);
 
                         if (invoiceId > 0 && context.mounted) {
+                          // Reload products to update stock quantities in the POS UI
+                          Provider.of<ProductProvider>(context, listen: false).loadProducts();
+                          
                           final finalInvoice = await DbHelper().getInvoiceById(invoiceId);
                           
                           if (context.mounted) {
