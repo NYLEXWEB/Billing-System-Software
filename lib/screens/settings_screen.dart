@@ -11,6 +11,7 @@ import '../models/printer_settings.dart';
 import '../models/business.dart';
 import '../data/db_helper.dart';
 import '../utils/crypto_utils.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -607,6 +608,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 password: password,
               );
 
+              if (ok) {
+                const storage = FlutterSecureStorage();
+                await storage.write(key: 'recovery_passphrase', value: password);
+              }
+
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -654,39 +660,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
               final password = _passwordPromptController.text;
               if (password.isEmpty) return;
               Navigator.pop(context); // Close dialog
-
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Downloading backup file...")));
-
-              final ok = await backup.restoreFromGoogleDrive(
-                googleSignIn: auth.googleSignIn,
-                password: password,
-                onDatabaseReload: () async {
-                  // Invalidate current state and force SQLite databases to reload in providers
-                  final pProvider = Provider.of<ProductProvider>(context, listen: false);
-                  final iProvider = Provider.of<InvoiceProvider>(context, listen: false);
-                  final bProvider = Provider.of<BusinessProvider>(context, listen: false);
-
-                  await bProvider.loadBusiness();
-                  await pProvider.loadProducts();
-                  await pProvider.loadCategories();
-                  await iProvider.loadInvoices();
-                },
-              );
-
-              if (context.mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(ok ? "Decrypted Restore Finished!" : "Decryption failed. Incorrect passphrase or missing cloud backup."),
-                    backgroundColor: ok ? Colors.green : Colors.red,
-                  ),
-                );
-              }
+              _triggerRestoreAction(context, auth, backup, password);
             },
             child: const Text("Restore"),
           ),
         ],
       ),
     );
+  }
+
+  void _triggerRestoreAction(BuildContext context, AuthProvider auth, BackupProvider backup, String password) async {
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Downloading backup file...")));
+
+    final ok = await backup.restoreFromGoogleDrive(
+      googleSignIn: auth.googleSignIn,
+      password: password,
+      onDatabaseReload: () async {
+        final pProvider = Provider.of<ProductProvider>(context, listen: false);
+        final iProvider = Provider.of<InvoiceProvider>(context, listen: false);
+        final bProvider = Provider.of<BusinessProvider>(context, listen: false);
+
+        await bProvider.loadBusiness();
+        await pProvider.loadProducts();
+        await pProvider.loadCategories();
+        await iProvider.loadInvoices();
+      },
+    );
+
+    if (ok) {
+      const storage = FlutterSecureStorage();
+      await storage.write(key: 'recovery_passphrase', value: password);
+    }
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ok ? "Decrypted Restore Finished!" : "Decryption failed. Incorrect passphrase or missing cloud backup."),
+          backgroundColor: ok ? Colors.green : Colors.red,
+        ),
+      );
+    }
   }
 
   // ==========================================

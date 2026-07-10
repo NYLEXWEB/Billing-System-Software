@@ -11,6 +11,7 @@ import '../providers/product_provider.dart';
 import '../providers/invoice_provider.dart';
 import '../utils/crypto_utils.dart';
 import '../data/db_helper.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -311,6 +312,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 }
                 
                 if (ok) {
+                  const storage = FlutterSecureStorage();
+                  await storage.write(key: 'recovery_passphrase', value: password);
                   if (context.mounted) {
                     Navigator.pop(dialogContext); // Close backup dialog
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -443,6 +446,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final id = await dbHelper.insertBusiness(business);
 
     if (id > 0) {
+      const storage = FlutterSecureStorage();
+      await storage.write(key: 'recovery_passphrase', value: password);
       if (mounted) {
         _showMandatoryBackupDialog(context, auth, backup, password, provider);
       }

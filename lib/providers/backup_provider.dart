@@ -9,7 +9,11 @@ import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:encrypt/encrypt.dart' as enc;
 import 'package:pointycastle/export.dart' as pc;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:intl/intl.dart';
 import '../data/db_helper.dart';
+import 'auth_provider.dart';
+import 'business_provider.dart';
 
 class BackupProvider extends ChangeNotifier {
   bool _isBackupInProgress = false;
@@ -214,6 +218,56 @@ class BackupProvider extends ChangeNotifier {
     } finally {
       _isRestoreInProgress = false;
       notifyListeners();
+    }
+  }
+
+  // ==========================================
+  // AUTOMATIC DAILY BACKUPS
+  // ==========================================
+
+  Future<void> checkAndPerformAutoBackup({
+    required AuthProvider authProvider,
+    required BusinessProvider businessProvider,
+  }) async {
+    // 1. Check if user is authenticated with Google
+    if (!authProvider.isAuthenticated || authProvider.currentUser == null) {
+      debugPrint("Auto-backup skipped: User not logged in to Google.");
+      return;
+    }
+
+    // 2. Check if we already did an automatic backup today
+    final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    const storage = FlutterSecureStorage();
+    
+    try {
+      final lastAutoBackupDate = await storage.read(key: 'last_auto_backup_date');
+      if (lastAutoBackupDate == todayStr) {
+        debugPrint("Auto-backup skipped: Already backed up today.");
+        return;
+      }
+
+      // 3. Get the encryption passphrase
+      final password = await storage.read(key: 'recovery_passphrase');
+      if (password == null || password.isEmpty) {
+        debugPrint("Auto-backup skipped: No recovery passphrase stored in secure storage.");
+        return;
+      }
+
+      // 4. Perform the backup
+      debugPrint("Triggering daily automatic backup to Google Drive...");
+      final success = await backupToGoogleDrive(
+        googleSignIn: authProvider.googleSignIn,
+        password: password,
+      );
+
+      if (success) {
+        await storage.write(key: 'last_auto_backup_date', value: todayStr);
+        debugPrint("Daily automatic backup succeeded!");
+      } else {
+        debugPrint("Daily automatic backup failed.");
+      }
+    } catch (e) {
+      debugPrint("Error running automatic daily backup: $e");
     }
   }
 }

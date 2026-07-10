@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../providers/business_provider.dart';
 import '../providers/invoice_provider.dart';
 import '../providers/product_provider.dart';
+import '../providers/auth_provider.dart';
+import '../providers/backup_provider.dart';
 import '../models/invoice.dart';
 import '../models/product.dart';
 import 'invoice_detail_sheet.dart';
@@ -24,6 +26,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ProductProvider>(context, listen: false).loadProducts();
       Provider.of<InvoiceProvider>(context, listen: false).loadInvoices();
+      
+      // Perform silent check for daily auto-backup to Google Drive
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+      Provider.of<BackupProvider>(context, listen: false).checkAndPerformAutoBackup(
+        authProvider: authProvider,
+        businessProvider: businessProvider,
+      );
     });
   }
 
