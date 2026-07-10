@@ -255,22 +255,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
     required ThemeData theme,
     required double width,
   }) {
-    final isDark = theme.brightness == Brightness.dark;
+    // Generate a matching gradient end color dynamically
+    final Color gradEnd = Color.alphaBlend(Colors.black.withOpacity(0.18), accentColor);
+    final Gradient cardGradient = LinearGradient(
+      colors: [accentColor, gradEnd],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
+
     return Container(
       width: width,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E293B) : Colors.white,
+        gradient: cardGradient,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
-          width: 1,
-        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(isDark ? 0.05 : 0.02),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            color: accentColor.withOpacity(0.24),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -283,21 +286,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.08),
+                  color: Colors.white.withOpacity(0.18),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: Icon(icon, color: accentColor, size: 20),
+                child: Icon(icon, color: Colors.white, size: 20),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: accentColor.withOpacity(0.06),
+                  color: Colors.white.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
                   trendText,
-                  style: TextStyle(
-                    color: accentColor,
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                   ),
@@ -309,7 +312,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Text(
             title,
             style: TextStyle(
-              color: theme.hintColor,
+              color: Colors.white.withOpacity(0.75),
               fontSize: 12,
               fontWeight: FontWeight.w600,
             ),
@@ -318,6 +321,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Text(
             value,
             style: const TextStyle(
+              color: Colors.white,
               fontSize: 22,
               fontWeight: FontWeight.bold,
               letterSpacing: -0.6,

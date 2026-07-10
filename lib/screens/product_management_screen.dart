@@ -78,23 +78,119 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
             },
           ),
         ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          indicatorWeight: 3,
-          labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-          unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.normal, fontSize: 15),
-          tabs: const [
-            Tab(text: "Products", icon: Icon(Icons.shopping_bag_outlined)),
-            Tab(text: "Categories", icon: Icon(Icons.category_outlined)),
-          ],
-        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: Column(
         children: [
-          _buildProductsTab(provider, theme),
-          _buildCategoriesTab(provider, theme),
+          // Sleek custom pill tab switcher
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+            child: Container(
+              height: 48,
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE2E8F0), // Slate 200
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        _tabController.animateTo(0);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: _tabController.index == 0 ? Colors.white : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: _tabController.index == 0
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.06),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ]
+                              : null,
+                        ),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.shopping_bag_outlined,
+                              size: 16,
+                              color: _tabController.index == 0 ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Products",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: _tabController.index == 0 ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        _tabController.animateTo(1);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: _tabController.index == 1 ? Colors.white : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: _tabController.index == 1
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.06),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ]
+                              : null,
+                        ),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.category_outlined,
+                              size: 16,
+                              color: _tabController.index == 1 ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Categories",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: _tabController.index == 1 ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildProductsTab(provider, theme),
+                _buildCategoriesTab(provider, theme),
+              ],
+            ),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
