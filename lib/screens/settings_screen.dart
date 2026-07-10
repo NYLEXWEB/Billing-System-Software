@@ -69,146 +69,181 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildGroupCard(
               isDark: isDark,
               children: [
-                _buildSettingsTile(
-                  isDark: isDark,
-                  icon: Icons.dark_mode_outlined,
-                  iconColor: const Color(0xFF3B82F6),
-                  title: "Appearance Theme",
-                  subtitle: "Switch between light and dark visual modes",
-                  trailing: DropdownButton<String>(
-                    value: shop?.themeMode ?? 'system',
-                    underline: const SizedBox(),
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
-                    style: TextStyle(
-                      color: isDark ? Colors.white : const Color(0xFF0F172A),
-                      fontWeight: FontWeight.bold,
-                      fontSize: 13,
-                    ),
-                    items: const [
-                      DropdownMenuItem(value: 'light', child: Text("Light Theme")),
-                      DropdownMenuItem(value: 'dark', child: Text("Dark Theme")),
-                      DropdownMenuItem(value: 'system', child: Text("System Default")),
-                    ],
-                    onChanged: (val) async {
-                      if (shop != null && val != null) {
-                        final updated = shop.copyWith(themeMode: val);
-                        await businessProvider.updateBusiness(updated);
-                      }
-                    },
-                  ),
-                ),
-                const Divider(height: 1, indent: 56),
-                // Printer configurations
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF8B5CF6).withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(Icons.print_outlined, color: Color(0xFF8B5CF6), size: 20),
+                      // Sub-card 1: Theme selection
+                      Container(
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                            width: 1,
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text("Receipt Printer Setup", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
-                                Text(
-                                  printerProvider.activePrinter != null
-                                      ? "Active: ${printerProvider.activePrinter!.name} (${printerProvider.activePrinter!.paperWidth}mm)"
-                                      : "No active printer selected",
-                                  style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
-                                ),
-                              ],
+                        ),
+                        child: _buildSettingsTile(
+                          isDark: isDark,
+                          icon: Icons.dark_mode_outlined,
+                          iconColor: const Color(0xFF3B82F6),
+                          title: "Appearance Theme",
+                          subtitle: "Switch between light and dark visual modes",
+                          trailing: DropdownButton<String>(
+                            value: shop?.themeMode ?? 'system',
+                            underline: const SizedBox(),
+                            icon: const Icon(Icons.keyboard_arrow_down_rounded, color: Color(0xFF64748B)),
+                            style: TextStyle(
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
                             ),
+                            items: const [
+                              DropdownMenuItem(value: 'light', child: Text("Light Theme")),
+                              DropdownMenuItem(value: 'dark', child: Text("Dark Theme")),
+                              DropdownMenuItem(value: 'system', child: Text("System Default")),
+                            ],
+                            onChanged: (val) async {
+                              if (shop != null && val != null) {
+                                final updated = shop.copyWith(themeMode: val);
+                                await businessProvider.updateBusiness(updated);
+                              }
+                            },
                           ),
-                        ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      // Saved printers list
-                      if (printerProvider.printers.isNotEmpty) ...[
-                        ...printerProvider.printers.map((p) {
-                          final isActive = printerProvider.activePrinter?.id == p.id;
-                          return Container(
-                            margin: const EdgeInsets.only(bottom: 8),
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(
-                                color: isActive ? const Color(0xFF2563EB) : Colors.transparent,
-                                width: 1.5,
-                              ),
-                            ),
-                            child: Row(
+                      const SizedBox(height: 12),
+
+                      // Sub-card 2: Printer configurations
+                      Container(
+                        padding: const EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
                               children: [
-                                const Icon(Icons.print_rounded, size: 18, color: Color(0xFF64748B)),
-                                const SizedBox(width: 10),
+                                Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF8B5CF6).withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(Icons.print_outlined, color: Color(0xFF8B5CF6), size: 20),
+                                ),
+                                const SizedBox(width: 12),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(p.name, style: TextStyle(fontWeight: isActive ? FontWeight.bold : FontWeight.normal, fontSize: 13)),
-                                      Text("${p.type.toUpperCase()} | ${p.address}", style: const TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+                                      const Text("Receipt Printer Setup", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                                      Text(
+                                        printerProvider.activePrinter != null
+                                            ? "Active: ${printerProvider.activePrinter!.name} (${printerProvider.activePrinter!.paperWidth}mm)"
+                                            : "No active printer selected",
+                                        style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                      ),
                                     ],
                                   ),
                                 ),
-                                if (!isActive)
-                                  TextButton(
-                                    onPressed: () => printerProvider.setActivePrinter(p),
-                                    child: const Text("Select", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                                  )
-                                else
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFFEFF6FF),
-                                      borderRadius: BorderRadius.circular(6),
+                              ],
+                            ),
+                            const SizedBox(height: 16),
+                            // Saved printers list
+                            if (printerProvider.printers.isNotEmpty) ...[
+                              ...printerProvider.printers.map((p) {
+                                final isActive = printerProvider.activePrinter?.id == p.id;
+                                return Container(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(
+                                      color: isActive ? const Color(0xFF2563EB) : Colors.transparent,
+                                      width: 1.5,
                                     ),
-                                    child: const Text("Active", style: TextStyle(fontSize: 10, color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
                                   ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
-                                  onPressed: () => printerProvider.deletePrinter(p.id!),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.print_rounded, size: 18, color: Color(0xFF64748B)),
+                                      const SizedBox(width: 10),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(p.name, style: TextStyle(fontWeight: isActive ? FontWeight.bold : FontWeight.normal, fontSize: 13)),
+                                            Text("${p.type.toUpperCase()} | ${p.address}", style: const TextStyle(fontSize: 10, color: Color(0xFF64748B))),
+                                          ],
+                                        ),
+                                      ),
+                                      if (!isActive)
+                                        TextButton(
+                                          onPressed: () => printerProvider.setActivePrinter(p),
+                                          child: const Text("Select", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                        )
+                                      else
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFEFF6FF),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: const Text("Active", style: TextStyle(fontSize: 10, color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                                        ),
+                                      IconButton(
+                                        icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                                        onPressed: () => printerProvider.deletePrinter(p.id!),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                              const SizedBox(height: 12),
+                            ],
+                            // Scan actions (Colored Backgrounds)
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () => _showBluetoothScanModal(context, printerProvider),
+                                    icon: const Icon(Icons.bluetooth, size: 16),
+                                    label: const Text("Bluetooth Scan", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF8B5CF6), // Purple
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: ElevatedButton.icon(
+                                    onPressed: () => _showWifiPrinterDialog(context, printerProvider),
+                                    icon: const Icon(Icons.wifi, size: 16),
+                                    label: const Text("Add Network IP", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color(0xFF0F172A), // Slate/Black
+                                      foregroundColor: Colors.white,
+                                      elevation: 0,
+                                      padding: const EdgeInsets.symmetric(vertical: 14),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                          );
-                        }).toList(),
-                        const SizedBox(height: 12),
-                      ],
-                      // Scan actions
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () => _showBluetoothScanModal(context, printerProvider),
-                              icon: const Icon(Icons.bluetooth, size: 16),
-                              label: const Text("Bluetooth Scan", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () => _showWifiPrinterDialog(context, printerProvider),
-                              icon: const Icon(Icons.wifi, size: 16),
-                              label: const Text("Add Wi-Fi IP", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                              ),
-                            ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -222,87 +257,149 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildGroupCard(
               isDark: isDark,
               children: [
-                _buildSettingsTile(
-                  isDark: isDark,
-                  icon: Icons.cloud_done_outlined,
-                  iconColor: const Color(0xFF10B981),
-                  title: "Google Drive Status",
-                  subtitle: authProvider.isAuthenticated ? "Connected as ${authProvider.currentUser?.email}" : "Disconnected",
-                  trailing: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: authProvider.isAuthenticated ? const Color(0xFFECFDF5) : const Color(0xFFFEF2F2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      authProvider.isAuthenticated ? "Connected" : "Disconnected",
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.bold,
-                        color: authProvider.isAuthenticated ? const Color(0xFF059669) : const Color(0xFFDC2626),
-                      ),
-                    ),
-                  ),
-                ),
-                if (backupProvider.lastBackupTime != null) ...[
-                  const Divider(height: 1, indent: 56),
-                  _buildSettingsTile(
-                    isDark: isDark,
-                    icon: Icons.history_rounded,
-                    iconColor: const Color(0xFFF59E0B),
-                    title: "Last Cloud Sync",
-                    subtitle: DateFormat('dd-MMM-yyyy hh:mm a').format(backupProvider.lastBackupTime!),
-                    trailing: const SizedBox.shrink(),
-                  ),
-                ],
-                const Divider(height: 1, indent: 56),
                 Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(12.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (!authProvider.isAuthenticated)
-                        Text(
-                          "Please connect your Google Account in the Session section below to enable database backup.",
-                          style: TextStyle(color: Colors.grey.shade600, fontSize: 12, height: 1.3),
-                          textAlign: TextAlign.center,
-                        )
-                      else
-                        Row(
+                      // Sub-card 1: Horizontal grid layout of status boxes (No Dividers)
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.cloud_done_outlined, color: Color(0xFF10B981), size: 16),
+                                      const SizedBox(width: 6),
+                                      const Text("Cloud Status", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    authProvider.isAuthenticated ? "Connected" : "Disconnected",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                      color: authProvider.isAuthenticated ? const Color(0xFF059669) : const Color(0xFFDC2626),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.history_rounded, color: Color(0xFFF59E0B), size: 16),
+                                      const SizedBox(width: 6),
+                                      const Text("Last Backup", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    backupProvider.lastBackupTime != null
+                                        ? DateFormat('dd-MMM hh:mm a').format(backupProvider.lastBackupTime!)
+                                        : "Never",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Sub-card 2: Backup/Restore Actions
+                      Container(
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: backupProvider.isBackupInProgress
-                                    ? null
-                                    : () => _promptPasswordForBackup(context, authProvider, backupProvider),
-                                icon: const Icon(Icons.cloud_upload_outlined, size: 16),
-                                label: const Text("Backup Now", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFF2563EB),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
+                            if (!authProvider.isAuthenticated)
+                              Text(
+                                "Please connect your Google Account in the Session section below to enable database backup.",
+                                style: TextStyle(color: Colors.grey.shade600, fontSize: 12, height: 1.3),
+                                textAlign: TextAlign.center,
+                              )
+                            else
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: ElevatedButton.icon(
+                                      onPressed: backupProvider.isBackupInProgress
+                                          ? null
+                                          : () => _promptPasswordForBackup(context, authProvider, backupProvider),
+                                      icon: const Icon(Icons.cloud_upload_outlined, size: 16),
+                                      label: const Text("Backup Now", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF2563EB),
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: ElevatedButton.icon(
+                                      onPressed: backupProvider.isRestoreInProgress
+                                          ? null
+                                          : () => _promptPasswordForRestore(context, authProvider, backupProvider),
+                                      icon: const Icon(Icons.cloud_download_outlined, size: 16),
+                                      label: const Text("Restore Data", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFFF59E0B),
+                                        foregroundColor: Colors.white,
+                                        elevation: 0,
+                                        padding: const EdgeInsets.symmetric(vertical: 14),
+                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: ElevatedButton.icon(
-                                onPressed: backupProvider.isRestoreInProgress
-                                    ? null
-                                    : () => _promptPasswordForRestore(context, authProvider, backupProvider),
-                                icon: const Icon(Icons.cloud_download_outlined, size: 16),
-                                label: const Text("Restore Data", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color(0xFFF59E0B),
-                                  foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                                ),
-                              ),
-                            ),
                           ],
                         ),
+                      ),
                     ],
                   ),
                 ),
@@ -315,63 +412,114 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildGroupCard(
               isDark: isDark,
               children: [
-                if (authProvider.isAuthenticated) ...[
-                  ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    leading: CircleAvatar(
-                      backgroundImage: authProvider.currentUser?.photoUrl != null
-                          ? NetworkImage(authProvider.currentUser!.photoUrl!)
-                          : null,
-                      child: authProvider.currentUser?.photoUrl == null
-                          ? const Icon(Icons.person)
-                          : null,
-                    ),
-                    title: Text(authProvider.currentUser?.displayName ?? "Connected User", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                    subtitle: Text(authProvider.currentUser?.email ?? "", style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
-                    trailing: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        shape: BoxShape.circle,
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      // Sub-card 1: User Account details (No Dividers)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                            width: 1,
+                          ),
+                        ),
+                        child: authProvider.isAuthenticated
+                            ? ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                leading: CircleAvatar(
+                                  backgroundImage: authProvider.currentUser?.photoUrl != null
+                                      ? NetworkImage(authProvider.currentUser!.photoUrl!)
+                                      : null,
+                                  child: authProvider.currentUser?.photoUrl == null
+                                      ? const Icon(Icons.person)
+                                      : null,
+                                ),
+                                title: Text(authProvider.currentUser?.displayName ?? "Connected User", style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                subtitle: Text(authProvider.currentUser?.email ?? "", style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                                trailing: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade50,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: IconButton(
+                                    icon: const Icon(Icons.logout, color: Colors.red, size: 18),
+                                    onPressed: () {
+                                      final productProvider = Provider.of<ProductProvider>(context, listen: false);
+                                      final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
+                                      _showLogoutConfirmation(context, authProvider, businessProvider, productProvider, invoiceProvider);
+                                    },
+                                  ),
+                                ),
+                              )
+                            : _buildSettingsTile(
+                                isDark: isDark,
+                                icon: Icons.login_rounded,
+                                iconColor: const Color(0xFF2563EB),
+                                title: "Google Cloud Sync",
+                                subtitle: "Sign in with Google to enable cloud database sync",
+                                trailing: TextButton.icon(
+                                  onPressed: () async {
+                                    final ok = await authProvider.signIn();
+                                    if (ok && context.mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Connected to Google Drive")));
+                                    }
+                                  },
+                                  icon: const Icon(Icons.login),
+                                  label: const Text("Sign In", style: TextStyle(fontWeight: FontWeight.bold)),
+                                ),
+                              ),
                       ),
-                      child: IconButton(
-                        icon: const Icon(Icons.logout, color: Colors.red, size: 18),
-                        onPressed: () {
-                          final productProvider = Provider.of<ProductProvider>(context, listen: false);
-                          final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
-                          _showLogoutConfirmation(context, authProvider, businessProvider, productProvider, invoiceProvider);
-                        },
+                      const SizedBox(height: 12),
+                      
+                      // Sub-card 2: Danger Zone (Reset Shop Profile option) with soft red tint
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF7F1D1D).withOpacity(0.15) : const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF991B1B).withOpacity(0.3) : const Color(0xFFFEE2E2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Reset Shop Profile",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: isDark ? Colors.red.shade300 : const Color(0xFF991B1B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    "Wipe current local configurations & setup again",
+                                    style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => _showResetShopConfirmation(context, businessProvider),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFFEF4444),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              ),
+                              child: const Text("Reset", style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ),
-                ] else ...[
-                  _buildSettingsTile(
-                    isDark: isDark,
-                    icon: Icons.login_rounded,
-                    iconColor: const Color(0xFF2563EB),
-                    title: "Google Cloud Sync",
-                    subtitle: "Sign in with Google to enable cloud database sync",
-                    trailing: TextButton.icon(
-                      onPressed: () async {
-                        final ok = await authProvider.signIn();
-                        if (ok && context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Connected to Google Drive")));
-                        }
-                      },
-                      icon: const Icon(Icons.login),
-                      label: const Text("Sign In", style: TextStyle(fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
-                const Divider(height: 1, indent: 56),
-                _buildSettingsTile(
-                  isDark: isDark,
-                  icon: Icons.refresh_rounded,
-                  iconColor: const Color(0xFFEF4444),
-                  title: "Reset Shop Profile",
-                  subtitle: "Wipe current local configurations & setup again",
-                  trailing: TextButton(
-                    onPressed: () => _showResetShopConfirmation(context, businessProvider),
-                    child: const Text("Reset", style: TextStyle(color: Color(0xFFEF4444), fontWeight: FontWeight.bold)),
+                    ],
                   ),
                 ),
               ],

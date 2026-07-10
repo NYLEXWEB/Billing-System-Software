@@ -11,7 +11,7 @@ class BarcodeScannerScreen extends StatefulWidget {
 }
 
 class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
-  final MobileScannerController _controller = MobileScannerController();
+  MobileScannerController? _controller;
   bool _hasDetected = false;
   PermissionStatus _permissionStatus = PermissionStatus.denied;
   bool _isCheckingPermission = true;
@@ -35,12 +35,15 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
     setState(() {
       _permissionStatus = status;
       _isCheckingPermission = false;
+      if (status.isGranted) {
+        _controller ??= MobileScannerController();
+      }
     });
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -106,33 +109,50 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
       appBar: AppBar(
         title: const Text("Scan Barcode / QR", style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
-          if (hasCameraAccess) ...[
+          if (hasCameraAccess && _controller != null) ...[
             ValueListenableBuilder(
-              valueListenable: _controller.torchState,
+              valueListenable: _controller!.torchState,
               builder: (context, state, child) {
                 final isTorchOn = state == TorchState.on;
                 return IconButton(
                   icon: Icon(isTorchOn ? Icons.flash_on : Icons.flash_off, color: isTorchOn ? Colors.yellow : Colors.white),
-                  onPressed: () => _controller.toggleTorch(),
+                  onPressed: () => _controller!.toggleTorch(),
                 );
               },
             ),
             IconButton(
               icon: const Icon(Icons.flip_camera_ios_outlined),
-              onPressed: () => _controller.switchCamera(),
+              onPressed: () => _controller!.switchCamera(),
             ),
           ]
         ],
       ),
       body: _isCheckingPermission
           ? const Center(child: CircularProgressIndicator())
-          : !hasCameraAccess
+          : !hasCameraAccess || _controller == null
               ? _buildPermissionDeniedView()
               : Stack(
                   children: [
                     // 1. Camera scanner viewfinder
                     MobileScanner(
-                      controller: _controller,
+                      controller: _controller!,
+                      errorBuilder: (context, error, child) {
+                        return Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(16),
+                            margin: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: Colors.black87,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              "Camera Error: ${error.errorCode.name}\n${error.errorDetails?.message ?? 'Please restart the scanner.'}",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.white, fontSize: 13),
+                            ),
+                          ),
+                        );
+                      },
                       onDetect: (capture) {
                         if (_hasDetected) return;
 

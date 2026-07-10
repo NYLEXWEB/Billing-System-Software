@@ -465,108 +465,163 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildGoogleSignInScreen(BuildContext context, AuthProvider authProvider) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 32.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF2563EB).withOpacity(0.08),
-                        blurRadius: 12,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: Image.asset(
-                      'assets/app_logo.png',
-                      width: 56,
-                      height: 56,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+            padding: const EdgeInsets.all(24.0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 36.0),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                  width: 1,
                 ),
-                const SizedBox(height: 24),
-                
-                Text(
-                  "Welcome to EasyToBill",
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: const Color(0xFF0F172A),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                
-                Text(
-                  "Sign in with your Google account to get started and keep your data backed up safely.",
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF64748B),
-                    fontSize: 15,
-                    height: 1.4,
-                  ),
-                ),
-                const SizedBox(height: 40),
-
-                if (_isCheckingBackup)
-                  const CircularProgressIndicator()
-                else ...[
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      final success = await authProvider.signIn();
-                      if (success) {
-                        if (mounted) {
-                          await _checkForBackup(authProvider);
-                        }
-                      } else {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Google Sign-In failed. Please try again.")),
-                          );
-                        }
-                      }
-                    },
-                    icon: const Icon(Icons.login_rounded),
-                    label: const Text(
-                      "Sign In with Google",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Row(
-                    children: const [
-                      Expanded(child: Divider(endIndent: 10)),
-                      Text("OR", style: TextStyle(color: Colors.grey, fontSize: 12, fontWeight: FontWeight.bold)),
-                      Expanded(child: Divider(indent: 10)),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  OutlinedButton.icon(
-                    onPressed: _handleTestUserLogin,
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    icon: const Icon(Icons.developer_mode_rounded, color: Color(0xFF2563EB)),
-                    label: const Text(
-                      "Sign In as Test User (Demo)",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
-                    ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 16,
+                    offset: const Offset(0, 8),
                   ),
                 ],
-              ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF2563EB).withOpacity(0.06),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/app_logo.png',
+                        width: 64,
+                        height: 64,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  Text(
+                    "Welcome to EasyToBill",
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      letterSpacing: -0.5,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  
+                  Text(
+                    "Sign in with your Google account to get started and keep your data backed up safely.",
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: const Color(0xFF64748B),
+                      fontSize: 14,
+                      height: 1.45,
+                    ),
+                  ),
+                  const SizedBox(height: 36),
+
+                  if (_isCheckingBackup)
+                    const CircularProgressIndicator()
+                  else ...[
+                    // Custom Google Sign-In Button
+                    ElevatedButton(
+                      onPressed: () async {
+                        final success = await authProvider.signIn();
+                        if (success) {
+                          if (mounted) {
+                            await _checkForBackup(authProvider);
+                          }
+                        } else {
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Google Sign-In failed. Please try again.")),
+                            );
+                          }
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF3C4043),
+                        elevation: 1,
+                        shadowColor: Colors.black.withOpacity(0.15),
+                        side: const BorderSide(color: Color(0xFFDADCE0), width: 1.2),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const GoogleSignInButtonIcon(size: 20),
+                          const SizedBox(width: 12),
+                          const Text(
+                            "Sign in with Google",
+                            style: TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF3C4043),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(child: Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0))),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Text(
+                            "OR",
+                            style: TextStyle(
+                              color: isDark ? const Color(0xFF64748B) : Colors.grey.shade500,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.0,
+                            ),
+                          ),
+                        ),
+                        Expanded(child: Divider(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0))),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    OutlinedButton.icon(
+                      onPressed: _handleTestUserLogin,
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: Color(0xFF2563EB), width: 1.5),
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: const Icon(Icons.developer_mode_rounded, color: Color(0xFF2563EB), size: 18),
+                      label: const Text(
+                        "Sign In as Test User (Demo)",
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         ),
@@ -1028,4 +1083,81 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       ],
     );
   }
+}
+
+class GoogleSignInButtonIcon extends StatelessWidget {
+  final double size;
+
+  const GoogleSignInButtonIcon({super.key, this.size = 24.0});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: CustomPaint(
+        painter: _GoogleLogoPainter(),
+      ),
+    );
+  }
+}
+
+class _GoogleLogoPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double radius = size.width / 2;
+    final double strokeWidth = size.width * 0.22;
+    final Offset center = Offset(radius, radius);
+
+    final Paint paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth
+      ..isAntiAlias = true;
+
+    final Rect rect = Rect.fromCircle(center: center, radius: radius - (strokeWidth / 2));
+
+    const double startRed = -142.0;
+    const double sweepRed = 104.0;
+
+    const double startBlue = -38.0;
+    const double sweepBlue = 88.0;
+
+    const double startGreen = 50.0;
+    const double sweepGreen = 92.0;
+
+    const double startYellow = 142.0;
+    const double sweepYellow = 76.0;
+
+    double toRad(double deg) => deg * 3.141592653589793 / 180.0;
+
+    // Draw Yellow (Left)
+    paint.color = const Color(0xFFFBBC05);
+    canvas.drawArc(rect, toRad(startYellow), toRad(sweepYellow), false, paint);
+
+    // Draw Red (Top)
+    paint.color = const Color(0xFFEA4335);
+    canvas.drawArc(rect, toRad(startRed), toRad(sweepRed), false, paint);
+
+    // Draw Green (Bottom)
+    paint.color = const Color(0xFF34A853);
+    canvas.drawArc(rect, toRad(startGreen), toRad(sweepGreen), false, paint);
+
+    // Draw Blue (Right)
+    paint.color = const Color(0xFF4285F4);
+    canvas.drawArc(rect, toRad(startBlue), toRad(sweepBlue), false, paint);
+
+    // Draw the horizontal bar of the 'G'
+    final Paint fillPaint = Paint()
+      ..color = const Color(0xFF4285F4)
+      ..style = PaintingStyle.fill;
+
+    final double barLeft = radius;
+    final double barTop = radius - (strokeWidth / 2);
+    final double barRight = size.width - (strokeWidth / 2) + 0.5;
+    final double barBottom = radius + (strokeWidth / 2);
+    canvas.drawRect(Rect.fromLTRB(barLeft, barTop, barRight, barBottom), fillPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
