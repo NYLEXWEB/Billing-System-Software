@@ -22,6 +22,15 @@ class DbHelper {
     return _database!;
   }
 
+  Future<void> closeDatabase() async {
+    if (_database != null) {
+      try {
+        await _database!.close();
+      } catch (_) {}
+      _database = null;
+    }
+  }
+
   Future<Database> _initDatabase() async {
     final dbPath = await getDatabasesPath();
     final path = join(dbPath, 'shop_billing.db');

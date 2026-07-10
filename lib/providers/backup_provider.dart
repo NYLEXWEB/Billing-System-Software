@@ -197,9 +197,8 @@ class BackupProvider extends ChangeNotifier {
       // 5. Safe Database Hot-Swap
       final dbPath = join(await getDatabasesPath(), 'shop_billing.db');
       
-      // Close database connection
-      final db = await DbHelper().database;
-      await db.close();
+      // Close database connection and reset cached instance
+      await DbHelper().closeDatabase();
 
       // Write decrypted bytes to db path (overwrites existing database)
       await databaseFactory.writeDatabaseBytes(dbPath, decryptedBytes);

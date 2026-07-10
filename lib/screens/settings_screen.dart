@@ -808,7 +808,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           children: const [
             Icon(Icons.warning_amber_rounded, color: Colors.red),
             SizedBox(width: 10),
-            Text("Logout & Clear Session"),
+            Flexible(child: Text("Logout & Clear Session")),
           ],
         ),
         content: const Text(

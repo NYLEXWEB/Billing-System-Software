@@ -315,20 +315,26 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                           children: [
                             const Icon(Icons.qr_code, size: 12, color: Color(0xFF94A3B8)),
                             const SizedBox(width: 4),
-                            Text(
-                              product.barcode,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Color(0xFF64748B),
-                                fontFamily: "monospace",
+                            Expanded(
+                              child: Text(
+                                product.barcode,
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF64748B),
+                                  fontFamily: "monospace",
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 6),
-                        Row(
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 4,
                           children: [
-                            if (product.categoryName != null) ...[
+                            if (product.categoryName != null)
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
@@ -344,8 +350,6 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                            ],
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                               decoration: BoxDecoration(
@@ -595,7 +599,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       TextFormField(
                         controller: barcodeController,
                         decoration: InputDecoration(
-                          labelText: "Barcode / SKU *",
+                          labelText: "Barcode / SKU (Optional)",
                           hintText: "Scan or enter barcode",
                           prefixIcon: const Icon(Icons.qr_code),
                           suffixIcon: IconButton(
@@ -613,7 +617,6 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                             },
                           ),
                         ),
-                        validator: (v) => v == null || v.trim().isEmpty ? "Barcode is required" : null,
                       ),
                       const SizedBox(height: 16),
                       DropdownButtonFormField<int?>(
@@ -742,7 +745,10 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                     if (!formKey.currentState!.validate()) return;
 
                     final name = nameController.text.trim();
-                    final barcode = barcodeController.text.trim();
+                    var barcode = barcodeController.text.trim();
+                    if (barcode.isEmpty) {
+                      barcode = DateTime.now().microsecondsSinceEpoch.toString();
+                    }
                     final price = double.parse(priceController.text);
                     final cost = double.tryParse(costController.text) ?? 0.0;
                     final stock = int.tryParse(stockController.text) ?? 0;

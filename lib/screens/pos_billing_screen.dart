@@ -227,13 +227,15 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                   product.name,
                   style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
                 ),
-                subtitle: Row(
+                subtitle: Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     Text(
                       "Price: $currency${product.price.toStringAsFixed(2)}",
                       style: const TextStyle(color: Color(0xFF475569), fontWeight: FontWeight.w600),
                     ),
-                    const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
@@ -336,10 +338,15 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  "$currency${p.price.toStringAsFixed(0)}",
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                                Expanded(
+                                  child: Text(
+                                    "$currency${p.price.toStringAsFixed(0)}",
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
+                                const SizedBox(width: 4),
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                   decoration: BoxDecoration(
@@ -396,13 +403,14 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
               ),
             ],
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
                       item.productName,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
@@ -412,82 +420,80 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
-                    Text(
-                      "$currency${item.price.toStringAsFixed(2)} each",
-                      style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              // Quantity Selector
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF1F5F9),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.remove, size: 16, color: Color(0xFF475569)),
-                      onPressed: () {
-                        cart.updateQuantity(item.productId, item.quantity - 1, product);
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                    ),
-                    Container(
-                      constraints: const BoxConstraints(minWidth: 28),
-                      child: Text(
-                        item.quantity.toString(),
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.add, size: 16, color: Color(0xFF2563EB)),
-                      onPressed: () {
-                        final ok = cart.updateQuantity(item.productId, item.quantity + 1, product);
-                        if (!ok) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Insufficient stock quantity!"),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                        }
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(width: 14),
-
-              // Subtotal
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    "$currency${item.subtotal.toStringAsFixed(2)}",
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      color: Color(0xFF0F172A),
-                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                    onPressed: () => cart.removeItem(item.productId),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
                 ],
               ),
-              const SizedBox(width: 4),
-
-              IconButton(
-                icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
-                onPressed: () => cart.removeItem(item.productId),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "$currency${item.price.toStringAsFixed(2)} each",
+                    style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                  ),
+                  Row(
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove, size: 16, color: Color(0xFF475569)),
+                              onPressed: () {
+                                cart.updateQuantity(item.productId, item.quantity - 1, product);
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                            ),
+                            Container(
+                              constraints: const BoxConstraints(minWidth: 28),
+                              child: Text(
+                                item.quantity.toString(),
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add, size: 16, color: Color(0xFF2563EB)),
+                              onPressed: () {
+                                final ok = cart.updateQuantity(item.productId, item.quantity + 1, product);
+                                if (!ok) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Insufficient stock quantity!"),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                }
+                              },
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        "$currency${item.subtotal.toStringAsFixed(2)}",
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                          color: Color(0xFF0F172A),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ],
           ),

@@ -218,7 +218,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: const [
               Icon(Icons.cloud_done_rounded, color: Colors.blueAccent),
               SizedBox(width: 10),
-              Text("Backup Found!", style: TextStyle(fontWeight: FontWeight.bold)),
+              Flexible(child: Text("Backup Found!", style: TextStyle(fontWeight: FontWeight.bold))),
             ],
           ),
           content: Column(
@@ -339,7 +339,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             children: const [
               Icon(Icons.backup_rounded, color: Colors.blueAccent),
               SizedBox(width: 10),
-              Text("Cloud Backup Required", style: TextStyle(fontWeight: FontWeight.bold)),
+              Flexible(child: Text("Cloud Backup Required", style: TextStyle(fontWeight: FontWeight.bold))),
             ],
           ),
           content: const Text(

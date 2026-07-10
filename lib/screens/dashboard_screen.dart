@@ -560,9 +560,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             title: Row(
               children: [
-                Text(
-                  invoice.invoiceNumber,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                Expanded(
+                  child: Text(
+                    invoice.invoiceNumber,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
                 ),
                 const SizedBox(width: 8),
                 if (invoice.customerPhone.isNotEmpty)

@@ -66,19 +66,24 @@ class InvoiceDetailSheet extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    invoice.invoiceNumber,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
-                  Text(
-                    DateFormat('dd-MMM-yyyy hh:mm a').format(invoice.dateTime),
-                    style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
-                  ),
-                ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      invoice.invoiceNumber,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      DateFormat('dd-MMM-yyyy hh:mm a').format(invoice.dateTime),
+                      style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+                    ),
+                  ],
+                ),
               ),
+              const SizedBox(width: 12),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
