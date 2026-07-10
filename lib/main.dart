@@ -220,14 +220,22 @@ class MyApp extends StatelessWidget {
 
     if (!provider.isInitialized) {
       // Splash/Loading State
-      return const Scaffold(
+      return Scaffold(
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.storefront_outlined, size: 80, color: Colors.blueAccent),
-              SizedBox(height: 16),
-              CircularProgressIndicator(),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(16),
+                child: Image.asset(
+                  'assets/app_logo.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const CircularProgressIndicator(),
             ],
           ),
         ),
