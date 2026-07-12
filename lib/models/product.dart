@@ -9,6 +9,7 @@ class Product {
   final int lowStockThreshold;
   final bool isTracked; // true if we track inventory stock levels
   final String? categoryName; // Helper field for joined UI display
+  final String unit; // UOM (Unit of Measure) e.g. Piece, Kilogram, Gram, etc.
 
   Product({
     this.id,
@@ -21,6 +22,7 @@ class Product {
     this.lowStockThreshold = 5,
     this.isTracked = true,
     this.categoryName,
+    this.unit = 'Piece',
   });
 
   Map<String, dynamic> toMap() {
@@ -34,6 +36,7 @@ class Product {
       'stockQuantity': stockQuantity,
       'lowStockThreshold': lowStockThreshold,
       'isTracked': isTracked ? 1 : 0,
+      'unit': unit,
     };
   }
 
@@ -49,6 +52,7 @@ class Product {
       lowStockThreshold: map['lowStockThreshold'] as int? ?? 5,
       isTracked: (map['isTracked'] as int? ?? 1) == 1,
       categoryName: map['categoryName'] as String?,
+      unit: map['unit'] as String? ?? 'Piece',
     );
   }
 
@@ -63,6 +67,7 @@ class Product {
     int? lowStockThreshold,
     bool? isTracked,
     String? categoryName,
+    String? unit,
   }) {
     return Product(
       id: id ?? this.id,
@@ -75,6 +80,7 @@ class Product {
       lowStockThreshold: lowStockThreshold ?? this.lowStockThreshold,
       isTracked: isTracked ?? this.isTracked,
       categoryName: categoryName ?? this.categoryName,
+      unit: unit ?? this.unit,
     );
   }
 }

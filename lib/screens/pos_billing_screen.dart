@@ -23,6 +23,7 @@ class PosBillingScreen extends StatefulWidget {
 class _PosBillingScreenState extends State<PosBillingScreen> {
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _customerController = TextEditingController();
+  final TextEditingController _customerNameController = TextEditingController();
   final FocusNode _searchFocusNode = FocusNode();
   
   List<Product> _searchResults = [];
@@ -40,6 +41,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
   void dispose() {
     _searchController.dispose();
     _customerController.dispose();
+    _customerNameController.dispose();
     _searchFocusNode.dispose();
     super.dispose();
   }
@@ -377,6 +379,59 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
       );
     }
 
+  void _showQuantityEditDialog(BuildContext context, InvoiceItem item, Product product, CartProvider cart) {
+    final controller = TextEditingController(text: item.quantity.toString());
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Edit Quantity"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Product: ${item.productName}", style: const TextStyle(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 12),
+            TextField(
+              controller: controller,
+              keyboardType: TextInputType.number,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: "Quantity",
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              final newQty = int.tryParse(controller.text) ?? 0;
+              if (newQty <= 0) {
+                cart.removeItem(item.productId);
+              } else {
+                final ok = cart.updateQuantity(item.productId, newQty, product);
+                if (!ok) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Insufficient stock quantity!"),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+              Navigator.pop(context);
+            },
+            child: const Text("Update"),
+          ),
+        ],
+      ),
+    );
+  }
+
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       itemCount: cart.items.length,
@@ -455,12 +510,20 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
                             ),
-                            Container(
-                              constraints: const BoxConstraints(minWidth: 28),
-                              child: Text(
-                                item.quantity.toString(),
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                            InkWell(
+                              onTap: () => _showQuantityEditDialog(context, item, product, cart),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                constraints: const BoxConstraints(minWidth: 28),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: const Color(0xFFCBD5E1)),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  item.quantity.toString(),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                                ),
                               ),
                             ),
                             IconButton(
@@ -773,9 +836,18 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
 
     String selectedPayment = 'CASH';
     _customerController.clear();
+    _customerNameController.clear();
 
     final cashReceivedController = TextEditingController();
-    double changeAmount = -cart.grandTotal;
+    final splitAmount1Controller = TextEditingController();
+    final splitAmount2Controller = TextEditingController();
+    String splitMethod1 = 'CASH';
+    String splitMethod2 = 'UPI';
+
+    // Default split values to 50/50
+    double halfAmount = cart.grandTotal / 2;
+    splitAmount1Controller.text = halfAmount.toStringAsFixed(2);
+    splitAmount2Controller.text = (cart.grandTotal - halfAmount).toStringAsFixed(2);
 
     final invoiceNum = _generateInvoiceNumber();
 
@@ -792,11 +864,16 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
               invoiceNumber: invoiceNum,
             );
 
-            void updateChange(String val) {
-              final rec = double.tryParse(val) ?? 0.0;
-              setModalState(() {
-                changeAmount = rec - cart.grandTotal;
-              });
+            void updateSplitFrom1(String val) {
+              final amt1 = double.tryParse(val) ?? 0.0;
+              final amt2 = cart.grandTotal - amt1;
+              splitAmount2Controller.text = amt2 >= 0 ? amt2.toStringAsFixed(2) : '0.00';
+            }
+
+            void updateSplitFrom2(String val) {
+              final amt2 = double.tryParse(val) ?? 0.0;
+              final amt1 = cart.grandTotal - amt2;
+              splitAmount1Controller.text = amt1 >= 0 ? amt1.toStringAsFixed(2) : '0.00';
             }
 
             return Container(
@@ -852,15 +929,33 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                     ),
                     const SizedBox(height: 20),
 
-                    // Customer details
-                    TextField(
-                      controller: _customerController,
-                      keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(
-                        labelText: "Customer Mobile (Optional)",
-                        prefixIcon: Icon(Icons.phone_iphone_rounded),
-                        hintText: "Enter customer phone",
-                      ),
+                    // Customer details (Name and Phone, both optional)
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _customerNameController,
+                            keyboardType: TextInputType.name,
+                            decoration: const InputDecoration(
+                              labelText: "Customer Name (Optional)",
+                              prefixIcon: Icon(Icons.person_outline_rounded),
+                              hintText: "Enter name",
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: TextField(
+                            controller: _customerController,
+                            keyboardType: TextInputType.phone,
+                            decoration: const InputDecoration(
+                              labelText: "Customer Mobile (Optional)",
+                              prefixIcon: Icon(Icons.phone_iphone_rounded),
+                              hintText: "Enter phone",
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 24),
 
@@ -889,13 +984,26 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           onTap: () => setModalState(() => selectedPayment = 'UPI'),
                           theme: theme,
                         ),
-                        const SizedBox(width: 10),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      children: [
                         _buildPaymentMethodCard(
                           title: "CARD",
                           icon: Icons.credit_card_rounded,
                           isSelected: selectedPayment == 'CARD',
                           activeColor: Colors.purple,
                           onTap: () => setModalState(() => selectedPayment = 'CARD'),
+                          theme: theme,
+                        ),
+                        const SizedBox(width: 10),
+                        _buildPaymentMethodCard(
+                          title: "SPLIT",
+                          icon: Icons.call_split_rounded,
+                          isSelected: selectedPayment == 'SPLIT',
+                          activeColor: Colors.teal,
+                          onTap: () => setModalState(() => selectedPayment = 'SPLIT'),
                           theme: theme,
                         ),
                       ],
@@ -907,15 +1015,17 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                       TextField(
                         controller: cashReceivedController,
                         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        onChanged: updateChange,
+                        onChanged: (val) {
+                          setModalState(() {});
+                        },
                         decoration: const InputDecoration(
-                          labelText: "Cash Tendered *",
+                          labelText: "Cash Tendered (Optional)",
                           prefixText: "₹ ",
+                          hintText: "Enter amount to calculate change",
                         ),
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       const SizedBox(height: 12),
-
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
@@ -924,7 +1034,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                             label: "Exact (₹${cart.grandTotal.toStringAsFixed(0)})",
                             onTap: () {
                               cashReceivedController.text = cart.grandTotal.toStringAsFixed(2);
-                              updateChange(cart.grandTotal.toStringAsFixed(2));
+                              setModalState(() {});
                             },
                             theme: theme,
                           ),
@@ -932,7 +1042,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                             label: "₹100",
                             onTap: () {
                               cashReceivedController.text = "100.00";
-                              updateChange("100.00");
+                              setModalState(() {});
                             },
                             theme: theme,
                           ),
@@ -940,7 +1050,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                             label: "₹200",
                             onTap: () {
                               cashReceivedController.text = "200.00";
-                              updateChange("200.00");
+                              setModalState(() {});
                             },
                             theme: theme,
                           ),
@@ -948,48 +1058,181 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                             label: "₹500",
                             onTap: () {
                               cashReceivedController.text = "500.00";
-                              updateChange("500.00");
+                              setModalState(() {});
                             },
                             theme: theme,
                           ),
                         ],
                       ),
-                      const SizedBox(height: 20),
-
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: changeAmount >= 0 
-                              ? const Color(0xFFECFDF5) 
-                              : const Color(0xFFFEF2F2),
-                          border: Border.all(
-                            color: changeAmount >= 0 ? const Color(0xFF10B981).withOpacity(0.3) : const Color(0xFFEF4444).withOpacity(0.3),
-                            width: 1.5,
+                      const SizedBox(height: 16),
+                      Builder(
+                        builder: (context) {
+                          final input = cashReceivedController.text.trim();
+                          if (input.isEmpty) {
+                            return Container(
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFECFDF5),
+                                border: Border.all(color: const Color(0xFF10B981).withOpacity(0.2), width: 1.5),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.payments_outlined, color: Color(0xFF10B981)),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      "Collect exact cash: ₹${cart.grandTotal.toStringAsFixed(2)}",
+                                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF065F46), fontSize: 13),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                          final rec = double.tryParse(input) ?? 0.0;
+                          final changeAmount = rec - cart.grandTotal;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: changeAmount >= 0 
+                                  ? const Color(0xFFECFDF5) 
+                                  : const Color(0xFFFEF2F2),
+                              border: Border.all(
+                                color: changeAmount >= 0 ? const Color(0xFF10B981).withOpacity(0.3) : const Color(0xFFEF4444).withOpacity(0.3),
+                                width: 1.5,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  changeAmount >= 0 ? "Change Due:" : "Shortage:",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: changeAmount >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                                  ),
+                                ),
+                                Text(
+                                  "₹${changeAmount.abs().toStringAsFixed(2)}",
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: changeAmount >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                      ),
+                      const SizedBox(height: 24),
+                    ] else if (selectedPayment == 'SPLIT') ...[
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: splitMethod1,
+                              decoration: const InputDecoration(labelText: "Method 1"),
+                              items: ['CASH', 'UPI', 'CARD'].map((m) {
+                                return DropdownMenuItem(value: m, child: Text(m));
+                              }).toList(),
+                              onChanged: (val) {
+                                if (val != null) {
+                                  setModalState(() {
+                                    splitMethod1 = val;
+                                    if (splitMethod1 == splitMethod2) {
+                                      splitMethod2 = ['CASH', 'UPI', 'CARD'].firstWhere((e) => e != splitMethod1);
+                                    }
+                                  });
+                                }
+                              },
+                            ),
                           ),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              changeAmount >= 0 ? "Change Due:" : "Shortage:",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                                color: changeAmount >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444),
-                              ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: splitMethod2,
+                              decoration: const InputDecoration(labelText: "Method 2"),
+                              items: ['CASH', 'UPI', 'CARD'].map((m) {
+                                return DropdownMenuItem(value: m, child: Text(m));
+                              }).toList(),
+                              onChanged: (val) {
+                                if (val != null) {
+                                  setModalState(() {
+                                    splitMethod2 = val;
+                                    if (splitMethod2 == splitMethod1) {
+                                      splitMethod1 = ['CASH', 'UPI', 'CARD'].firstWhere((e) => e != splitMethod2);
+                                    }
+                                  });
+                                }
+                              },
                             ),
-                            Text(
-                              "$currency${changeAmount.abs().toStringAsFixed(2)}",
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: changeAmount >= 0 ? const Color(0xFF10B981) : const Color(0xFFEF4444),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              controller: splitAmount1Controller,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              decoration: InputDecoration(
+                                labelText: "$splitMethod1 Amount *",
+                                prefixText: "₹ ",
                               ),
+                              onChanged: updateSplitFrom1,
                             ),
-                          ],
-                        ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: TextFormField(
+                              controller: splitAmount2Controller,
+                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                              decoration: InputDecoration(
+                                labelText: "$splitMethod2 Amount *",
+                                prefixText: "₹ ",
+                              ),
+                              onChanged: updateSplitFrom2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: [
+                          _buildQuickCashButton(
+                            label: "Split 50/50",
+                            onTap: () {
+                              final half = cart.grandTotal / 2;
+                              splitAmount1Controller.text = half.toStringAsFixed(2);
+                              splitAmount2Controller.text = (cart.grandTotal - half).toStringAsFixed(2);
+                            },
+                            theme: theme,
+                          ),
+                          _buildQuickCashButton(
+                            label: "All $splitMethod1",
+                            onTap: () {
+                              splitAmount1Controller.text = cart.grandTotal.toStringAsFixed(2);
+                              splitAmount2Controller.text = '0.00';
+                            },
+                            theme: theme,
+                          ),
+                          _buildQuickCashButton(
+                            label: "All $splitMethod2",
+                            onTap: () {
+                              splitAmount1Controller.text = '0.00';
+                              splitAmount2Controller.text = cart.grandTotal.toStringAsFixed(2);
+                            },
+                            theme: theme,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 24),
                     ] else if (selectedPayment == 'UPI') ...[
@@ -1112,14 +1355,33 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
 
                     ElevatedButton(
                       onPressed: () async {
+                        String finalPaymentMethod = selectedPayment;
+
                         if (selectedPayment == 'CASH') {
-                          final rec = double.tryParse(cashReceivedController.text) ?? 0.0;
-                          if (rec < cart.grandTotal) {
+                          final recStr = cashReceivedController.text.trim();
+                          if (recStr.isNotEmpty) {
+                            final rec = double.tryParse(recStr) ?? 0.0;
+                            if (rec < cart.grandTotal) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text("Insufficient Cash Tendered!"), backgroundColor: Colors.red),
+                              );
+                              return;
+                            }
+                          }
+                        } else if (selectedPayment == 'SPLIT') {
+                          final amt1 = double.tryParse(splitAmount1Controller.text) ?? 0.0;
+                          final amt2 = double.tryParse(splitAmount2Controller.text) ?? 0.0;
+                          final sum = amt1 + amt2;
+                          if ((sum - cart.grandTotal).abs() > 0.01) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Insufficient Cash Received!"), backgroundColor: Colors.red),
+                              SnackBar(
+                                content: Text("Split sum (₹${sum.toStringAsFixed(2)}) must equal Total (₹${cart.grandTotal.toStringAsFixed(2)})!"),
+                                backgroundColor: Colors.red,
+                              ),
                             );
                             return;
                           }
+                          finalPaymentMethod = 'SPLIT:$splitMethod1=${amt1.toStringAsFixed(2)};$splitMethod2=${amt2.toStringAsFixed(2)}';
                         }
 
                         final List<InvoiceItem> items = List.from(cart.items);
@@ -1131,9 +1393,10 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           taxAmount: cart.calculatedTaxAmount,
                           discountAmount: cart.discountAmount,
                           grandTotal: cart.grandTotal,
-                          paymentMethod: selectedPayment,
+                          paymentMethod: finalPaymentMethod,
                           paymentStatus: 'PAID',
                           customerPhone: _customerController.text.trim(),
+                          customerName: _customerNameController.text.trim(),
                           items: items,
                         );
 

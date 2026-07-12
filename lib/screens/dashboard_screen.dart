@@ -10,6 +10,7 @@ import '../providers/backup_provider.dart';
 import '../models/invoice.dart';
 import '../models/product.dart';
 import 'invoice_detail_sheet.dart';
+import 'reports_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -22,14 +23,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    // Load products and invoices when entering dashboard
+    // Load products, invoices, and business profile when entering dashboard
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+      businessProvider.loadBusiness();
       Provider.of<ProductProvider>(context, listen: false).loadProducts();
       Provider.of<InvoiceProvider>(context, listen: false).loadInvoices();
       
       // Perform silent check for daily auto-backup to Google Drive
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
       Provider.of<BackupProvider>(context, listen: false).checkAndPerformAutoBackup(
         authProvider: authProvider,
         businessProvider: businessProvider,
@@ -51,6 +53,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final businessProvider = Provider.of<BusinessProvider>(context);
+    final shop = businessProvider.business;
+
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            shop?.name ?? "Dashboard",
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          ),
+          bottom: const TabBar(
+            indicatorColor: Color(0xFF2563EB),
+            labelColor: Color(0xFF2563EB),
+            unselectedLabelColor: Colors.grey,
+            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+            tabs: [
+              Tab(text: "Overview", icon: Icon(Icons.dashboard_outlined, size: 20)),
+              Tab(text: "Reports & Logs", icon: Icon(Icons.analytics_outlined, size: 20)),
+            ],
+          ),
+        ),
+        body: TabBarView(
+          children: [
+            _buildOverviewTab(context),
+            const ReportsScreen(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOverviewTab(BuildContext context) {
+    final businessProvider = Provider.of<BusinessProvider>(context);
     final invoiceProvider = Provider.of<InvoiceProvider>(context);
     final productProvider = Provider.of<ProductProvider>(context);
 
@@ -65,24 +100,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 0, // We build our own premium custom header in the body
-        elevation: 0,
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          await productProvider.loadProducts();
-          await invoiceProvider.loadInvoices();
-        },
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 1. Welcome / Shop Header
-              Row(
+    return RefreshIndicator(
+      onRefresh: () async {
+        await productProvider.loadProducts();
+        await invoiceProvider.loadInvoices();
+      },
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Welcome / Shop Header
+            Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Column(
@@ -195,8 +225,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildKpiGrid(

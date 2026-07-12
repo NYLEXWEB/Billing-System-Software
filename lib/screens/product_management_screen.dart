@@ -209,9 +209,92 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
     );
   }
 
+  String _getShortUnit(String unit) {
+    switch (unit) {
+      case 'Piece': return 'pcs';
+      case 'Kilogram': return 'kg';
+      case 'Gram': return 'g';
+      case 'Litre': return 'ltr';
+      case 'Millilitre': return 'ml';
+      case 'Pack': return 'pk';
+      case 'Box': return 'box';
+      case 'Metre': return 'm';
+      default: return 'unit';
+    }
+  }
+
   // ==========================================
   // PRODUCTS TAB
   // ==========================================
+
+  Widget _buildVerticalCategoryBar(ProductProvider provider, ThemeData theme) {
+    return Container(
+      width: 110,
+      decoration: const BoxDecoration(
+        color: Color(0xFFF1F5F9), // Slate 100
+        border: Border(
+          right: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+        ),
+      ),
+      child: ListView.builder(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        itemCount: provider.categories.length + 1,
+        itemBuilder: (context, index) {
+          final isAll = index == 0;
+          final category = isAll ? null : provider.categories[index - 1];
+          final isSelected = isAll 
+              ? provider.selectedCategoryId == null 
+              : provider.selectedCategoryId == category?.id;
+
+          return Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                provider.setSelectedCategoryId(isAll ? null : category!.id);
+              },
+              child: Stack(
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                    margin: const EdgeInsets.only(left: 8, right: 4, top: 4, bottom: 4),
+                    decoration: BoxDecoration(
+                      color: isSelected ? Colors.white : Colors.transparent,
+                      borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
+                    ),
+                    child: Text(
+                      isAll ? "All Products" : category!.name,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF475569),
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  if (isSelected)
+                    Positioned(
+                      left: 0,
+                      top: 12,
+                      bottom: 12,
+                      child: Container(
+                        width: 4,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2563EB),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   Widget _buildProductsTab(ProductProvider provider, ThemeData theme) {
     return Column(
@@ -243,80 +326,42 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
           ),
         ),
 
-        // Horizontal Category filter chips
-        _buildCategoryFilterChips(provider),
-        const SizedBox(height: 8),
-
-        // Products List
+        // Expanded Row: Left side Categories, Right side Products
         Expanded(
-          child: provider.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : provider.filteredProducts.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.inventory_2_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
-                          const SizedBox(height: 16),
-                          const Text(
-                            "No products found in catalog",
-                            style: TextStyle(color: Color(0xFF64748B), fontSize: 16, fontWeight: FontWeight.w500),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildVerticalCategoryBar(provider, theme),
+              Expanded(
+                child: provider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : provider.filteredProducts.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.inventory_2_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  "No products found",
+                                  style: TextStyle(color: Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(left: 8, right: 16, top: 4, bottom: 80),
+                            itemCount: provider.filteredProducts.length,
+                            itemBuilder: (context, index) {
+                              final product = provider.filteredProducts[index];
+                              return _buildProductCard(product, provider, theme);
+                            },
                           ),
-                        ],
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      itemCount: provider.filteredProducts.length,
-                      itemBuilder: (context, index) {
-                        final product = provider.filteredProducts[index];
-                        return _buildProductCard(product, provider, theme);
-                      },
-                    ),
+              ),
+            ],
+          ),
         ),
       ],
-    );
-  }
-
-  Widget _buildCategoryFilterChips(ProductProvider provider) {
-    return Container(
-      height: 40,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: provider.categories.length + 1,
-        itemBuilder: (context, index) {
-          final isAll = index == 0;
-          final category = isAll ? null : provider.categories[index - 1];
-          final isSelected = isAll 
-              ? provider.selectedCategoryId == null 
-              : provider.selectedCategoryId == category?.id;
-
-          return Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: ChoiceChip(
-              label: Text(isAll ? "All Products" : category!.name),
-              selected: isSelected,
-              onSelected: (selected) {
-                provider.setSelectedCategoryId(isAll ? null : category!.id);
-              },
-              selectedColor: const Color(0xFF2563EB).withOpacity(0.15),
-              labelStyle: TextStyle(
-                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
-                fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              ),
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-                side: BorderSide(
-                  color: isSelected ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
-                  width: 1,
-                ),
-              ),
-            ),
-          );
-        },
-      ),
     );
   }
 
@@ -478,12 +523,21 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                           color: Color(0xFF0F172A),
                         ),
                       ),
+                      const SizedBox(height: 2),
+                      Text(
+                        "per ${_getShortUnit(product.unit)}",
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF2563EB),
+                        ),
+                      ),
                       if (product.costPrice > 0) ...[
                         const SizedBox(height: 2),
                         Text(
                           "Cost: ₹${product.costPrice.toStringAsFixed(2)}",
                           style: const TextStyle(
-                            fontSize: 11,
+                            fontSize: 10,
                             color: Color(0xFF94A3B8),
                           ),
                         ),
@@ -649,6 +703,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
     
     int? selectedCatId = product?.categoryId;
     bool isTracked = product?.isTracked ?? true;
+    String selectedUnit = product?.unit ?? 'Piece';
 
     showDialog(
       context: context,
@@ -715,17 +770,44 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                         ),
                       ),
                       const SizedBox(height: 16),
-                      DropdownButtonFormField<int?>(
-                        value: selectedCatId,
-                        decoration: const InputDecoration(
-                          labelText: "Category",
-                          prefixIcon: Icon(Icons.category_outlined),
-                        ),
-                        items: [
-                          const DropdownMenuItem<int?>(value: null, child: Text("None")),
-                          ...provider.categories.map((c) => DropdownMenuItem<int?>(value: c.id, child: Text(c.name))),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: DropdownButtonFormField<int?>(
+                              value: selectedCatId,
+                              decoration: const InputDecoration(
+                                labelText: "Category",
+                                prefixIcon: Icon(Icons.category_outlined),
+                              ),
+                              items: [
+                                const DropdownMenuItem<int?>(value: null, child: Text("None")),
+                                ...provider.categories.map((c) => DropdownMenuItem<int?>(value: c.id, child: Text(c.name))),
+                              ],
+                              onChanged: (val) => setModalState(() => selectedCatId = val),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: selectedUnit,
+                              decoration: const InputDecoration(
+                                labelText: "Selling Unit *",
+                                prefixIcon: Icon(Icons.balance_outlined),
+                              ),
+                              items: const [
+                                DropdownMenuItem(value: 'Piece', child: Text('Piece (pcs)')),
+                                DropdownMenuItem(value: 'Kilogram', child: Text('Kilogram (kg)')),
+                                DropdownMenuItem(value: 'Gram', child: Text('Gram (g)')),
+                                DropdownMenuItem(value: 'Litre', child: Text('Litre (l)')),
+                                DropdownMenuItem(value: 'Millilitre', child: Text('Millilitre (ml)')),
+                                DropdownMenuItem(value: 'Pack', child: Text('Pack (pk)')),
+                                DropdownMenuItem(value: 'Box', child: Text('Box (bx)')),
+                                DropdownMenuItem(value: 'Metre', child: Text('Metre (m)')),
+                              ],
+                              onChanged: (val) => setModalState(() => selectedUnit = val ?? 'Piece'),
+                            ),
+                          ),
                         ],
-                        onChanged: (val) => setModalState(() => selectedCatId = val),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -860,6 +942,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       stockQuantity: isTracked ? stock : 0,
                       lowStockThreshold: isTracked ? threshold : 5,
                       isTracked: isTracked,
+                      unit: selectedUnit,
                     );
 
                     bool success;

@@ -11,6 +11,7 @@ class Invoice {
   final String paymentMethod; // 'CASH', 'UPI', 'CARD', etc.
   final String paymentStatus; // 'PAID', 'PENDING'
   final String customerPhone;
+  final String customerName;
   final List<InvoiceItem> items; // Joined relation, not database column
 
   Invoice({
@@ -24,6 +25,7 @@ class Invoice {
     required this.paymentMethod,
     required this.paymentStatus,
     required this.customerPhone,
+    this.customerName = '',
     this.items = const [],
   });
 
@@ -39,6 +41,7 @@ class Invoice {
       'paymentMethod': paymentMethod,
       'paymentStatus': paymentStatus,
       'customerPhone': customerPhone,
+      'customerName': customerName,
     };
   }
 
@@ -54,6 +57,7 @@ class Invoice {
       paymentMethod: map['paymentMethod'] as String? ?? 'CASH',
       paymentStatus: map['paymentStatus'] as String? ?? 'PAID',
       customerPhone: map['customerPhone'] as String? ?? '',
+      customerName: map['customerName'] as String? ?? '',
       items: items,
     );
   }
@@ -69,6 +73,7 @@ class Invoice {
     String? paymentMethod,
     String? paymentStatus,
     String? customerPhone,
+    String? customerName,
     List<InvoiceItem>? items,
   }) {
     return Invoice(
@@ -82,6 +87,7 @@ class Invoice {
       paymentMethod: paymentMethod ?? this.paymentMethod,
       paymentStatus: paymentStatus ?? this.paymentStatus,
       customerPhone: customerPhone ?? this.customerPhone,
+      customerName: customerName ?? this.customerName,
       items: items ?? this.items,
     );
   }

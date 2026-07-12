@@ -391,7 +391,23 @@ class _ReportsScreenState extends State<ReportsScreen> {
     double cardTotal = 0;
 
     for (var inv in list) {
-      if (inv.paymentMethod == 'CASH') {
+      if (inv.paymentMethod.startsWith('SPLIT:')) {
+        final parts = inv.paymentMethod.replaceFirst('SPLIT:', '').split(';');
+        for (var part in parts) {
+          final kv = part.split('=');
+          if (kv.length == 2) {
+            final key = kv[0];
+            final val = double.tryParse(kv[1]) ?? 0.0;
+            if (key == 'CASH') {
+              cashTotal += val;
+            } else if (key == 'UPI') {
+              upiTotal += val;
+            } else if (key == 'CARD') {
+              cardTotal += val;
+            }
+          }
+        }
+      } else if (inv.paymentMethod == 'CASH') {
         cashTotal += inv.grandTotal;
       } else if (inv.paymentMethod == 'UPI') {
         upiTotal += inv.grandTotal;
@@ -547,7 +563,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }) {
     IconData icon;
     Color iconColor;
-    if (invoice.paymentMethod == 'CASH') {
+    if (invoice.paymentMethod.startsWith('SPLIT:')) {
+      icon = Icons.call_split_rounded;
+      iconColor = Colors.teal;
+    } else if (invoice.paymentMethod == 'CASH') {
       icon = Icons.payments_outlined;
       iconColor = const Color(0xFF10B981);
     } else if (invoice.paymentMethod == 'UPI') {
@@ -623,6 +642,17 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             color: Color(0xFF64748B),
                           ),
                         ),
+                        if (invoice.customerName.isNotEmpty) ...[
+                          const SizedBox(height: 2),
+                          Text(
+                            "Customer: ${invoice.customerName}",
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF475569),
+                            ),
+                          ),
+                        ],
                         if (invoice.customerPhone.isNotEmpty) ...[
                           const SizedBox(height: 2),
                           Text(
@@ -633,6 +663,17 @@ class _ReportsScreenState extends State<ReportsScreen> {
                             ),
                           ),
                         ],
+                        const SizedBox(height: 2),
+                        Text(
+                          invoice.paymentMethod.startsWith('SPLIT:')
+                              ? _getSplitPaymentDisplay(invoice.paymentMethod)
+                              : "Method: ${invoice.paymentMethod}",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: invoice.paymentMethod.startsWith('SPLIT:') ? Colors.teal : const Color(0xFF64748B),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -677,5 +718,18 @@ class _ReportsScreenState extends State<ReportsScreen> {
         ),
       ),
     );
+  }
+
+  String _getSplitPaymentDisplay(String paymentMethod) {
+    if (!paymentMethod.startsWith('SPLIT:')) return paymentMethod;
+    final parts = paymentMethod.replaceFirst('SPLIT:', '').split(';');
+    List<String> list = [];
+    for (var part in parts) {
+      final kv = part.split('=');
+      if (kv.length == 2) {
+        list.add("${kv[0]}: ₹${kv[1]}");
+      }
+    }
+    return list.join(" + ");
   }
 }

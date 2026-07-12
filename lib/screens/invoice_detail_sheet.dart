@@ -80,6 +80,20 @@ class InvoiceDetailSheet extends StatelessWidget {
                       DateFormat('dd-MMM-yyyy hh:mm a').format(invoice.dateTime),
                       style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
                     ),
+                    if (invoice.customerName.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        "Customer: ${invoice.customerName}",
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
+                      ),
+                    ],
+                    if (invoice.customerPhone.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        "Mobile: ${invoice.customerPhone}",
+                        style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -170,6 +184,19 @@ class InvoiceDetailSheet extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Payment Method"),
+              Text(
+                invoice.paymentMethod.startsWith('SPLIT:')
+                    ? _getSplitPaymentDisplay(invoice.paymentMethod)
+                    : invoice.paymentMethod,
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -271,5 +298,18 @@ class InvoiceDetailSheet extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _getSplitPaymentDisplay(String paymentMethod) {
+    if (!paymentMethod.startsWith('SPLIT:')) return paymentMethod;
+    final parts = paymentMethod.replaceFirst('SPLIT:', '').split(';');
+    List<String> list = [];
+    for (var part in parts) {
+      final kv = part.split('=');
+      if (kv.length == 2) {
+        list.add("${kv[0]}: ₹${kv[1]}");
+      }
+    }
+    return list.join(" + ");
   }
 }
