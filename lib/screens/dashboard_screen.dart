@@ -109,27 +109,77 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final businessProvider = Provider.of<BusinessProvider>(context);
-    final shop = businessProvider.business;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return DefaultTabController(
       length: 3,
       child: Scaffold(
         appBar: AppBar(
-          title: Text(
-            shop?.name ?? "Dashboard",
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-          ),
-          bottom: const TabBar(
-            indicatorColor: Color(0xFF2563EB),
-            labelColor: Color(0xFF2563EB),
-            unselectedLabelColor: Colors.grey,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-            tabs: [
-              Tab(text: "Overview", icon: Icon(Icons.dashboard_outlined, size: 20)),
-              Tab(text: "Reports", icon: Icon(Icons.analytics_outlined, size: 20)),
-              Tab(text: "Transactions", icon: Icon(Icons.receipt_long_outlined, size: 20)),
-            ],
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          title: Container(
+            height: 44,
+            padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[900] : const Color(0xFFF1F5F9),
+              borderRadius: BorderRadius.circular(22),
+              border: Border.all(
+                color: isDark ? Colors.grey[800]! : const Color(0xFFE2E8F0),
+                width: 1,
+              ),
+            ),
+            child: TabBar(
+              indicator: BoxDecoration(
+                color: const Color(0xFF2563EB),
+                borderRadius: BorderRadius.circular(18),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF2563EB).withOpacity(0.2),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
+              ),
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelColor: Colors.white,
+              unselectedLabelColor: isDark ? Colors.grey[400] : const Color(0xFF64748B),
+              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.semibold, fontSize: 11),
+              dividerColor: Colors.transparent,
+              tabs: const [
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.dashboard_outlined, size: 14),
+                      SizedBox(width: 4),
+                      Text("Overview"),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.analytics_outlined, size: 14),
+                      SizedBox(width: 4),
+                      Text("Reports"),
+                    ],
+                  ),
+                ),
+                Tab(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.receipt_long_outlined, size: 14),
+                      SizedBox(width: 4),
+                      Text("Txns"),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         body: TabBarView(

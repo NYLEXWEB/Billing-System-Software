@@ -340,6 +340,15 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   }
 
   Widget _buildProductsTab(ProductProvider provider, ThemeData theme) {
+    final searchQuery = provider.searchQuery.toLowerCase();
+    final products = provider.products.where((product) {
+      if (searchQuery.isNotEmpty) {
+        return product.name.toLowerCase().contains(searchQuery) ||
+               product.barcode.toLowerCase().contains(searchQuery);
+      }
+      return true;
+    }).toList();
+
     return Column(
       children: [
         // Search header
@@ -349,7 +358,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
             controller: _searchController,
             onChanged: provider.setSearchQuery,
             decoration: InputDecoration(
-              hintText: "Search by name or barcode...",
+              hintText: "Search products by name or barcode...",
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: IconButton(
                 icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
@@ -369,40 +378,32 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
           ),
         ),
 
-        // Expanded Row: Left side Categories, Right side Products
+        // Expanded: Pure products list (no category sidebar)
         Expanded(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildVerticalCategoryBar(provider, theme),
-              Expanded(
-                child: provider.isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : provider.filteredProducts.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.inventory_2_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  "No products found",
-                                  style: TextStyle(color: Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
-                                ),
-                              ],
-                            ),
-                          )
-                        : ListView.builder(
-                            padding: const EdgeInsets.only(left: 8, right: 16, top: 4, bottom: 80),
-                            itemCount: provider.filteredProducts.length,
-                            itemBuilder: (context, index) {
-                              final product = provider.filteredProducts[index];
-                              return _buildProductCard(product, provider, theme);
-                            },
+          child: provider.isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : products.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.inventory_2_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "No products found",
+                            style: TextStyle(color: Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
                           ),
-              ),
-            ],
-          ),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(left: 16, right: 16, top: 4, bottom: 80),
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        final product = products[index];
+                        return _buildProductCard(product, provider, theme);
+                      },
+                    ),
         ),
       ],
     );
@@ -1199,7 +1200,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
             controller: _searchController,
             onChanged: provider.setSearchQuery,
             decoration: InputDecoration(
-              hintText: "Search categories or products...",
+              hintText: "Search by name or barcode...",
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: IconButton(
                 icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
@@ -1218,115 +1219,40 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
             ),
           ),
         ),
+
+        // Expanded Row: Left side Categories, Right side Products
         Expanded(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Categories Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Categories",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-                    ),
-                    TextButton(
-                      onPressed: () => _tabController.animateTo(2),
-                      child: const Text("View All", style: TextStyle(fontSize: 13, color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                if (provider.categories.isEmpty)
-                  const Text("No categories added yet.", style: TextStyle(color: Colors.grey, fontSize: 13))
-                else
-                  SizedBox(
-                    height: 90,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: provider.categories.length,
-                      itemBuilder: (context, index) {
-                        final cat = provider.categories[index];
-                        final count = provider.products.where((p) => p.categoryId == cat.id).length;
-                        return Container(
-                          width: 130,
-                          margin: const EdgeInsets.only(right: 12),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: const Color(0xFFE2E8F0)),
-                          ),
-                          child: Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(16),
-                              onTap: () {
-                                provider.setSelectedCategoryId(cat.id);
-                                _tabController.animateTo(1);
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      cat.name,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      "$count products",
-                                      style: const TextStyle(fontSize: 11, color: Colors.grey),
-                                    ),
-                                  ],
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildVerticalCategoryBar(provider, theme),
+              Expanded(
+                child: provider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : provider.filteredProducts.isEmpty
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.inventory_2_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  "No products found",
+                                  style: TextStyle(color: Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
                                 ),
-                              ),
+                              ],
                             ),
+                          )
+                        : ListView.builder(
+                            padding: const EdgeInsets.only(left: 8, right: 16, top: 4, bottom: 80),
+                            itemCount: provider.filteredProducts.length,
+                            itemBuilder: (context, index) {
+                              final product = provider.filteredProducts[index];
+                              return _buildProductCard(product, provider, theme);
+                            },
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                const SizedBox(height: 24),
-                // Products Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      "Products",
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
-                    ),
-                    TextButton(
-                      onPressed: () => _tabController.animateTo(1),
-                      child: const Text("View All", style: TextStyle(fontSize: 13, color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                if (provider.filteredProducts.isEmpty)
-                  const Center(
-                     child: Padding(
-                       padding: EdgeInsets.symmetric(vertical: 24.0),
-                       child: Text("No products found", style: TextStyle(color: Colors.grey, fontSize: 13)),
-                     ),
-                  )
-                else
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: provider.filteredProducts.take(15).toList().length,
-                    itemBuilder: (context, index) {
-                      final product = provider.filteredProducts[index];
-                      return _buildProductCard(product, provider, theme);
-                    },
-                  ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ],
