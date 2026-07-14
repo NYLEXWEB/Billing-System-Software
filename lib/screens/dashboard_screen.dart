@@ -145,7 +145,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               labelColor: Colors.white,
               unselectedLabelColor: isDark ? Colors.grey[400] : const Color(0xFF64748B),
               labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.semibold, fontSize: 11),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
               dividerColor: Colors.transparent,
               tabs: const [
                 Tab(
