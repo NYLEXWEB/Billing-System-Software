@@ -254,32 +254,39 @@ class InvoiceDetailSheet extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          // Delete button
-          TextButton.icon(
-            onPressed: () {
-              _showDeleteConfirmDialog(context, invoiceProvider);
-            },
-            icon: const Icon(Icons.delete_outline, color: Colors.red),
-            label: const Text("Delete Record", style: TextStyle(color: Colors.red)),
-          ),
+          // Cancel button
+          if (invoice.paymentStatus.toUpperCase() != 'CANCELLED')
+            TextButton.icon(
+              onPressed: () {
+                _showCancelConfirmDialog(context, invoiceProvider);
+              },
+              icon: const Icon(Icons.cancel_outlined, color: Colors.red),
+              label: const Text("Cancel Invoice", style: TextStyle(color: Colors.red)),
+            ),
         ],
       ),
     );
   }
 
-  void _showDeleteConfirmDialog(BuildContext context, InvoiceProvider provider) {
+  void _showCancelConfirmDialog(BuildContext context, InvoiceProvider provider) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text("Delete Invoice?"),
-        content: const Text("Are you sure you want to permanently delete this invoice record? This action cannot be undone."),
+        title: const Text("Cancel Invoice?", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text(
+          "Are you sure you want to cancel this invoice?\n\n"
+          "This will automatically replenish inventory stock levels for all items in this invoice and mark the transaction status as CANCELLED. This action cannot be undone."
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel"),
+            child: const Text("No, Keep It"),
           ),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () async {
               Navigator.pop(context); // close dialog
               Navigator.pop(context); // close sheet
@@ -287,13 +294,13 @@ class InvoiceDetailSheet extends StatelessWidget {
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(success ? "Invoice deleted." : "Failed to delete invoice."),
+                    content: Text(success ? "Invoice cancelled and stock replenished." : "Failed to cancel invoice."),
                     backgroundColor: success ? Colors.green : Colors.red,
                   ),
                 );
               }
             },
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            child: const Text("Cancel Invoice"),
           ),
         ],
       ),

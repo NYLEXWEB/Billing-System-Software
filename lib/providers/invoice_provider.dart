@@ -62,27 +62,28 @@ class InvoiceProvider extends ChangeNotifier {
   double get salesToday {
     final today = DateTime.now();
     return _invoices
-        .where((inv) => inv.dateTime.year == today.year && inv.dateTime.month == today.month && inv.dateTime.day == today.day)
+        .where((inv) => inv.paymentStatus.toUpperCase() != 'CANCELLED' && inv.dateTime.year == today.year && inv.dateTime.month == today.month && inv.dateTime.day == today.day)
         .fold(0.0, (sum, inv) => sum + inv.grandTotal);
   }
 
   double get salesThisMonth {
     final today = DateTime.now();
     return _invoices
-        .where((inv) => inv.dateTime.year == today.year && inv.dateTime.month == today.month)
+        .where((inv) => inv.paymentStatus.toUpperCase() != 'CANCELLED' && inv.dateTime.year == today.year && inv.dateTime.month == today.month)
         .fold(0.0, (sum, inv) => sum + inv.grandTotal);
   }
 
   int get ordersTodayCount {
     final today = DateTime.now();
     return _invoices
-        .where((inv) => inv.dateTime.year == today.year && inv.dateTime.month == today.month && inv.dateTime.day == today.day)
+        .where((inv) => inv.paymentStatus.toUpperCase() != 'CANCELLED' && inv.dateTime.year == today.year && inv.dateTime.month == today.month && inv.dateTime.day == today.day)
         .length;
   }
 
   Map<String, double> get paymentMethodBreakdown {
     final Map<String, double> breakdown = {};
     for (var inv in _invoices) {
+      if (inv.paymentStatus.toUpperCase() == 'CANCELLED') continue;
       breakdown[inv.paymentMethod] = (breakdown[inv.paymentMethod] ?? 0.0) + inv.grandTotal;
     }
     return breakdown;
@@ -103,7 +104,7 @@ class InvoiceProvider extends ChangeNotifier {
       final dateStr = dateStrs[i];
 
       final daySales = _invoices
-          .where((inv) => inv.dateTime.year == targetDate.year && inv.dateTime.month == targetDate.month && inv.dateTime.day == targetDate.day)
+          .where((inv) => inv.paymentStatus.toUpperCase() != 'CANCELLED' && inv.dateTime.year == targetDate.year && inv.dateTime.month == targetDate.month && inv.dateTime.day == targetDate.day)
           .fold(0.0, (sum, inv) => sum + inv.grandTotal);
 
       points.add(DailySalesPoint(dateStr: dateStr, label: label, amount: daySales));

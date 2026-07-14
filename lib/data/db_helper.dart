@@ -38,7 +38,7 @@ class DbHelper {
 
     return await openDatabase(
       path,
-      version: 3,
+      version: 4,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
@@ -59,6 +59,14 @@ class DbHelper {
         await db.execute("ALTER TABLE invoices ADD COLUMN customerName TEXT NOT NULL DEFAULT ''");
       } catch (e) {
         debugPrint("Error migrating database version 3: $e");
+      }
+    }
+    if (oldVersion < 4) {
+      try {
+        await db.execute("ALTER TABLE businesses ADD COLUMN receiptHeader TEXT NOT NULL DEFAULT ''");
+        await db.execute("ALTER TABLE businesses ADD COLUMN receiptFooter TEXT NOT NULL DEFAULT ''");
+      } catch (e) {
+        debugPrint("Error migrating database version 4: $e");
       }
     }
   }
@@ -91,7 +99,9 @@ class DbHelper {
         recoveryPasswordHash TEXT,
         backupEmail TEXT,
         lastBackupTime TEXT,
-        themeMode TEXT NOT NULL DEFAULT 'system'
+        themeMode TEXT NOT NULL DEFAULT 'system',
+        receiptHeader TEXT NOT NULL DEFAULT '',
+        receiptFooter TEXT NOT NULL DEFAULT ''
       )
     ''');
 
@@ -469,16 +479,75 @@ class DbHelper {
     return Invoice.fromMap(results.first, items: items);
   }
 
-  Future<int> deleteInvoice(int id) async {
+  Future<int> cancelInvoice(int id) async {
     final db = await database;
-    // This will cascadingly delete invoice_items as well.
-    // NOTE: Does not automatically replenish inventory, which is correct as the user requested POS billing
-    // and returns/refunds/voids are excluded from master scope.
-    return await db.delete(
-      'invoices',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    return await db.transaction((txn) async {
+      // 1. Fetch the invoice first to verify existence and get invoiceNumber
+      final List<Map<String, dynamic>> invoiceList = await txn.query(
+        'invoices',
+        where: 'id = ?',
+        whereArgs: [id],
+        limit: 1,
+      );
+      if (invoiceList.isEmpty) return 0;
+      
+      final invoiceMap = invoiceList.first;
+      if (invoiceMap['paymentStatus'] == 'CANCELLED') {
+        // Already cancelled, do nothing
+        return 0;
+      }
+      
+      // 2. Fetch invoice items
+      final List<Map<String, dynamic>> itemsList = await txn.query(
+        'invoice_items',
+        where: 'invoiceId = ?',
+        whereArgs: [id],
+      );
+      final items = itemsList.map((itemMap) => InvoiceItem.fromMap(itemMap)).toList();
+      
+      // 3. Mark invoice as CANCELLED
+      final updatedRows = await txn.update(
+        'invoices',
+        {'paymentStatus': 'CANCELLED'},
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      
+      if (updatedRows > 0) {
+        final invoiceNumber = invoiceMap['invoiceNumber'] as String;
+        // 4. Replenish inventory
+        for (var item in items) {
+          // Fetch current product to check if we track stock
+          final products = await txn.query('products', where: 'id = ?', whereArgs: [item.productId], limit: 1);
+          if (products.isNotEmpty) {
+            final product = Product.fromMap(products.first);
+            if (product.isTracked) {
+              // Add stock back
+              await txn.rawUpdate('''
+                UPDATE products 
+                SET stockQuantity = stockQuantity + ? 
+                WHERE id = ?
+              ''', [item.quantity, item.productId]);
+
+              // Log stock movement
+              await txn.insert('stock_movements', {
+                'productId': item.productId,
+                'quantity': item.quantity,
+                'type': 'IN',
+                'reason': 'Cancelled POS Checkout $invoiceNumber',
+                'dateTime': DateTime.now().toIso8601String(),
+              });
+            }
+          }
+        }
+      }
+      
+      return updatedRows;
+    });
+  }
+
+  Future<int> deleteInvoice(int id) async {
+    return await cancelInvoice(id);
   }
 
   // ==========================================

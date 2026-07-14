@@ -1,10 +1,16 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:excel/excel.dart' as excel_pkg;
+import 'package:share_plus/share_plus.dart';
 import '../providers/invoice_provider.dart';
 import '../providers/business_provider.dart';
 import '../models/invoice.dart';
+import '../models/business.dart';
+import '../services/pdf_service.dart';
 import 'invoice_detail_sheet.dart';
 
 class ReportsScreen extends StatefulWidget {
@@ -162,8 +168,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
     final filteredInvoices = _getFilteredInvoices(invoiceProvider.invoices);
     
     // Aggregate calculations
-    final totalSales = filteredInvoices.fold(0.0, (sum, inv) => sum + inv.grandTotal);
-    final totalOrders = filteredInvoices.length;
+    final totalSales = filteredInvoices
+        .where((inv) => inv.paymentStatus.toUpperCase() != 'CANCELLED')
+        .fold(0.0, (sum, inv) => sum + inv.grandTotal);
+    final totalOrders = filteredInvoices
+        .where((inv) => inv.paymentStatus.toUpperCase() != 'CANCELLED')
+        .length;
 
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
@@ -175,6 +185,27 @@ class _ReportsScreenState extends State<ReportsScreen> {
         backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.white,
         elevation: 0,
         actions: [
+          if (filteredInvoices.isNotEmpty) ...[
+            IconButton(
+              icon: const Icon(Icons.grid_on_rounded, color: Color(0xFF10B981)),
+              tooltip: "Export Excel",
+              onPressed: () => _exportToExcel(filteredInvoices, businessProvider.business),
+            ),
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFFEF4444)),
+              tooltip: "Export PDF",
+              onPressed: () {
+                if (businessProvider.business != null) {
+                  PdfService.generateAndShareSalesReportPdf(
+                    invoices: filteredInvoices,
+                    business: businessProvider.business!,
+                    startDate: _selectedDateRange?.start,
+                    endDate: _selectedDateRange?.end,
+                  );
+                }
+              },
+            ),
+          ],
           if (_selectedDateRange != null || _searchQuery.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.clear_all_rounded, color: Colors.redAccent),
@@ -190,6 +221,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
             ),
         ],
       ),
+
       body: Column(
         children: [
           // 1. Search Box
@@ -579,6 +611,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
     final formattedDate = DateFormat('dd MMM yyyy, hh:mm a').format(invoice.dateTime);
 
+    final isCancelled = invoice.paymentStatus.toUpperCase() == 'CANCELLED';
+    final textDecoration = isCancelled ? TextDecoration.lineThrough : null;
+    final textMutedColor = isCancelled ? const Color(0xFF94A3B8) : null;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10, left: 16, right: 16),
       decoration: BoxDecoration(
@@ -616,10 +652,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: iconColor.withOpacity(0.1),
+                      color: isCancelled ? Colors.red.withOpacity(0.1) : iconColor.withOpacity(0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(icon, color: iconColor, size: 24),
+                    child: Icon(isCancelled ? Icons.cancel_outlined : icon, color: isCancelled ? Colors.red : iconColor, size: 24),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -631,25 +667,28 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
-                            color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            decoration: textDecoration,
+                            color: textMutedColor ?? (isDark ? Colors.white : const Color(0xFF0F172A)),
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           formattedDate,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 11,
-                            color: Color(0xFF64748B),
+                            decoration: textDecoration,
+                            color: const Color(0xFF64748B),
                           ),
                         ),
                         if (invoice.customerName.isNotEmpty) ...[
                           const SizedBox(height: 2),
                           Text(
                             "Customer: ${invoice.customerName}",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF475569),
+                              decoration: textDecoration,
+                              color: textMutedColor ?? const Color(0xFF475569),
                             ),
                           ),
                         ],
@@ -657,9 +696,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           const SizedBox(height: 2),
                           Text(
                             "Phone: ${invoice.customerPhone}",
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11,
-                              color: Color(0xFF64748B),
+                              decoration: textDecoration,
+                              color: const Color(0xFF64748B),
                             ),
                           ),
                         ],
@@ -671,7 +711,10 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.bold,
-                            color: invoice.paymentMethod.startsWith('SPLIT:') ? Colors.teal : const Color(0xFF64748B),
+                            decoration: textDecoration,
+                            color: isCancelled
+                                ? const Color(0xFF64748B)
+                                : (invoice.paymentMethod.startsWith('SPLIT:') ? Colors.teal : const Color(0xFF64748B)),
                           ),
                         ),
                       ],
@@ -686,16 +729,19 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 15,
-                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                          decoration: textDecoration,
+                          color: textMutedColor ?? (isDark ? Colors.white : const Color(0xFF0F172A)),
                         ),
                       ),
                       const SizedBox(height: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: invoice.paymentStatus.toUpperCase() == 'PAID'
-                              ? const Color(0xFFEFF6FF)
-                              : const Color(0xFFFEF3C7),
+                          color: isCancelled
+                              ? const Color(0xFFFEF2F2)
+                              : (invoice.paymentStatus.toUpperCase() == 'PAID'
+                                  ? const Color(0xFFEFF6FF)
+                                  : const Color(0xFFFEF3C7)),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(
@@ -703,9 +749,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.bold,
-                            color: invoice.paymentStatus.toUpperCase() == 'PAID'
-                                ? const Color(0xFF2563EB)
-                                : const Color(0xFFD97706),
+                            color: isCancelled
+                                ? const Color(0xFFEF4444)
+                                : (invoice.paymentStatus.toUpperCase() == 'PAID'
+                                    ? const Color(0xFF2563EB)
+                                    : const Color(0xFFD97706)),
                           ),
                         ),
                       ),
@@ -731,5 +779,102 @@ class _ReportsScreenState extends State<ReportsScreen> {
       }
     }
     return list.join(" + ");
+  }
+
+  Future<void> _exportToExcel(List<Invoice> invoices, Business? business) async {
+    if (invoices.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No data to export")),
+      );
+      return;
+    }
+    
+    // Show a loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator()),
+    );
+    
+    try {
+      final excel = excel_pkg.Excel.createExcel();
+      final sheet = excel['Sheet1'];
+      
+      // Add title block
+      sheet.appendRow([excel_pkg.TextCellValue(business?.name.toUpperCase() ?? 'SALES REPORT')]);
+      sheet.appendRow([excel_pkg.TextCellValue('Sales Log Report')]);
+      sheet.appendRow([excel_pkg.TextCellValue('Generated: ${DateFormat('dd-MMM-yyyy hh:mm a').format(DateTime.now())}')]);
+      sheet.appendRow([excel_pkg.TextCellValue('')]); // empty spacer row
+      
+      // Table Header Row
+      sheet.appendRow([
+        excel_pkg.TextCellValue('Invoice No'),
+        excel_pkg.TextCellValue('Date & Time'),
+        excel_pkg.TextCellValue('Customer Name'),
+        excel_pkg.TextCellValue('Customer Phone'),
+        excel_pkg.TextCellValue('Payment Method'),
+        excel_pkg.TextCellValue('Payment Status'),
+        excel_pkg.TextCellValue('Total Amount'),
+        excel_pkg.TextCellValue('Discount'),
+        excel_pkg.TextCellValue('Tax'),
+        excel_pkg.TextCellValue('Grand Total')
+      ]);
+      
+      for (var inv in invoices) {
+        sheet.appendRow([
+          excel_pkg.TextCellValue(inv.invoiceNumber),
+          excel_pkg.TextCellValue(DateFormat('dd-MMM-yyyy hh:mm a').format(inv.dateTime)),
+          excel_pkg.TextCellValue(inv.customerName),
+          excel_pkg.TextCellValue(inv.customerPhone),
+          excel_pkg.TextCellValue(inv.paymentMethod),
+          excel_pkg.TextCellValue(inv.paymentStatus),
+          excel_pkg.DoubleCellValue(inv.totalAmount),
+          excel_pkg.DoubleCellValue(inv.discountAmount),
+          excel_pkg.DoubleCellValue(inv.taxAmount),
+          excel_pkg.DoubleCellValue(inv.grandTotal)
+        ]);
+      }
+      
+      // Calculate totals
+      final nonCancelled = invoices.where((i) => i.paymentStatus.toUpperCase() != 'CANCELLED');
+      final double totalSales = nonCancelled.fold(0.0, (sum, i) => sum + i.grandTotal);
+      sheet.appendRow([excel_pkg.TextCellValue('')]);
+      sheet.appendRow([
+        excel_pkg.TextCellValue('Total Net Sales:'),
+        excel_pkg.TextCellValue(''),
+        excel_pkg.TextCellValue(''),
+        excel_pkg.TextCellValue(''),
+        excel_pkg.TextCellValue(''),
+        excel_pkg.TextCellValue(''),
+        excel_pkg.TextCellValue(''),
+        excel_pkg.TextCellValue(''),
+        excel_pkg.TextCellValue(''),
+        excel_pkg.DoubleCellValue(totalSales)
+      ]);
+      
+      final fileBytes = excel.save();
+      if (fileBytes != null) {
+        final tempDir = await getTemporaryDirectory();
+        final file = File('${tempDir.path}/Sales_Report_${DateTime.now().millisecondsSinceEpoch}.xlsx');
+        await file.writeAsBytes(fileBytes);
+        
+        Navigator.pop(context); // close loader
+        
+        await Share.shareXFiles(
+          [XFile(file.path)],
+          subject: 'Sales Report Excel',
+        );
+      } else {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to generate Excel file.")),
+        );
+      }
+    } catch (e) {
+      Navigator.pop(context); // close loader
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error exporting Excel: $e")),
+      );
+    }
   }
 }

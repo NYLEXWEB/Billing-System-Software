@@ -524,6 +524,103 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 24),
+
+            // 5. About & Support
+            _buildSectionLabel("About & Support"),
+            _buildGroupCard(
+              isDark: isDark,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF0284C7).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.info_outline_rounded, color: Color(0xFF0284C7), size: 24),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Text("EasyToBill POS", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                  SizedBox(height: 2),
+                                  Text("Version: 1.0.0 (Production)", style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    "EasyToBill is an offline-first POS Billing app designed for small businesses. "
+                                    "Your transactions, inventory, and settings are securely stored locally on this device.",
+                                    style: TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF475569)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF10B981).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.security_outlined, color: Color(0xFF10B981), size: 24),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Text("Privacy & Security", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "All business operations are fully offline. We do not gather or store any data on external servers. "
+                                    "Cloud backups are encrypted using your personal recovery passphrase and saved exclusively to your own Google Drive storage.",
+                                    style: TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF475569)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -1084,6 +1181,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final addressController = TextEditingController(text: shop.address);
     final gstController = TextEditingController(text: shop.gstOrTin);
     final upiController = TextEditingController(text: shop.upiId);
+    final headerController = TextEditingController(text: shop.receiptHeader);
+    final footerController = TextEditingController(text: shop.receiptFooter);
 
     showDialog(
       context: context,
@@ -1128,6 +1227,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     return null;
                   },
                 ),
+                TextFormField(
+                  controller: headerController,
+                  maxLines: 2,
+                  decoration: const InputDecoration(
+                    labelText: "Custom Receipt Header",
+                    hintText: "e.g. Welcome to Our Shop!",
+                  ),
+                ),
+                TextFormField(
+                  controller: footerController,
+                  maxLines: 2,
+                  decoration: const InputDecoration(
+                    labelText: "Custom Receipt Footer",
+                    hintText: "e.g. Thanks for shopping! No return.",
+                  ),
+                ),
               ],
             ),
           ),
@@ -1144,6 +1259,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 address: addressController.text.trim(),
                 gstOrTin: gstController.text.trim(),
                 upiId: upiController.text.trim(),
+                receiptHeader: headerController.text.trim(),
+                receiptFooter: footerController.text.trim(),
               );
 
               final ok = await provider.updateBusiness(updated);

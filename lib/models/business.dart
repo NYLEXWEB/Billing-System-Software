@@ -12,6 +12,8 @@ class Business {
   final String? backupEmail;
   final DateTime? lastBackupTime;
   final String themeMode; // 'light', 'dark', or 'system'
+  final String receiptHeader;
+  final String receiptFooter;
 
   Business({
     this.id,
@@ -27,6 +29,8 @@ class Business {
     this.backupEmail,
     this.lastBackupTime,
     this.themeMode = 'system',
+    this.receiptHeader = '',
+    this.receiptFooter = '',
   });
 
   Map<String, dynamic> toMap() {
@@ -44,6 +48,8 @@ class Business {
       'backupEmail': backupEmail,
       'lastBackupTime': lastBackupTime?.toIso8601String(),
       'themeMode': themeMode,
+      'receiptHeader': receiptHeader,
+      'receiptFooter': receiptFooter,
     };
   }
 
@@ -64,6 +70,8 @@ class Business {
           ? DateTime.tryParse(map['lastBackupTime'] as String)
           : null,
       themeMode: map['themeMode'] as String? ?? 'system',
+      receiptHeader: map['receiptHeader'] as String? ?? '',
+      receiptFooter: map['receiptFooter'] as String? ?? '',
     );
   }
 
@@ -81,6 +89,8 @@ class Business {
     String? backupEmail,
     DateTime? lastBackupTime,
     String? themeMode,
+    String? receiptHeader,
+    String? receiptFooter,
   }) {
     return Business(
       id: id ?? this.id,
@@ -96,6 +106,8 @@ class Business {
       backupEmail: backupEmail ?? this.backupEmail,
       lastBackupTime: lastBackupTime ?? this.lastBackupTime,
       themeMode: themeMode ?? this.themeMode,
+      receiptHeader: receiptHeader ?? this.receiptHeader,
+      receiptFooter: receiptFooter ?? this.receiptFooter,
     );
   }
 }

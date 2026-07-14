@@ -165,6 +165,12 @@ class PrinterProvider extends ChangeNotifier {
     if (business.gstOrTin.isNotEmpty) {
       bytes += generator.text("GSTIN: ${business.gstOrTin}", styles: const PosStyles(align: PosAlign.center, bold: true));
     }
+    if (business.receiptHeader.isNotEmpty) {
+      final headerLines = business.receiptHeader.split('\n');
+      for (var line in headerLines) {
+        bytes += generator.text(line, styles: const PosStyles(align: PosAlign.center));
+      }
+    }
 
     bytes += generator.hr();
 
@@ -281,8 +287,15 @@ class PrinterProvider extends ChangeNotifier {
     }
 
     // Footer
-    bytes += generator.text("Thank You for Shopping!", styles: const PosStyles(align: PosAlign.center));
-    bytes += generator.text("Please visit again", styles: const PosStyles(align: PosAlign.center));
+    if (business.receiptFooter.isNotEmpty) {
+      final footerLines = business.receiptFooter.split('\n');
+      for (var line in footerLines) {
+        bytes += generator.text(line, styles: const PosStyles(align: PosAlign.center));
+      }
+    } else {
+      bytes += generator.text("Thank You for Shopping!", styles: const PosStyles(align: PosAlign.center));
+      bytes += generator.text("Please visit again", styles: const PosStyles(align: PosAlign.center));
+    }
 
     // Feed paper & Cut
     bytes += generator.feed(3);
