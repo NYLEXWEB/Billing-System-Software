@@ -10,41 +10,50 @@ class BarcodeScannerScreen extends StatefulWidget {
   State<BarcodeScannerScreen> createState() => _BarcodeScannerScreenState();
 }
 
-class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
-  MobileScannerController? _controller;
+class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> with WidgetsBindingObserver {
+  late MobileScannerController _controller;
   bool _hasDetected = false;
-  PermissionStatus _permissionStatus = PermissionStatus.denied;
-  bool _isCheckingPermission = true;
+  bool _isPermissionDenied = false;
 
   @override
   void initState() {
     super.initState();
-    _checkPermission();
+    WidgetsBinding.instance.addObserver(this);
+    _initController();
   }
 
-  Future<void> _checkPermission() async {
-    setState(() {
-      _isCheckingPermission = true;
-    });
-
-    var status = await Permission.camera.status;
-    if (status.isDenied) {
-      status = await Permission.camera.request();
-    }
-
-    setState(() {
-      _permissionStatus = status;
-      _isCheckingPermission = false;
-      if (status.isGranted) {
-        _controller ??= MobileScannerController();
-      }
-    });
+  void _initController() {
+    _controller = MobileScannerController(
+      autoStart: true,
+      detectionSpeed: DetectionSpeed.normal,
+    );
   }
 
   @override
   void dispose() {
-    _controller?.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // If the app is resumed (e.g. user came back from Settings),
+    // and permission was previously denied, we can check if they granted it now.
+    if (state == AppLifecycleState.resumed && _isPermissionDenied) {
+      _checkPermissionAndRestart();
+    }
+  }
+
+  Future<void> _checkPermissionAndRestart() async {
+    final status = await Permission.camera.status;
+    if (status.isGranted) {
+      setState(() {
+        _isPermissionDenied = false;
+        _controller.dispose();
+        _initController();
+      });
+    }
   }
 
   Widget _buildPermissionDeniedView() {
@@ -56,8 +65,8 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
           children: [
             Container(
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFEF2F2),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFEF2F2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.camera_alt_outlined, size: 56, color: Color(0xFFEF4444)),
@@ -76,16 +85,25 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
             const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: () async {
-                if (_permissionStatus.isPermanentlyDenied) {
+                final status = await Permission.camera.request();
+                if (status.isPermanentlyDenied) {
                   await openAppSettings();
+                } else if (status.isGranted) {
+                  setState(() {
+                    _isPermissionDenied = false;
+                    _controller.dispose();
+                    _initController();
+                  });
                 } else {
-                  await _checkPermission();
+                  setState(() {
+                    _isPermissionDenied = true;
+                  });
                 }
               },
               icon: const Icon(Icons.security, size: 18),
-              label: Text(
-                _permissionStatus.isPermanentlyDenied ? "Open System Settings" : "Grant Permission",
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              label: const Text(
+                "Grant Permission / Settings",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2563EB),
@@ -103,116 +121,155 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final hasCameraAccess = _permissionStatus.isGranted;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text("Scan Barcode / QR", style: TextStyle(fontWeight: FontWeight.bold)),
         actions: [
-          if (hasCameraAccess && _controller != null) ...[
+          if (!_isPermissionDenied) ...[
             ValueListenableBuilder(
-              valueListenable: _controller!.torchState,
+              valueListenable: _controller.torchState,
               builder: (context, state, child) {
                 final isTorchOn = state == TorchState.on;
                 return IconButton(
                   icon: Icon(isTorchOn ? Icons.flash_on : Icons.flash_off, color: isTorchOn ? Colors.yellow : Colors.white),
-                  onPressed: () => _controller!.toggleTorch(),
+                  onPressed: () => _controller.toggleTorch(),
                 );
               },
             ),
             IconButton(
               icon: const Icon(Icons.flip_camera_ios_outlined),
-              onPressed: () => _controller!.switchCamera(),
+              onPressed: () => _controller.switchCamera(),
             ),
           ]
         ],
       ),
-      body: _isCheckingPermission
-          ? const Center(child: CircularProgressIndicator())
-          : !hasCameraAccess || _controller == null
-              ? _buildPermissionDeniedView()
-              : Stack(
-                  children: [
-                    // 1. Camera scanner viewfinder
-                    MobileScanner(
-                      controller: _controller!,
-                      errorBuilder: (context, error, child) {
-                        return Center(
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            margin: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(
-                              color: Colors.black87,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              "Camera Error: ${error.errorCode.name}\n${error.errorDetails?.message ?? 'Please restart the scanner.'}",
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.white, fontSize: 13),
-                            ),
-                          ),
-                        );
-                      },
-                      onDetect: (capture) {
-                        if (_hasDetected) return;
-
-                        final List<Barcode> barcodes = capture.barcodes;
-                        if (barcodes.isNotEmpty) {
-                          final barcode = barcodes.first.rawValue;
-                          if (barcode != null && barcode.isNotEmpty) {
-                            setState(() {
-                              _hasDetected = true;
-                            });
-                            // Trigger a short haptic vibration
-                            HapticFeedback.lightImpact();
-                            Navigator.pop(context, barcode);
-                          }
+      body: _isPermissionDenied
+          ? _buildPermissionDeniedView()
+          : Stack(
+              children: [
+                // 1. Camera scanner viewfinder
+                MobileScanner(
+                  controller: _controller,
+                  errorBuilder: (context, error, child) {
+                    // Check if it is a permission denied error
+                    if (error.errorCode == MobileScannerErrorCode.permissionDenied) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted && !_isPermissionDenied) {
+                          setState(() {
+                            _isPermissionDenied = true;
+                          });
                         }
-                      },
-                    ),
+                      });
+                      return const Center(child: CircularProgressIndicator());
+                    }
 
-                    // 2. Viewfinder Overlay UI
-                    Center(
+                    // For other errors (like Called state before initializing / genericError)
+                    return Center(
                       child: Container(
-                        width: 250,
-                        height: 250,
+                        padding: const EdgeInsets.all(20),
+                        margin: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          border: Border.all(color: Colors.blueAccent, width: 4),
+                          color: Colors.black87,
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        child: const Align(
-                          alignment: Alignment.center,
-                          child: SizedBox(
-                            width: 230,
-                            height: 2,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(color: Colors.redAccent),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 40),
+                            const SizedBox(height: 12),
+                            Text(
+                              "Camera Error: ${error.errorCode.name}",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
                             ),
-                          ),
+                            const SizedBox(height: 8),
+                            Text(
+                              error.errorDetails?.message ?? "Failed to initialize camera.",
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.white70, fontSize: 13),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _controller.dispose();
+                                  _initController();
+                                });
+                              },
+                              icon: const Icon(Icons.refresh_rounded, size: 18),
+                              label: const Text("Retry Scanner"),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2563EB),
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ),
+                    );
+                  },
+                  onDetect: (capture) {
+                    if (_hasDetected) return;
 
-                    // Instruction Text
-                    Positioned(
-                      bottom: 60,
-                      left: 20,
-                      right: 20,
-                      child: Card(
-                        elevation: 4,
-                        color: Colors.black.withOpacity(0.7),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          child: Text(
-                            "Align barcode within the framing box to scan",
-                            textAlign: TextAlign.center,
-                            style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-                          ),
+                    final List<Barcode> barcodes = capture.barcodes;
+                    if (barcodes.isNotEmpty) {
+                      final barcode = barcodes.first.rawValue;
+                      if (barcode != null && barcode.isNotEmpty) {
+                        setState(() {
+                          _hasDetected = true;
+                        });
+                        // Trigger a short haptic vibration
+                        HapticFeedback.lightImpact();
+                        Navigator.pop(context, barcode);
+                      }
+                    }
+                  },
+                ),
+
+                // 2. Viewfinder Overlay UI
+                Center(
+                  child: Container(
+                    width: 250,
+                    height: 250,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blueAccent, width: 4),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: const Align(
+                      alignment: Alignment.center,
+                      child: SizedBox(
+                        width: 230,
+                        height: 2,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(color: Colors.redAccent),
                         ),
                       ),
                     ),
-                  ],
+                  ),
                 ),
+
+                // Instruction Text
+                Positioned(
+                  bottom: 60,
+                  left: 20,
+                  right: 20,
+                  child: Card(
+                    elevation: 4,
+                    color: Colors.black.withOpacity(0.7),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Text(
+                        "Align barcode within the framing box to scan",
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.bodyMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

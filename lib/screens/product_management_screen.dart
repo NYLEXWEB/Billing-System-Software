@@ -20,7 +20,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(() {
       if (mounted) {
         setState(() {});
@@ -117,13 +117,13 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              Icons.shopping_bag_outlined,
+                              Icons.grid_view_rounded,
                               size: 16,
                               color: _tabController.index == 0 ? const Color(0xFF2563EB) : const Color(0xFF64748B),
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              "Products",
+                              "All",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
@@ -159,9 +159,51 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
-                              Icons.category_outlined,
+                              Icons.shopping_bag_outlined,
                               size: 16,
                               color: _tabController.index == 1 ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Products",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13,
+                                color: _tabController.index == 1 ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () {
+                        _tabController.animateTo(2);
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: _tabController.index == 2 ? Colors.white : Colors.transparent,
+                          borderRadius: BorderRadius.circular(8),
+                          boxShadow: _tabController.index == 2
+                              ? [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.06),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ]
+                              : null,
+                        ),
+                        alignment: Alignment.center,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.category_outlined,
+                              size: 16,
+                              color: _tabController.index == 2 ? const Color(0xFF2563EB) : const Color(0xFF64748B),
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -169,7 +211,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
-                                color: _tabController.index == 1 ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+                                color: _tabController.index == 2 ? const Color(0xFF0F172A) : const Color(0xFF64748B),
                               ),
                             ),
                           ],
@@ -186,6 +228,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
             child: TabBarView(
               controller: _tabController,
               children: [
+                _buildAllTab(provider, theme),
                 _buildProductsTab(provider, theme),
                 _buildCategoriesTab(provider, theme),
               ],
@@ -195,16 +238,16 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          if (_tabController.index == 0) {
-            _showProductFormDialog(context, provider);
-          } else {
+          if (_tabController.index == 2) {
             _showCategoryFormDialog(context, provider);
+          } else {
+            _showProductFormDialog(context, provider);
           }
         },
         backgroundColor: const Color(0xFF2563EB),
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add),
-        label: Text(_tabController.index == 0 ? "New Product" : "New Category"),
+        label: Text(_tabController.index == 2 ? "New Category" : "New Product"),
       ),
     );
   }
@@ -731,166 +774,162 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                   ),
                 ],
               ),
-              content: Form(
-                key: formKey,
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      TextFormField(
-                        controller: nameController,
-                        decoration: const InputDecoration(
-                          labelText: "Product Name *",
-                          hintText: "Enter product name",
-                          prefixIcon: Icon(Icons.shopping_bag_outlined),
-                        ),
-                        validator: (v) => v == null || v.trim().isEmpty ? "Name is required" : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: barcodeController,
-                        decoration: InputDecoration(
-                          labelText: "Barcode / SKU (Optional)",
-                          hintText: "Scan or enter barcode",
-                          prefixIcon: const Icon(Icons.qr_code),
-                          suffixIcon: IconButton(
-                            icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
-                            onPressed: () async {
-                              final scannedCode = await Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => const BarcodeScannerScreen()),
-                              );
-                              if (scannedCode != null && scannedCode.isNotEmpty) {
-                                setModalState(() {
-                                  barcodeController.text = scannedCode;
-                                });
-                              }
-                            },
+              content: Container(
+                width: MediaQuery.of(context).size.width * 0.9,
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: Form(
+                  key: formKey,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextFormField(
+                          controller: nameController,
+                          decoration: const InputDecoration(
+                            labelText: "Product Name *",
+                            hintText: "Enter product name",
+                            prefixIcon: Icon(Icons.shopping_bag_outlined),
                           ),
+                          validator: (v) => v == null || v.trim().isEmpty ? "Name is required" : null,
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<int?>(
-                              value: selectedCatId,
-                              decoration: const InputDecoration(
-                                labelText: "Category",
-                                prefixIcon: Icon(Icons.category_outlined),
-                              ),
-                              items: [
-                                const DropdownMenuItem<int?>(value: null, child: Text("None")),
-                                ...provider.categories.map((c) => DropdownMenuItem<int?>(value: c.id, child: Text(c.name))),
-                              ],
-                              onChanged: (val) => setModalState(() => selectedCatId = val),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: barcodeController,
+                          decoration: InputDecoration(
+                            labelText: "Barcode / SKU (Optional)",
+                            hintText: "Scan or enter barcode",
+                            prefixIcon: const Icon(Icons.qr_code),
+                            suffixIcon: IconButton(
+                              icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
+                              onPressed: () async {
+                                final scannedCode = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const BarcodeScannerScreen()),
+                                );
+                                if (scannedCode != null && scannedCode.isNotEmpty) {
+                                  setModalState(() {
+                                    barcodeController.text = scannedCode;
+                                  });
+                                }
+                              },
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              value: selectedUnit,
-                              decoration: const InputDecoration(
-                                labelText: "Selling Unit *",
-                                prefixIcon: Icon(Icons.balance_outlined),
-                              ),
-                              items: const [
-                                DropdownMenuItem(value: 'Piece', child: Text('Piece (pcs)')),
-                                DropdownMenuItem(value: 'Kilogram', child: Text('Kilogram (kg)')),
-                                DropdownMenuItem(value: 'Gram', child: Text('Gram (g)')),
-                                DropdownMenuItem(value: 'Litre', child: Text('Litre (l)')),
-                                DropdownMenuItem(value: 'Millilitre', child: Text('Millilitre (ml)')),
-                                DropdownMenuItem(value: 'Pack', child: Text('Pack (pk)')),
-                                DropdownMenuItem(value: 'Box', child: Text('Box (bx)')),
-                                DropdownMenuItem(value: 'Metre', child: Text('Metre (m)')),
-                              ],
-                              onChanged: (val) => setModalState(() => selectedUnit = val ?? 'Piece'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextFormField(
-                              controller: priceController,
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              decoration: const InputDecoration(
-                                labelText: "Selling Price *",
-                                prefixText: "₹ ",
-                                prefixIcon: Icon(Icons.sell_outlined),
-                              ),
-                              validator: (v) => v == null || double.tryParse(v) == null ? "Invalid price" : null,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextFormField(
-                              controller: costController,
-                              keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                              decoration: const InputDecoration(
-                                labelText: "Cost Price",
-                                prefixText: "₹ ",
-                                prefixIcon: Icon(Icons.money_off_csred_outlined),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
-                        child: SwitchListTile(
-                          title: const Text(
-                            "Track Inventory Stock",
-                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<int?>(
+                          value: selectedCatId,
+                          decoration: const InputDecoration(
+                            labelText: "Category",
+                            prefixIcon: Icon(Icons.category_outlined),
                           ),
-                          subtitle: const Text(
-                            "Automatically monitor and update stock levels",
-                            style: TextStyle(fontSize: 12),
-                          ),
-                          value: isTracked,
-                          activeColor: const Color(0xFF2563EB),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                          onChanged: (val) => setModalState(() => isTracked = val),
+                          items: [
+                            const DropdownMenuItem<int?>(value: null, child: Text("None")),
+                            ...provider.categories.map((c) => DropdownMenuItem<int?>(value: c.id, child: Text(c.name))),
+                          ],
+                          onChanged: (val) => setModalState(() => selectedCatId = val),
                         ),
-                      ),
-                      if (isTracked) ...[
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: selectedUnit,
+                          decoration: const InputDecoration(
+                            labelText: "Selling Unit *",
+                            prefixIcon: Icon(Icons.balance_outlined),
+                          ),
+                          items: const [
+                            DropdownMenuItem(value: 'Piece', child: Text('Piece (pcs)')),
+                            DropdownMenuItem(value: 'Kilogram', child: Text('Kilogram (kg)')),
+                            DropdownMenuItem(value: 'Gram', child: Text('Gram (g)')),
+                            DropdownMenuItem(value: 'Litre', child: Text('Litre (l)')),
+                            DropdownMenuItem(value: 'Millilitre', child: Text('Millilitre (ml)')),
+                            DropdownMenuItem(value: 'Pack', child: Text('Pack (pk)')),
+                            DropdownMenuItem(value: 'Box', child: Text('Box (bx)')),
+                            DropdownMenuItem(value: 'Metre', child: Text('Metre (m)')),
+                          ],
+                          onChanged: (val) => setModalState(() => selectedUnit = val ?? 'Piece'),
+                        ),
                         const SizedBox(height: 16),
                         Row(
                           children: [
                             Expanded(
                               child: TextFormField(
-                                controller: stockController,
-                                keyboardType: TextInputType.number,
+                                controller: priceController,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 decoration: const InputDecoration(
-                                  labelText: "Current Stock",
-                                  prefixIcon: Icon(Icons.inventory_2_outlined),
+                                  labelText: "Selling Price *",
+                                  prefixText: "₹ ",
+                                  prefixIcon: Icon(Icons.sell_outlined),
                                 ),
-                                validator: (v) => v == null || int.tryParse(v) == null ? "Invalid count" : null,
+                                validator: (v) => v == null || double.tryParse(v) == null ? "Invalid price" : null,
                               ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: TextFormField(
-                                controller: thresholdController,
-                                keyboardType: TextInputType.number,
+                                controller: costController,
+                                keyboardType: const TextInputType.numberWithOptions(decimal: true),
                                 decoration: const InputDecoration(
-                                  labelText: "Low Threshold",
-                                  prefixIcon: Icon(Icons.warning_amber_rounded),
+                                  labelText: "Cost Price",
+                                  prefixText: "₹ ",
+                                  prefixIcon: Icon(Icons.money_off_csred_outlined),
                                 ),
-                                validator: (v) => v == null || int.tryParse(v) == null ? "Invalid threshold" : null,
                               ),
                             ),
                           ],
                         ),
+                        const SizedBox(height: 16),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: SwitchListTile(
+                            title: const Text(
+                              "Track Inventory Stock",
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                            ),
+                            subtitle: const Text(
+                              "Automatically monitor and update stock levels",
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            value: isTracked,
+                            activeColor: const Color(0xFF2563EB),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                            onChanged: (val) => setModalState(() => isTracked = val),
+                          ),
+                        ),
+                        if (isTracked) ...[
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextFormField(
+                                  controller: stockController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: "Current Stock",
+                                    prefixIcon: Icon(Icons.inventory_2_outlined),
+                                  ),
+                                  validator: (v) => v == null || int.tryParse(v) == null ? "Invalid count" : null,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: TextFormField(
+                                  controller: thresholdController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    labelText: "Low Threshold",
+                                    prefixIcon: Icon(Icons.warning_amber_rounded),
+                                  ),
+                                  validator: (v) => v == null || int.tryParse(v) == null ? "Invalid threshold" : null,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -1147,6 +1186,150 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAllTab(ProductProvider provider, ThemeData theme) {
+    return Column(
+      children: [
+        // Search header
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: TextField(
+            controller: _searchController,
+            onChanged: provider.setSearchQuery,
+            decoration: InputDecoration(
+              hintText: "Search categories or products...",
+              prefixIcon: const Icon(Icons.search_rounded),
+              suffixIcon: IconButton(
+                icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
+                tooltip: "Scan Barcode to Search",
+                onPressed: () async {
+                  final scannedCode = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const BarcodeScannerScreen()),
+                  );
+                  if (scannedCode != null && scannedCode.isNotEmpty) {
+                    _searchController.text = scannedCode;
+                    provider.setSearchQuery(scannedCode);
+                  }
+                },
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Categories Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Categories",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                    ),
+                    TextButton(
+                      onPressed: () => _tabController.animateTo(2),
+                      child: const Text("View All", style: TextStyle(fontSize: 13, color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (provider.categories.isEmpty)
+                  const Text("No categories added yet.", style: TextStyle(color: Colors.grey, fontSize: 13))
+                else
+                  SizedBox(
+                    height: 90,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: provider.categories.length,
+                      itemBuilder: (context, index) {
+                        final cat = provider.categories[index];
+                        final count = provider.products.where((p) => p.categoryId == cat.id).length;
+                        return Container(
+                          width: 130,
+                          margin: const EdgeInsets.only(right: 12),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(16),
+                              onTap: () {
+                                provider.setSelectedCategoryId(cat.id);
+                                _tabController.animateTo(1);
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(10.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      cat.name,
+                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "$count products",
+                                      style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                const SizedBox(height: 24),
+                // Products Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Products",
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                    ),
+                    TextButton(
+                      onPressed: () => _tabController.animateTo(1),
+                      child: const Text("View All", style: TextStyle(fontSize: 13, color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                if (provider.filteredProducts.isEmpty)
+                  const Center(
+                     child: Padding(
+                       padding: EdgeInsets.symmetric(vertical: 24.0),
+                       child: Text("No products found", style: TextStyle(color: Colors.grey, fontSize: 13)),
+                     ),
+                  )
+                else
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: provider.filteredProducts.take(15).toList().length,
+                    itemBuilder: (context, index) {
+                      final product = provider.filteredProducts[index];
+                      return _buildProductCard(product, provider, theme);
+                    },
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -9,6 +9,7 @@ import '../providers/auth_provider.dart';
 import '../providers/backup_provider.dart';
 import '../models/invoice.dart';
 import '../models/product.dart';
+import '../models/business.dart';
 import 'invoice_detail_sheet.dart';
 import 'reports_screen.dart';
 
@@ -20,6 +21,10 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  String _searchQuery = "";
+  String _selectedPaymentMethod = "All";
+  String _selectedDateRange = "All";
+
   @override
   void initState() {
     super.initState();
@@ -50,13 +55,65 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  List<Invoice> _getFilteredInvoices(List<Invoice> invoices) {
+    final now = DateTime.now();
+    return invoices.where((invoice) {
+      if (_searchQuery.isNotEmpty) {
+        final query = _searchQuery.toLowerCase();
+        final matchesNumber = invoice.invoiceNumber.toLowerCase().contains(query);
+        final matchesPhone = invoice.customerPhone.toLowerCase().contains(query);
+        final matchesName = (invoice.customerName ?? "").toLowerCase().contains(query);
+        if (!matchesNumber && !matchesPhone && !matchesName) {
+          return false;
+        }
+      }
+
+      if (_selectedPaymentMethod != "All") {
+        if (_selectedPaymentMethod == "SPLIT") {
+          if (!invoice.paymentMethod.startsWith("SPLIT")) {
+            return false;
+          }
+        } else {
+          if (invoice.paymentMethod != _selectedPaymentMethod) {
+            return false;
+          }
+        }
+      }
+
+      if (_selectedDateRange != "All") {
+        final date = invoice.dateTime;
+        if (_selectedDateRange == "Today") {
+          if (date.year != now.year || date.month != now.month || date.day != now.day) {
+            return false;
+          }
+        } else if (_selectedDateRange == "Yesterday") {
+          final yesterday = now.subtract(const Duration(days: 1));
+          if (date.year != yesterday.year || date.month != yesterday.month || date.day != yesterday.day) {
+            return false;
+          }
+        } else if (_selectedDateRange == "Last 7 Days") {
+          final sevenDaysAgo = now.subtract(const Duration(days: 7));
+          if (date.isBefore(sevenDaysAgo)) {
+            return false;
+          }
+        } else if (_selectedDateRange == "This Month") {
+          if (date.year != now.year || date.month != now.month) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final businessProvider = Provider.of<BusinessProvider>(context);
     final shop = businessProvider.business;
 
     return DefaultTabController(
-      length: 2,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -70,7 +127,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
             tabs: [
               Tab(text: "Overview", icon: Icon(Icons.dashboard_outlined, size: 20)),
-              Tab(text: "Reports & Logs", icon: Icon(Icons.analytics_outlined, size: 20)),
+              Tab(text: "Reports", icon: Icon(Icons.analytics_outlined, size: 20)),
+              Tab(text: "Transactions", icon: Icon(Icons.receipt_long_outlined, size: 20)),
             ],
           ),
         ),
@@ -78,6 +136,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             _buildOverviewTab(context),
             const ReportsScreen(),
+            _buildTransactionsTab(context),
           ],
         ),
       ),
@@ -113,60 +172,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             // 1. Welcome / Shop Header
             Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _getGreeting(),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: theme.hintColor,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        shop?.name ?? "EasyToBill Store",
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: -0.8,
-                        ),
-                      ),
-                    ],
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _getGreeting(),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: -0.8,
                   ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.primary.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: theme.colorScheme.primary.withOpacity(0.15), width: 1.5),
-                    ),
-                    child: IconButton(
-                      icon: Icon(
-                        lowStockItems.isNotEmpty ? Icons.warning_amber_rounded : Icons.storefront_rounded,
-                        color: lowStockItems.isNotEmpty ? Colors.orange : theme.colorScheme.primary,
-                        size: 24,
-                      ),
-                      onPressed: () {
-                        if (lowStockItems.isNotEmpty) {
-                          _showLowStockDialog(context, lowStockItems);
-                        } else {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text("Welcome to ${shop?.name ?? 'EasyToBill'}! All systems running smooth."),
-                              backgroundColor: theme.colorScheme.primary,
-                            ),
-                          );
-                        }
-                      },
-                    ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: theme.colorScheme.primary.withOpacity(0.15), width: 1.5),
                   ),
-                ],
-              ),
+                  child: IconButton(
+                    icon: Icon(
+                      lowStockItems.isNotEmpty ? Icons.warning_amber_rounded : Icons.storefront_rounded,
+                      color: lowStockItems.isNotEmpty ? Colors.orange : theme.colorScheme.primary,
+                      size: 24,
+                    ),
+                    onPressed: () {
+                      if (lowStockItems.isNotEmpty) {
+                        _showLowStockDialog(context, lowStockItems);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text("Welcome to ${shop?.name ?? 'EasyToBill'}! All systems running smooth."),
+                            backgroundColor: theme.colorScheme.primary,
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            // Business Details Card
+            if (shop != null) ...[
+              _buildDashboardBusinessCard(shop, businessProvider, theme),
               const SizedBox(height: 24),
+            ],
 
               // 2. KPI Cards Grid
               _buildKpiGrid(currency, salesTodayVal, ordersTodayVal, salesMonthVal, theme),
@@ -737,6 +787,433 @@ class _DashboardScreenState extends State<DashboardScreen> {
           )
         ],
       ),
+    );
+  }
+
+  Widget _buildDashboardBusinessCard(Business shop, BusinessProvider provider, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark 
+              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+              : [const Color(0xFFF8FAFC), const Color(0xFFF1F5F9)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+          width: 1,
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    shop.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: -0.4,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit_note_rounded, color: Color(0xFF2563EB), size: 24),
+                  tooltip: "Edit Profile",
+                  onPressed: () => _showEditShopDialog(context, provider, shop),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(Icons.phone_outlined, size: 14, color: Color(0xFF64748B)),
+                const SizedBox(width: 8),
+                Text(shop.phone, style: TextStyle(fontSize: 13, color: isDark ? Colors.white70 : const Color(0xFF475569))),
+                if (shop.email.isNotEmpty) ...[
+                  const SizedBox(width: 16),
+                  const Icon(Icons.mail_outline_rounded, size: 14, color: Color(0xFF64748B)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      shop.email,
+                      style: TextStyle(fontSize: 13, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+            if (shop.address.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.place_outlined, size: 14, color: Color(0xFF64748B)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      shop.address,
+                      style: TextStyle(fontSize: 13, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            const SizedBox(height: 12),
+            Divider(height: 1, color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
+            const SizedBox(height: 10),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "GSTIN: ${shop.gstOrTin.isNotEmpty ? shop.gstOrTin : 'N/A'}",
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
+                ),
+                Text(
+                  "UPI: ${shop.upiId.isNotEmpty ? shop.upiId : 'Not Configured'}",
+                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF64748B)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showEditShopDialog(BuildContext context, BusinessProvider provider, Business shop) {
+    final formKey = GlobalKey<FormState>();
+    final nameController = TextEditingController(text: shop.name);
+    final phoneController = TextEditingController(text: shop.phone);
+    final emailController = TextEditingController(text: shop.email);
+    final addressController = TextEditingController(text: shop.address);
+    final gstController = TextEditingController(text: shop.gstOrTin);
+    final upiController = TextEditingController(text: shop.upiId);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Edit Shop Profile"),
+        content: Form(
+          key: formKey,
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: "Shop Name *"),
+                  validator: (v) => v == null || v.trim().isEmpty ? "Required" : null,
+                ),
+                TextFormField(
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(labelText: "Phone Number *"),
+                  validator: (v) => v == null || v.trim().isEmpty ? "Required" : null,
+                ),
+                TextFormField(
+                  controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: const InputDecoration(labelText: "Email"),
+                ),
+                TextFormField(
+                  controller: addressController,
+                  decoration: const InputDecoration(labelText: "Address"),
+                ),
+                TextFormField(
+                  controller: gstController,
+                  decoration: const InputDecoration(labelText: "GST / TAX No"),
+                ),
+                TextFormField(
+                  controller: upiController,
+                  decoration: const InputDecoration(labelText: "UPI ID for Payments (Optional)"),
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return null;
+                    if (!v.trim().contains('@')) return "Valid UPI ID required";
+                    return null;
+                  },
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          ElevatedButton(
+            onPressed: () async {
+              if (!formKey.currentState!.validate()) return;
+              final updated = shop.copyWith(
+                name: nameController.text.trim(),
+                phone: phoneController.text.trim(),
+                email: emailController.text.trim(),
+                address: addressController.text.trim(),
+                gstOrTin: gstController.text.trim(),
+                upiId: upiController.text.trim(),
+              );
+
+              final ok = await provider.updateBusiness(updated);
+              if (context.mounted) {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(ok ? "Profile updated." : "Failed to update profile.")),
+                );
+              }
+            },
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTransactionsTab(BuildContext context) {
+    final invoiceProvider = Provider.of<InvoiceProvider>(context);
+    final businessProvider = Provider.of<BusinessProvider>(context);
+    final shop = businessProvider.business;
+    final currency = shop?.currency ?? '₹';
+    final theme = Theme.of(context);
+
+    final filtered = _getFilteredInvoices(invoiceProvider.invoices);
+
+    return Column(
+      children: [
+        // Filters Section
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            border: Border(bottom: BorderSide(color: theme.dividerColor.withOpacity(0.08))),
+          ),
+          child: Column(
+            children: [
+              // Search Input
+              TextField(
+                onChanged: (val) {
+                  setState(() {
+                    _searchQuery = val;
+                  });
+                },
+                decoration: InputDecoration(
+                  hintText: "Search Invoice, Phone or Customer...",
+                  prefixIcon: const Icon(Icons.search, size: 20),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  filled: true,
+                  fillColor: theme.dividerColor.withOpacity(0.04),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              // Filter Dropdowns
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: theme.dividerColor.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedPaymentMethod,
+                          isExpanded: true,
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() {
+                                _selectedPaymentMethod = val;
+                              });
+                            }
+                          },
+                          items: const [
+                            DropdownMenuItem(value: "All", child: Text("All Payments")),
+                            DropdownMenuItem(value: "CASH", child: Text("Cash")),
+                            DropdownMenuItem(value: "UPI", child: Text("UPI")),
+                            DropdownMenuItem(value: "CARD", child: Text("Card")),
+                            DropdownMenuItem(value: "SPLIT", child: Text("Split")),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: theme.dividerColor.withOpacity(0.04),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          value: _selectedDateRange,
+                          isExpanded: true,
+                          onChanged: (val) {
+                            if (val != null) {
+                              setState(() {
+                                _selectedDateRange = val;
+                              });
+                            }
+                          },
+                          items: const [
+                            DropdownMenuItem(value: "All", child: Text("All Dates")),
+                            DropdownMenuItem(value: "Today", child: Text("Today")),
+                            DropdownMenuItem(value: "Yesterday", child: Text("Yesterday")),
+                            DropdownMenuItem(value: "Last 7 Days", child: Text("Last 7 Days")),
+                            DropdownMenuItem(value: "This Month", child: Text("This Month")),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        // List Section
+        Expanded(
+          child: filtered.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.receipt_long_rounded, size: 64, color: theme.hintColor.withOpacity(0.25)),
+                      const SizedBox(height: 16),
+                      Text(
+                        "No transactions found matching filters.",
+                        style: TextStyle(color: theme.hintColor, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final invoice = filtered[index];
+                    final isCash = invoice.paymentMethod == 'CASH';
+                    final isUpi = invoice.paymentMethod == 'UPI';
+
+                    Color paymentColor;
+                    IconData paymentIcon;
+                    if (isCash) {
+                      paymentColor = const Color(0xFF10B981);
+                      paymentIcon = Icons.payments_rounded;
+                    } else if (isUpi) {
+                      paymentColor = Colors.blueAccent;
+                      paymentIcon = Icons.qr_code_2_rounded;
+                    } else {
+                      paymentColor = Colors.purple;
+                      paymentIcon = Icons.contactless_rounded;
+                    }
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: theme.dividerColor.withOpacity(0.08),
+                          width: 1,
+                        ),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                            leading: Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: paymentColor.withOpacity(0.08),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(paymentIcon, color: paymentColor, size: 22),
+                            ),
+                            title: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    invoice.invoiceNumber,
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                if (invoice.customerPhone.isNotEmpty)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: theme.dividerColor.withOpacity(0.06),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                    child: Text(
+                                      invoice.customerPhone,
+                                      style: TextStyle(fontSize: 9, color: theme.hintColor, fontWeight: FontWeight.bold),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                            subtitle: Padding(
+                              padding: const EdgeInsets.only(top: 4.0),
+                              child: Text(
+                                DateFormat('dd MMM yyyy • hh:mm a').format(invoice.dateTime),
+                                style: TextStyle(fontSize: 11, color: theme.hintColor),
+                              ),
+                            ),
+                            trailing: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  "$currency${invoice.grandTotal.toStringAsFixed(2)}",
+                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: -0.4),
+                                ),
+                                const SizedBox(height: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                  decoration: BoxDecoration(
+                                    color: invoice.paymentStatus == 'PAID'
+                                        ? const Color(0xFF10B981).withOpacity(0.1)
+                                        : Colors.red.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    invoice.paymentStatus,
+                                    style: TextStyle(
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      color: invoice.paymentStatus == 'PAID' ? const Color(0xFF10B981) : Colors.red,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            onTap: () => _showInvoiceDetail(context, invoice),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 }
