@@ -10,6 +10,7 @@ class Product {
   final bool isTracked; // true if we track inventory stock levels
   final String? categoryName; // Helper field for joined UI display
   final String unit; // UOM (Unit of Measure) e.g. Piece, Kilogram, Gram, etc.
+  final String? imagePath; // Path to product thumbnail image stored locally
 
   Product({
     this.id,
@@ -23,6 +24,7 @@ class Product {
     this.isTracked = true,
     this.categoryName,
     this.unit = 'Piece',
+    this.imagePath,
   });
 
   Map<String, dynamic> toMap() {
@@ -37,6 +39,7 @@ class Product {
       'lowStockThreshold': lowStockThreshold,
       'isTracked': isTracked ? 1 : 0,
       'unit': unit,
+      'imagePath': imagePath,
     };
   }
 
@@ -53,6 +56,7 @@ class Product {
       isTracked: (map['isTracked'] as int? ?? 1) == 1,
       categoryName: map['categoryName'] as String?,
       unit: map['unit'] as String? ?? 'Piece',
+      imagePath: map['imagePath'] as String?,
     );
   }
 
@@ -68,6 +72,7 @@ class Product {
     bool? isTracked,
     String? categoryName,
     String? unit,
+    String? imagePath,
   }) {
     return Product(
       id: id ?? this.id,
@@ -81,6 +86,7 @@ class Product {
       isTracked: isTracked ?? this.isTracked,
       categoryName: categoryName ?? this.categoryName,
       unit: unit ?? this.unit,
+      imagePath: imagePath ?? this.imagePath,
     );
   }
 }

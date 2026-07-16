@@ -38,7 +38,7 @@ class DbHelper {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
       onConfigure: _onConfigure,
@@ -67,6 +67,13 @@ class DbHelper {
         await db.execute("ALTER TABLE businesses ADD COLUMN receiptFooter TEXT NOT NULL DEFAULT ''");
       } catch (e) {
         debugPrint("Error migrating database version 4: $e");
+      }
+    }
+    if (oldVersion < 5) {
+      try {
+        await db.execute("ALTER TABLE products ADD COLUMN imagePath TEXT");
+      } catch (e) {
+        debugPrint("Error migrating database version 5: $e");
       }
     }
   }
@@ -127,6 +134,7 @@ class DbHelper {
         lowStockThreshold INTEGER NOT NULL DEFAULT 5,
         isTracked INTEGER NOT NULL DEFAULT 1,
         unit TEXT NOT NULL DEFAULT 'Piece',
+        imagePath TEXT,
         FOREIGN KEY (categoryId) REFERENCES categories (id) ON DELETE SET NULL
       )
     ''');

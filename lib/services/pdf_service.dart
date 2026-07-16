@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:io';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -18,6 +19,19 @@ class PdfService {
 
     final String currencySym = business.currency;
 
+    // Load business logo
+    pw.MemoryImage? logoImage;
+    if (business.logoPath != null && business.logoPath!.isNotEmpty) {
+      final file = File(business.logoPath!);
+      if (file.existsSync()) {
+        try {
+          logoImage = pw.MemoryImage(file.readAsBytesSync());
+        } catch (e) {
+          // Ignore
+        }
+      }
+    }
+
     // Build UPI Payment URL
     final String nameEncoded = Uri.encodeComponent(business.name);
     final String noteEncoded = Uri.encodeComponent("Invoice ${invoice.invoiceNumber}");
@@ -36,24 +50,37 @@ class PdfService {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Column(
+                  pw.Row(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
-                        business.name.toUpperCase(),
-                        style: pw.TextStyle(font: fontBold, fontSize: 24, color: PdfColors.blueGrey900),
-                      ),
-                      pw.SizedBox(height: 4),
-                      if (business.address.isNotEmpty)
-                        pw.Text(business.address, style: pw.TextStyle(font: fontRegular, fontSize: 10, color: PdfColors.grey700)),
-                      pw.Text("Phone: ${business.phone}", style: pw.TextStyle(font: fontRegular, fontSize: 10, color: PdfColors.grey700)),
-                      pw.Text("Email: ${business.email}", style: pw.TextStyle(font: fontRegular, fontSize: 10, color: PdfColors.grey700)),
-                      if (business.gstOrTin.isNotEmpty)
-                        pw.Text("GSTIN: ${business.gstOrTin}", style: pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColors.blueGrey800)),
-                      if (business.receiptHeader.isNotEmpty) ...[
-                        pw.SizedBox(height: 4),
-                        pw.Text(business.receiptHeader, style: pw.TextStyle(font: fontRegular, fontSize: 9, color: PdfColors.grey700, fontStyle: pw.FontStyle.italic)),
+                      if (logoImage != null) ...[
+                        pw.Container(
+                          width: 50,
+                          height: 50,
+                          margin: const pw.EdgeInsets.only(right: 12),
+                          child: pw.Image(logoImage),
+                        ),
                       ],
+                      pw.Column(
+                        crossAxisAlignment: pw.CrossAxisAlignment.start,
+                        children: [
+                          pw.Text(
+                            business.name.toUpperCase(),
+                            style: pw.TextStyle(font: fontBold, fontSize: 24, color: PdfColors.blueGrey900),
+                          ),
+                          pw.SizedBox(height: 4),
+                          if (business.address.isNotEmpty)
+                            pw.Text(business.address, style: pw.TextStyle(font: fontRegular, fontSize: 10, color: PdfColors.grey700)),
+                          pw.Text("Phone: ${business.phone}", style: pw.TextStyle(font: fontRegular, fontSize: 10, color: PdfColors.grey700)),
+                          pw.Text("Email: ${business.email}", style: pw.TextStyle(font: fontRegular, fontSize: 10, color: PdfColors.grey700)),
+                          if (business.gstOrTin.isNotEmpty)
+                            pw.Text("GSTIN: ${business.gstOrTin}", style: pw.TextStyle(font: fontBold, fontSize: 10, color: PdfColors.blueGrey800)),
+                          if (business.receiptHeader.isNotEmpty) ...[
+                            pw.SizedBox(height: 4),
+                            pw.Text(business.receiptHeader, style: pw.TextStyle(font: fontRegular, fontSize: 9, color: PdfColors.grey700, fontStyle: pw.FontStyle.italic)),
+                          ],
+                        ],
+                      ),
                     ],
                   ),
                   pw.Column(

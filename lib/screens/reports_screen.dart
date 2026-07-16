@@ -12,6 +12,7 @@ import '../models/invoice.dart';
 import '../models/business.dart';
 import '../services/pdf_service.dart';
 import 'invoice_detail_sheet.dart';
+import '../widgets/app_toast.dart';
 
 class ReportsScreen extends StatefulWidget {
   const ReportsScreen({super.key});
@@ -783,9 +784,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   Future<void> _exportToExcel(List<Invoice> invoices, Business? business) async {
     if (invoices.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No data to export")),
-      );
+      AppToast.showInfo(context, "No data to export.");
       return;
     }
     
@@ -866,15 +865,11 @@ class _ReportsScreenState extends State<ReportsScreen> {
         );
       } else {
         Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Failed to generate Excel file.")),
-        );
+        AppToast.showError(context, "Failed to generate Excel file.");
       }
     } catch (e) {
       Navigator.pop(context); // close loader
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error exporting Excel: $e")),
-      );
+      AppToast.showError(context, "Error exporting Excel: $e");
     }
   }
 }

@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' show join, extension;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -1183,97 +1187,202 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final upiController = TextEditingController(text: shop.upiId);
     final headerController = TextEditingController(text: shop.receiptHeader);
     final footerController = TextEditingController(text: shop.receiptFooter);
+    String? currentLogoPath = shop.logoPath;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Edit Shop Profile"),
-        content: Form(
-          key: formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: nameController,
-                  decoration: const InputDecoration(labelText: "Shop Name *"),
-                  validator: (v) => v == null || v.trim().isEmpty ? "Required" : null,
-                ),
-                TextFormField(
-                  controller: phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(labelText: "Phone Number *"),
-                  validator: (v) => v == null || v.trim().isEmpty ? "Required" : null,
-                ),
-                TextFormField(
-                  controller: emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(labelText: "Email"),
-                ),
-                TextFormField(
-                  controller: addressController,
-                  decoration: const InputDecoration(labelText: "Address"),
-                ),
-                TextFormField(
-                  controller: gstController,
-                  decoration: const InputDecoration(labelText: "GST / TAX No"),
-                ),
-                TextFormField(
-                  controller: upiController,
-                  decoration: const InputDecoration(labelText: "UPI ID for Payments (Optional)"),
-                  validator: (v) {
-                    if (v == null || v.trim().isEmpty) return null;
-                    if (!v.trim().contains('@')) return "Valid UPI ID required";
-                    return null;
-                  },
-                ),
-                TextFormField(
-                  controller: headerController,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: "Custom Receipt Header",
-                    hintText: "e.g. Welcome to Our Shop!",
-                  ),
-                ),
-                TextFormField(
-                  controller: footerController,
-                  maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: "Custom Receipt Footer",
-                    hintText: "e.g. Thanks for shopping! No return.",
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
-          ElevatedButton(
-            onPressed: () async {
-              if (!formKey.currentState!.validate()) return;
-              final updated = shop.copyWith(
-                name: nameController.text.trim(),
-                phone: phoneController.text.trim(),
-                email: emailController.text.trim(),
-                address: addressController.text.trim(),
-                gstOrTin: gstController.text.trim(),
-                upiId: upiController.text.trim(),
-                receiptHeader: headerController.text.trim(),
-                receiptFooter: footerController.text.trim(),
-              );
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text("Edit Shop Profile"),
+            content: Form(
+              key: formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Shop Logo Picker Preview
+                    Center(
+                      child: Stack(
+                        children: [
+                          CircleAvatar(
+                            radius: 46,
+                            backgroundColor: Colors.blueAccent.withOpacity(0.1),
+                            backgroundImage: currentLogoPath != null && currentLogoPath!.isNotEmpty && File(currentLogoPath!).existsSync()
+                                ? FileImage(File(currentLogoPath!))
+                                : null,
+                            child: currentLogoPath == null || currentLogoPath!.isEmpty || !File(currentLogoPath!).existsSync()
+                                ? const Icon(Icons.storefront_rounded, size: 46, color: Colors.blueAccent)
+                                : null,
+                          ),
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.blueAccent,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 2),
+                              ),
+                              child: IconButton(
+                                constraints: const BoxConstraints(),
+                                padding: const EdgeInsets.all(6),
+                                icon: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
+                                onPressed: () async {
+                                  final picker = ImagePicker();
+                                  final source = await showModalBottomSheet<ImageSource>(
+                                    context: context,
+                                    builder: (context) => SafeArea(
+                                      child: Wrap(
+                                        children: [
+                                          ListTile(
+                                            leading: const Icon(Icons.photo_library_rounded),
+                                            title: const Text("Pick from Gallery"),
+                                            onTap: () => Navigator.pop(context, ImageSource.gallery),
+                                          ),
+                                          ListTile(
+                                            leading: const Icon(Icons.camera_alt_rounded),
+                                            title: const Text("Take Photo with Camera"),
+                                            onTap: () => Navigator.pop(context, ImageSource.camera),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                  if (source != null) {
+                                    final XFile? pickedFile = await picker.pickImage(
+                                      source: source,
+                                      maxWidth: 300,
+                                      maxHeight: 300,
+                                      imageQuality: 80,
+                                    );
+                                    if (pickedFile != null) {
+                                      final docDir = await getApplicationDocumentsDirectory();
+                                      final imagesDir = Directory(join(docDir.path, 'images'));
+                                      await imagesDir.create(recursive: true);
 
-              final ok = await provider.updateBusiness(updated);
-              if (context.mounted) {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(ok ? "Profile updated." : "Failed to update profile.")),
-                );
-              }
-            },
-            child: const Text("Save"),
-          ),
-        ],
+                                      final ext = extension(pickedFile.path);
+                                      final newPath = join(imagesDir.path, 'shop_logo_${DateTime.now().millisecondsSinceEpoch}$ext');
+                                      await File(pickedFile.path).copy(newPath);
+
+                                      setState(() {
+                                        currentLogoPath = newPath;
+                                      });
+                                    }
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                          if (currentLogoPath != null && currentLogoPath!.isNotEmpty)
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.redAccent,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: Colors.white, width: 1.5),
+                                ),
+                                child: IconButton(
+                                  constraints: const BoxConstraints(),
+                                  padding: const EdgeInsets.all(4),
+                                  icon: const Icon(Icons.close_rounded, size: 12, color: Colors.white),
+                                  onPressed: () {
+                                    setState(() {
+                                      currentLogoPath = null;
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
+                      controller: nameController,
+                      decoration: const InputDecoration(labelText: "Shop Name *"),
+                      validator: (v) => v == null || v.trim().isEmpty ? "Required" : null,
+                    ),
+                    TextFormField(
+                      controller: phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(labelText: "Phone Number *"),
+                      validator: (v) => v == null || v.trim().isEmpty ? "Required" : null,
+                    ),
+                    TextFormField(
+                      controller: emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(labelText: "Email"),
+                    ),
+                    TextFormField(
+                      controller: addressController,
+                      decoration: const InputDecoration(labelText: "Address"),
+                    ),
+                    TextFormField(
+                      controller: gstController,
+                      decoration: const InputDecoration(labelText: "GST / TAX No"),
+                    ),
+                    TextFormField(
+                      controller: upiController,
+                      decoration: const InputDecoration(labelText: "UPI ID for Payments (Optional)"),
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) return null;
+                        if (!v.trim().contains('@')) return "Valid UPI ID required";
+                        return null;
+                      },
+                    ),
+                    TextFormField(
+                      controller: headerController,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        labelText: "Custom Receipt Header",
+                        hintText: "e.g. Welcome to Our Shop!",
+                      ),
+                    ),
+                    TextFormField(
+                      controller: footerController,
+                      maxLines: 2,
+                      decoration: const InputDecoration(
+                        labelText: "Custom Receipt Footer",
+                        hintText: "e.g. Thanks for shopping! No return.",
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+              ElevatedButton(
+                onPressed: () async {
+                  if (!formKey.currentState!.validate()) return;
+                  final updated = shop.copyWith(
+                    name: nameController.text.trim(),
+                    phone: phoneController.text.trim(),
+                    email: emailController.text.trim(),
+                    address: addressController.text.trim(),
+                    gstOrTin: gstController.text.trim(),
+                    upiId: upiController.text.trim(),
+                    receiptHeader: headerController.text.trim(),
+                    receiptFooter: footerController.text.trim(),
+                    logoPath: currentLogoPath,
+                  );
+
+                  final ok = await provider.updateBusiness(updated);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(ok ? "Profile updated." : "Failed to update profile.")),
+                    );
+                  }
+                },
+                child: const Text("Save"),
+              ),
+            ],
+          );
+        },
       ),
     );
   }

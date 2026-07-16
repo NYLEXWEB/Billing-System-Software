@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' show join, extension;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
@@ -468,17 +472,25 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                     decoration: BoxDecoration(
                       color: avatarColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
+                      image: product.imagePath != null && product.imagePath!.isNotEmpty && File(product.imagePath!).existsSync()
+                          ? DecorationImage(
+                              image: FileImage(File(product.imagePath!)),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
                     ),
-                    child: Center(
-                      child: Text(
-                        firstLetter,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: avatarColor,
-                        ),
-                      ),
-                    ),
+                    child: product.imagePath == null || product.imagePath!.isEmpty || !File(product.imagePath!).existsSync()
+                        ? Center(
+                            child: Text(
+                              firstLetter,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: avatarColor,
+                              ),
+                            ),
+                          )
+                        : null,
                   ),
                   const SizedBox(width: 14),
                   Expanded(
@@ -748,6 +760,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
     int? selectedCatId = product?.categoryId;
     bool isTracked = product?.isTracked ?? true;
     String selectedUnit = product?.unit ?? 'Piece';
+    String? currentImagePath = product?.imagePath;
 
     showDialog(
       context: context,
@@ -784,6 +797,113 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
+                        // Product Image Picker
+                        Center(
+                          child: Stack(
+                            children: [
+                              Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF8FAFC),
+                                  borderRadius: BorderRadius.circular(16),
+                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  image: currentImagePath != null && currentImagePath!.isNotEmpty && File(currentImagePath!).existsSync()
+                                      ? DecorationImage(
+                                          image: FileImage(File(currentImagePath!)),
+                                          fit: BoxFit.cover,
+                                        )
+                                      : null,
+                                ),
+                                child: currentImagePath == null || currentImagePath!.isEmpty || !File(currentImagePath!).existsSync()
+                                    ? const Icon(Icons.add_photo_alternate_outlined, size: 36, color: Color(0xFF94A3B8))
+                                    : null,
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF2563EB),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(color: Colors.white, width: 2),
+                                  ),
+                                  child: IconButton(
+                                    constraints: const BoxConstraints(),
+                                    padding: const EdgeInsets.all(6),
+                                    icon: const Icon(Icons.camera_alt_rounded, size: 14, color: Colors.white),
+                                    onPressed: () async {
+                                      final picker = ImagePicker();
+                                      final source = await showModalBottomSheet<ImageSource>(
+                                        context: context,
+                                        builder: (context) => SafeArea(
+                                          child: Wrap(
+                                            children: [
+                                              ListTile(
+                                                leading: const Icon(Icons.photo_library_rounded),
+                                                title: const Text("Pick from Gallery"),
+                                                onTap: () => Navigator.pop(context, ImageSource.gallery),
+                                              ),
+                                              ListTile(
+                                                leading: const Icon(Icons.camera_alt_rounded),
+                                                title: const Text("Take Photo with Camera"),
+                                                onTap: () => Navigator.pop(context, ImageSource.camera),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      );
+                                      if (source != null) {
+                                        final XFile? pickedFile = await picker.pickImage(
+                                          source: source,
+                                          maxWidth: 400,
+                                          maxHeight: 400,
+                                          imageQuality: 80,
+                                        );
+                                        if (pickedFile != null) {
+                                          final docDir = await getApplicationDocumentsDirectory();
+                                          final imagesDir = Directory(join(docDir.path, 'images'));
+                                          await imagesDir.create(recursive: true);
+
+                                          final ext = extension(pickedFile.path);
+                                          final newPath = join(imagesDir.path, 'product_${DateTime.now().millisecondsSinceEpoch}$ext');
+                                          await File(pickedFile.path).copy(newPath);
+
+                                          setModalState(() {
+                                            currentImagePath = newPath;
+                                          });
+                                        }
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                              if (currentImagePath != null && currentImagePath!.isNotEmpty)
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.redAccent,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(color: Colors.white, width: 1.5),
+                                    ),
+                                    child: IconButton(
+                                      constraints: const BoxConstraints(),
+                                      padding: const EdgeInsets.all(4),
+                                      icon: const Icon(Icons.close_rounded, size: 12, color: Colors.white),
+                                      onPressed: () {
+                                        setModalState(() {
+                                          currentImagePath = null;
+                                        });
+                                      },
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 20),
                         TextFormField(
                           controller: nameController,
                           decoration: const InputDecoration(
@@ -983,6 +1103,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       lowStockThreshold: isTracked ? threshold : 5,
                       isTracked: isTracked,
                       unit: selectedUnit,
+                      imagePath: currentImagePath,
                     );
 
                     bool success;

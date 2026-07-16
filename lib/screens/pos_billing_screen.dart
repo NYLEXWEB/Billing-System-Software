@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'dart:math';
+import 'dart:io';
 import '../providers/business_provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/cart_provider.dart';
@@ -12,6 +13,7 @@ import '../models/invoice_item.dart';
 import '../data/db_helper.dart';
 import 'barcode_scanner_screen.dart';
 import 'invoice_detail_sheet.dart';
+import '../widgets/app_toast.dart';
 
 class PosBillingScreen extends StatefulWidget {
   const PosBillingScreen({super.key});
@@ -225,6 +227,23 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
               color: Colors.transparent,
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    image: product.imagePath != null && product.imagePath!.isNotEmpty && File(product.imagePath!).existsSync()
+                        ? DecorationImage(
+                            image: FileImage(File(product.imagePath!)),
+                            fit: BoxFit.cover,
+                          )
+                        : null,
+                  ),
+                  child: product.imagePath == null || product.imagePath!.isEmpty || !File(product.imagePath!).existsSync()
+                      ? const Icon(Icons.shopping_bag_outlined, size: 18, color: Color(0xFF94A3B8))
+                      : null,
+                ),
                 title: Text(
                   product.name,
                   style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
@@ -458,105 +477,131 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
               ),
             ],
           ),
-          child: Column(
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      item.productName,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        color: Color(0xFF0F172A),
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
-                    onPressed: () => cart.removeItem(item.productId),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                ],
+              // Product Thumbnail
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  image: product.imagePath != null && product.imagePath!.isNotEmpty && File(product.imagePath!).existsSync()
+                      ? DecorationImage(
+                          image: FileImage(File(product.imagePath!)),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: product.imagePath == null || product.imagePath!.isEmpty || !File(product.imagePath!).existsSync()
+                    ? const Icon(Icons.shopping_bag_outlined, size: 20, color: Color(0xFF94A3B8))
+                    : null,
               ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "$currency${item.price.toStringAsFixed(2)} each",
-                    style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
-                  ),
-                  Row(
-                    children: [
-                      Container(
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.remove, size: 16, color: Color(0xFF475569)),
-                              onPressed: () {
-                                cart.updateQuantity(item.productId, item.quantity - 1, product);
-                              },
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.productName,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: Color(0xFF0F172A),
                             ),
-                            InkWell(
-                              onTap: () => _showQuantityEditDialog(context, item, product, cart),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                constraints: const BoxConstraints(minWidth: 28),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: const Color(0xFFCBD5E1)),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  item.quantity.toString(),
-                                  textAlign: TextAlign.center,
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
-                                ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                          onPressed: () => cart.removeItem(item.productId),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "$currency${item.price.toStringAsFixed(2)} each",
+                          style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                        ),
+                        Row(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.remove, size: 16, color: Color(0xFF475569)),
+                                    onPressed: () {
+                                      cart.updateQuantity(item.productId, item.quantity - 1, product);
+                                    },
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  ),
+                                  InkWell(
+                                    onTap: () => _showQuantityEditDialog(context, item, product, cart),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      constraints: const BoxConstraints(minWidth: 28),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        item.quantity.toString(),
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.add, size: 16, color: Color(0xFF2563EB)),
+                                    onPressed: () {
+                                      final ok = cart.updateQuantity(item.productId, item.quantity + 1, product);
+                                      if (!ok) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text("Insufficient stock quantity!"),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                  ),
+                                ],
                               ),
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.add, size: 16, color: Color(0xFF2563EB)),
-                              onPressed: () {
-                                final ok = cart.updateQuantity(item.productId, item.quantity + 1, product);
-                                if (!ok) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text("Insufficient stock quantity!"),
-                                      backgroundColor: Colors.red,
-                                    ),
-                                  );
-                                }
-                              },
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                            const SizedBox(width: 12),
+                            Text(
+                              "$currency${item.subtotal.toStringAsFixed(2)}",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                                color: Color(0xFF0F172A),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Text(
-                        "$currency${item.subtotal.toStringAsFixed(2)}",
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          color: Color(0xFF0F172A),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -1362,9 +1407,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           if (recStr.isNotEmpty) {
                             final rec = double.tryParse(recStr) ?? 0.0;
                             if (rec < cart.grandTotal) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Insufficient Cash Tendered!"), backgroundColor: Colors.red),
-                              );
+                              AppToast.showError(context, "Insufficient Cash Tendered!");
                               return;
                             }
                           }
@@ -1373,12 +1416,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           final amt2 = double.tryParse(splitAmount2Controller.text) ?? 0.0;
                           final sum = amt1 + amt2;
                           if ((sum - cart.grandTotal).abs() > 0.01) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Split sum (₹${sum.toStringAsFixed(2)}) must equal Total (₹${cart.grandTotal.toStringAsFixed(2)})!"),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
+                            AppToast.showError(context, "Split sum (₹${sum.toStringAsFixed(2)}) must equal Total (₹${cart.grandTotal.toStringAsFixed(2)})!");
                             return;
                           }
                           finalPaymentMethod = 'SPLIT:$splitMethod1=${amt1.toStringAsFixed(2)};$splitMethod2=${amt2.toStringAsFixed(2)}';
@@ -1413,9 +1451,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                             Navigator.pop(context);
 
                             if (finalInvoice != null) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Checkout Completed!"), backgroundColor: Colors.green),
-                              );
+                              AppToast.showSuccess(context, "Checkout Completed!");
                               
                               showModalBottomSheet(
                                 context: context,

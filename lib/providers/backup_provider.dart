@@ -14,6 +14,8 @@ import 'package:intl/intl.dart';
 import '../data/db_helper.dart';
 import 'auth_provider.dart';
 import 'business_provider.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:archive/archive.dart';
 
 class BackupProvider extends ChangeNotifier {
   bool _isBackupInProgress = false;
@@ -90,8 +92,33 @@ class BackupProvider extends ChangeNotifier {
       }
       final dbBytes = await databaseFactory.readDatabaseBytes(dbPath);
 
-      // 2. Encrypt database bytes
-      final encryptedBytes = _encryptData(dbBytes, password);
+      // Create ZIP Archive
+      final archive = Archive();
+      archive.addFile(ArchiveFile('shop_billing.db', dbBytes.length, dbBytes));
+
+      // Retrieve local images and add to ZIP
+      final docDir = await getApplicationDocumentsDirectory();
+      final imagesDir = Directory(join(docDir.path, 'images'));
+      if (await imagesDir.exists()) {
+        final filesList = imagesDir.listSync(recursive: true);
+        for (final entity in filesList) {
+          if (entity is File) {
+            final relativePath = relative(entity.path, from: docDir.path);
+            final fileBytes = await entity.readAsBytes();
+            archive.addFile(ArchiveFile(relativePath, fileBytes.length, fileBytes));
+          }
+        }
+      }
+
+      // Encode archive to zip
+      final zipEncoder = ZipEncoder();
+      final zipBytes = zipEncoder.encode(archive);
+      if (zipBytes == null) {
+        throw Exception("Failed to package backup files");
+      }
+
+      // 2. Encrypt zip bytes
+      final encryptedBytes = _encryptData(Uint8List.fromList(zipBytes), password);
 
       // 3. Connect to Google Drive using authenticated client extension
       final authClient = await googleSignIn.authenticatedClient();
@@ -198,14 +225,30 @@ class BackupProvider extends ChangeNotifier {
       // 4. Decrypt backup bytes
       final decryptedBytes = _decryptData(encryptedBytes, password);
 
-      // 5. Safe Database Hot-Swap
-      final dbPath = join(await getDatabasesPath(), 'shop_billing.db');
-      
-      // Close database connection and reset cached instance
+      // 5. Safe Database Hot-Swap & File Extraction
+      // Close database connection first
       await DbHelper().closeDatabase();
 
-      // Write decrypted bytes to db path (overwrites existing database)
-      await databaseFactory.writeDatabaseBytes(dbPath, decryptedBytes);
+      // Decode ZIP archive
+      final archiveArchive = ZipDecoder().decodeBytes(decryptedBytes);
+      final docDir = await getApplicationDocumentsDirectory();
+
+      for (final file in archiveArchive) {
+        final filename = file.name;
+        if (file.isFile) {
+          final fileData = file.content as List<int>;
+          if (filename == 'shop_billing.db') {
+            final dbPath = join(await getDatabasesPath(), 'shop_billing.db');
+            final outFile = File(dbPath);
+            await outFile.parent.create(recursive: true);
+            await outFile.writeAsBytes(fileData, flush: true);
+          } else if (filename.startsWith('images/')) {
+            final outFile = File(join(docDir.path, filename));
+            await outFile.parent.create(recursive: true);
+            await outFile.writeAsBytes(fileData, flush: true);
+          }
+        }
+      }
 
       // Callback to clear memory state and re-open SQLite connection
       onDatabaseReload();
