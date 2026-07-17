@@ -5,6 +5,7 @@ import 'package:path/path.dart' show join, extension;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import '../providers/business_provider.dart';
 import '../providers/printer_provider.dart';
 import '../providers/auth_provider.dart';
@@ -15,6 +16,7 @@ import '../models/printer_settings.dart';
 import '../models/business.dart';
 import '../data/db_helper.dart';
 import '../utils/crypto_utils.dart';
+import '../services/analytics_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -30,6 +32,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
   
   // Dialog controller for passwords
   final TextEditingController _passwordPromptController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeSettingsData();
+  }
+
+  Future<void> _initializeSettingsData() async {
+    // Log settings view event
+    await AnalyticsService.logSettingsOpened();
+    
+    // Set custom Crashlytics keys
+    try {
+      final crashlytics = FirebaseCrashlytics.instance;
+      await crashlytics.setCustomKey('device_model', Platform.localHostname);
+      await crashlytics.setCustomKey('android_version', Platform.operatingSystemVersion);
+      await crashlytics.setCustomKey('app_version', '1.0.0');
+      await crashlytics.setCustomKey('build_number', '1');
+    } catch (e) {
+      debugPrint("Failed to set Crashlytics keys: $e");
+    }
+  }
 
   @override
   void dispose() {
@@ -519,6 +543,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                               ),
                               child: const Text("Reset", style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Sub-card 3: Test Crashlytics Integration
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF475569) : const Color(0xFFE2E8F0),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Text(
+                                    "Test Crashlytics Setup",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "Simulate a non-fatal crash to verify integration",
+                                    style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                FirebaseCrashlytics.instance.log("User triggered a test crash from SettingsScreen");
+                                FirebaseCrashlytics.instance.recordError(
+                                  StateError("Crashlytics Test Crash: Verification of integration."),
+                                  StackTrace.current,
+                                  reason: "Test Crash Button Pressed",
+                                  fatal: false,
+                                );
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text("Test crash logged to Crashlytics.")),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                foregroundColor: Colors.purple,
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              ),
+                              child: const Text("Trigger", style: TextStyle(fontWeight: FontWeight.bold)),
                             ),
                           ],
                         ),

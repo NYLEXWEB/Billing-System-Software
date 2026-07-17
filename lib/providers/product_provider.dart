@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../data/db_helper.dart';
 import '../models/product.dart';
 import '../models/category.dart';
+import '../services/analytics_service.dart';
 
 class ProductProvider extends ChangeNotifier {
   final DbHelper _dbHelper = DbHelper();
@@ -76,6 +77,15 @@ class ProductProvider extends ChangeNotifier {
       final id = await _dbHelper.insertProduct(product);
       if (id > 0) {
         await loadProducts();
+        final catName = _categories.firstWhere(
+          (c) => c.id == product.categoryId,
+          orElse: () => Category(id: -1, name: 'Uncategorized'),
+        ).name;
+        AnalyticsService.logProductCreated(
+          productId: id.toString(),
+          name: product.name,
+          category: catName,
+        );
         return true;
       }
       return false;
@@ -90,6 +100,10 @@ class ProductProvider extends ChangeNotifier {
       final count = await _dbHelper.updateProduct(product, movementReason: movementReason);
       if (count > 0) {
         await loadProducts();
+        AnalyticsService.logProductUpdated(
+          productId: product.id?.toString() ?? '',
+          name: product.name,
+        );
         return true;
       }
       return false;
@@ -101,9 +115,14 @@ class ProductProvider extends ChangeNotifier {
 
   Future<bool> deleteProduct(int id) async {
     try {
+      final deletedProduct = _products.firstWhere((p) => p.id == id, orElse: () => Product(name: 'Unknown', barcode: '', price: 0));
       final count = await _dbHelper.deleteProduct(id);
       if (count > 0) {
         await loadProducts();
+        AnalyticsService.logProductDeleted(
+          productId: id.toString(),
+          name: deletedProduct.name,
+        );
         return true;
       }
       return false;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../data/db_helper.dart';
 import '../models/invoice.dart';
+import '../services/analytics_service.dart';
 
 class InvoiceProvider extends ChangeNotifier {
   final DbHelper _dbHelper = DbHelper();
@@ -30,6 +31,13 @@ class InvoiceProvider extends ChangeNotifier {
     notifyListeners();
     try {
       final invoiceId = await _dbHelper.checkout(invoice);
+      if (invoiceId > 0) {
+        AnalyticsService.logBillCreated(
+          invoiceNo: invoice.invoiceNumber,
+          totalAmount: invoice.grandTotal,
+          itemCount: invoice.items.length,
+        );
+      }
       await loadInvoices();
       return invoiceId;
     } catch (e) {

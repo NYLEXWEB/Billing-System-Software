@@ -16,6 +16,7 @@ import 'auth_provider.dart';
 import 'business_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:archive/archive.dart';
+import '../services/analytics_service.dart';
 
 class BackupProvider extends ChangeNotifier {
   bool _isBackupInProgress = false;
@@ -84,6 +85,7 @@ class BackupProvider extends ChangeNotifier {
   }) async {
     _isBackupInProgress = true;
     notifyListeners();
+    AnalyticsService.logBackupStarted();
     try {
       // 1. Get database path and read file
       final dbPath = join(await getDatabasesPath(), 'shop_billing.db');
@@ -156,10 +158,12 @@ class BackupProvider extends ChangeNotifier {
       }
 
       _lastBackupTime = DateTime.now();
+      AnalyticsService.logBackupCompleted();
       notifyListeners();
       return true;
     } catch (e) {
       debugPrint("Backup to Google Drive failed: $e");
+      AnalyticsService.logBackupFailed(e.toString());
       return false;
     } finally {
       _isBackupInProgress = false;

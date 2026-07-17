@@ -7,6 +7,7 @@ import '../data/db_helper.dart';
 import '../models/printer_settings.dart';
 import '../models/business.dart';
 import '../models/invoice.dart';
+import '../services/analytics_service.dart';
 
 class PrinterProvider extends ChangeNotifier {
   final DbHelper _dbHelper = DbHelper();
@@ -316,6 +317,8 @@ class PrinterProvider extends ChangeNotifier {
       paperWidth: _activePrinter!.paperWidth,
     );
 
+    bool printResult = false;
+
     if (_activePrinter!.type == 'bluetooth') {
       try {
         // Ensure connected
@@ -325,11 +328,10 @@ class PrinterProvider extends ChangeNotifier {
           if (!connected) return false;
         }
 
-        final bool result = await PrintBluetoothThermal.writeBytes(bytes);
-        return result;
+        printResult = await PrintBluetoothThermal.writeBytes(bytes);
       } catch (e) {
         debugPrint("Error writing bluetooth print bytes: $e");
-        return false;
+        printResult = false;
       }
     } else if (_activePrinter!.type == 'network') {
       // Wi-Fi Printing
@@ -342,13 +344,17 @@ class PrinterProvider extends ChangeNotifier {
         socket.add(bytes);
         await socket.flush();
         await socket.close();
-        return true;
+        printResult = true;
       } catch (e) {
         debugPrint("Error writing Wi-Fi network print socket: $e");
-        return false;
+        printResult = false;
       }
     }
 
-    return false;
+    if (printResult) {
+      AnalyticsService.logBillPrinted(invoice.invoiceNumber);
+    }
+
+    return printResult;
   }
 }

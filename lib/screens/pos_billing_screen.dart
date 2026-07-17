@@ -529,12 +529,18 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
-                          "$currency${item.price.toStringAsFixed(2)} each",
-                          style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                        Flexible(
+                          child: Text(
+                            "$currency${item.price.toStringAsFixed(2)} each",
+                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
+                        const SizedBox(width: 8),
                         Row(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
                               decoration: BoxDecoration(
@@ -550,13 +556,13 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                                       cart.updateQuantity(item.productId, item.quantity - 1, product);
                                     },
                                     padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                   ),
                                   InkWell(
                                     onTap: () => _showQuantityEditDialog(context, item, product, cart),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      constraints: const BoxConstraints(minWidth: 28),
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      constraints: const BoxConstraints(minWidth: 24),
                                       decoration: BoxDecoration(
                                         border: Border.all(color: const Color(0xFFCBD5E1)),
                                         borderRadius: BorderRadius.circular(6),
@@ -564,7 +570,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                                       child: Text(
                                         item.quantity.toString(),
                                         textAlign: TextAlign.center,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A)),
                                       ),
                                     ),
                                   ),
@@ -582,17 +588,17 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                                       }
                                     },
                                     padding: EdgeInsets.zero,
-                                    constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                   ),
                                 ],
                               ),
                             ),
-                            const SizedBox(width: 12),
+                            const SizedBox(width: 8),
                             Text(
                               "$currency${item.subtotal.toStringAsFixed(2)}",
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 15,
+                                fontSize: 14,
                                 color: Color(0xFF0F172A),
                               ),
                             ),

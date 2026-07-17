@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:flutter/services.dart';
+import '../services/analytics_service.dart';
 
 class BarcodeScannerScreen extends StatefulWidget {
   const BarcodeScannerScreen({super.key});
@@ -60,6 +61,7 @@ class _BarcodeScannerScreenState extends State<BarcodeScannerScreen> {
                   });
                   // Trigger a short haptic vibration
                   HapticFeedback.lightImpact();
+                  AnalyticsService.logBarcodeScan(barcode);
                   Navigator.pop(context, barcode);
                 }
               }
