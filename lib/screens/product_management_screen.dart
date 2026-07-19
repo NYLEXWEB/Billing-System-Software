@@ -64,9 +64,10 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   Widget build(BuildContext context) {
     final provider = Provider.of<ProductProvider>(context);
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("Catalog Management", style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
@@ -92,7 +93,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
               height: 48,
               padding: const EdgeInsets.all(4),
               decoration: BoxDecoration(
-                color: const Color(0xFFE2E8F0), // Slate 200
+                color: isDark ? theme.colorScheme.surface : const Color(0xFFE2E8F0), // Slate 200
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
@@ -104,7 +105,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: _tabController.index == 0 ? Colors.white : Colors.transparent,
+                          color: _tabController.index == 0 ? (isDark ? theme.scaffoldBackgroundColor : Colors.white) : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                           boxShadow: _tabController.index == 0
                               ? [
@@ -123,7 +124,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                             Icon(
                               Icons.grid_view_rounded,
                               size: 16,
-                              color: _tabController.index == 0 ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                              color: _tabController.index == 0 ? theme.colorScheme.primary : const Color(0xFF64748B),
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -131,7 +132,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
-                                color: _tabController.index == 0 ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+                                color: _tabController.index == 0 ? (isDark ? Colors.white : const Color(0xFF0F172A)) : const Color(0xFF64748B),
                               ),
                             ),
                           ],
@@ -146,7 +147,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: _tabController.index == 1 ? Colors.white : Colors.transparent,
+                          color: _tabController.index == 1 ? (isDark ? theme.scaffoldBackgroundColor : Colors.white) : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                           boxShadow: _tabController.index == 1
                               ? [
@@ -165,15 +166,15 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                             Icon(
                               Icons.shopping_bag_outlined,
                               size: 16,
-                              color: _tabController.index == 1 ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                              color: _tabController.index == 1 ? theme.colorScheme.primary : const Color(0xFF64748B),
                             ),
                             const SizedBox(width: 8),
                             Text(
                               "Products",
                               style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                color: _tabController.index == 1 ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: _tabController.index == 1 ? (isDark ? Colors.white : const Color(0xFF0F172A)) : const Color(0xFF64748B),
                               ),
                             ),
                           ],
@@ -188,7 +189,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       },
                       child: Container(
                         decoration: BoxDecoration(
-                          color: _tabController.index == 2 ? Colors.white : Colors.transparent,
+                          color: _tabController.index == 2 ? (isDark ? theme.scaffoldBackgroundColor : Colors.white) : Colors.transparent,
                           borderRadius: BorderRadius.circular(8),
                           boxShadow: _tabController.index == 2
                               ? [
@@ -207,7 +208,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                             Icon(
                               Icons.category_outlined,
                               size: 16,
-                              color: _tabController.index == 2 ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                              color: _tabController.index == 2 ? theme.colorScheme.primary : const Color(0xFF64748B),
                             ),
                             const SizedBox(width: 8),
                             Text(
@@ -215,7 +216,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 13,
-                                color: _tabController.index == 2 ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+                                color: _tabController.index == 2 ? (isDark ? Colors.white : const Color(0xFF0F172A)) : const Color(0xFF64748B),
                               ),
                             ),
                           ],
@@ -248,8 +249,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
             _showProductFormDialog(context, provider);
           }
         },
-        backgroundColor: const Color(0xFF2563EB),
-        foregroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
         icon: const Icon(Icons.add),
         label: Text(_tabController.index == 2 ? "New Category" : "New Product"),
       ),
@@ -275,12 +276,13 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   // ==========================================
 
   Widget _buildVerticalCategoryBar(ProductProvider provider, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return Container(
       width: 110,
-      decoration: const BoxDecoration(
-        color: Color(0xFFF1F5F9), // Slate 100
+      decoration: BoxDecoration(
+        color: isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF1F5F9), // Slate 100
         border: Border(
-          right: BorderSide(color: Color(0xFFE2E8F0), width: 1),
+          right: BorderSide(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0), width: 1),
         ),
       ),
       child: ListView.builder(
@@ -307,7 +309,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                     margin: const EdgeInsets.only(left: 8, right: 4, top: 4, bottom: 4),
                     decoration: BoxDecoration(
-                      color: isSelected ? Colors.white : Colors.transparent,
+                      color: isSelected ? (isDark ? theme.colorScheme.surface : Colors.white) : Colors.transparent,
                       borderRadius: const BorderRadius.horizontal(left: Radius.circular(12)),
                     ),
                     child: Text(
@@ -315,7 +317,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF475569),
+                        color: isSelected ? theme.colorScheme.primary : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -329,7 +331,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       child: Container(
                         width: 4,
                         decoration: BoxDecoration(
-                          color: const Color(0xFF2563EB),
+                          color: theme.colorScheme.primary,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
@@ -344,6 +346,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   }
 
   Widget _buildProductsTab(ProductProvider provider, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     final searchQuery = provider.searchQuery.toLowerCase();
     final products = provider.products.where((product) {
       if (searchQuery.isNotEmpty) {
@@ -365,7 +368,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
               hintText: "Search products by name or barcode...",
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: IconButton(
-                icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
+                icon: Icon(Icons.qr_code_scanner_rounded, color: theme.colorScheme.primary),
                 tooltip: "Scan Barcode to Search",
                 onPressed: () async {
                   final scannedCode = await Navigator.push(
@@ -391,11 +394,11 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.inventory_2_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
+                          Icon(Icons.inventory_2_outlined, size: 64, color: isDark ? const Color(0xFF94A3B8).withOpacity(0.2) : const Color(0xFF94A3B8).withOpacity(0.4)),
                           const SizedBox(height: 16),
-                          const Text(
+                          Text(
                             "No products found",
-                            style: TextStyle(color: Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
+                            style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
                           ),
                         ],
                       ),
@@ -414,6 +417,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   }
 
   Widget _buildProductCard(Product product, ProductProvider provider, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     final hasLowStock = product.isTracked && product.stockQuantity <= product.lowStockThreshold;
     final isOutOfStock = product.isTracked && product.stockQuantity == 0;
     
@@ -422,20 +426,20 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
     String stockLabel;
     
     if (!product.isTracked) {
-      stockBadgeColor = const Color(0xFFF1F5F9);
-      stockTextColor = const Color(0xFF475569);
+      stockBadgeColor = isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF1F5F9);
+      stockTextColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569);
       stockLabel = "Unlimited";
     } else if (isOutOfStock) {
-      stockBadgeColor = const Color(0xFFFEF2F2);
-      stockTextColor = const Color(0xFFEF4444);
+      stockBadgeColor = isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEF2F2);
+      stockTextColor = isDark ? const Color(0xFFFCA5A5) : const Color(0xFFEF4444);
       stockLabel = "Out of Stock";
     } else if (hasLowStock) {
-      stockBadgeColor = const Color(0xFFFFF7ED);
-      stockTextColor = const Color(0xFFF97316);
+      stockBadgeColor = isDark ? const Color(0xFF7C2D12) : const Color(0xFFFFF7ED);
+      stockTextColor = isDark ? const Color(0xFFFED7AA) : const Color(0xFFF97316);
       stockLabel = "Low Stock: ${product.stockQuantity}";
     } else {
-      stockBadgeColor = const Color(0xFFECFDF5);
-      stockTextColor = const Color(0xFF10B981);
+      stockBadgeColor = isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5);
+      stockTextColor = isDark ? const Color(0xFF34D399) : const Color(0xFF10B981);
       stockLabel = "Stock: ${product.stockQuantity}";
     }
 
@@ -445,12 +449,12 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0), width: 1),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withOpacity(0.02),
+            color: isDark ? Colors.black.withOpacity(0.2) : const Color(0xFF0F172A).withOpacity(0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -499,10 +503,10 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                       children: [
                         Text(
                           product.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF0F172A),
+                            color: isDark ? Colors.white : const Color(0xFF0F172A),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -515,9 +519,9 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                             Expanded(
                               child: Text(
                                 product.barcode,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF64748B),
+                                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                                   fontFamily: "monospace",
                                 ),
                                 maxLines: 1,
@@ -535,15 +539,15 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFEFF6FF),
+                                  color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Text(
                                   product.categoryName!,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 10,
                                     fontWeight: FontWeight.w600,
-                                    color: Color(0xFF2563EB),
+                                    color: theme.colorScheme.primary,
                                   ),
                                 ),
                               ),
@@ -573,19 +577,19 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                     children: [
                       Text(
                         "₹${product.price.toStringAsFixed(2)}",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
-                          color: Color(0xFF0F172A),
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         "per ${_getShortUnit(product.unit)}",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF2563EB),
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                       if (product.costPrice > 0) ...[
@@ -614,6 +618,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   // ==========================================
 
   Widget _buildCategoriesTab(ProductProvider provider, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return provider.isLoading
         ? const Center(child: CircularProgressIndicator())
         : provider.categories.isEmpty
@@ -621,11 +626,11 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.category_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
+                    Icon(Icons.category_outlined, size: 64, color: isDark ? const Color(0xFF94A3B8).withOpacity(0.2) : const Color(0xFF94A3B8).withOpacity(0.4)),
                     const SizedBox(height: 16),
-                    const Text(
+                    Text(
                       "No categories added yet",
-                      style: TextStyle(color: Color(0xFF64748B), fontSize: 16, fontWeight: FontWeight.w500),
+                      style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), fontSize: 16, fontWeight: FontWeight.w500),
                     ),
                   ],
                 ),
@@ -641,17 +646,18 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   }
 
   Widget _buildCategoryCard(Category category, ProductProvider provider, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     final productsCount = provider.products.where((p) => p.categoryId == category.id).length;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+        border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0), width: 1),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withOpacity(0.02),
+            color: isDark ? Colors.black.withOpacity(0.2) : const Color(0xFF0F172A).withOpacity(0.02),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -663,26 +669,26 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: const Color(0xFFEFF6FF),
+            color: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF),
             borderRadius: BorderRadius.circular(12),
           ),
-          child: const Icon(
+          child: Icon(
             Icons.folder_open_rounded,
-            color: Color(0xFF2563EB),
+            color: theme.colorScheme.primary,
             size: 22,
           ),
         ),
         title: Text(
           category.name,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF0F172A),
+            color: isDark ? Colors.white : const Color(0xFF0F172A),
           ),
         ),
         subtitle: Text(
           category.description.isNotEmpty ? category.description : "No description provided",
-          style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
+          style: TextStyle(fontSize: 13, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -692,21 +698,21 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9),
+                color: isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 "$productsCount ${productsCount == 1 ? 'item' : 'items'}",
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF475569),
+                  color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
                 ),
               ),
             ),
             const SizedBox(width: 8),
             PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert_rounded, color: Color(0xFF64748B)),
+              icon: Icon(Icons.more_vert_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               onSelected: (value) {
                 if (value == 'edit') {
@@ -749,6 +755,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   // ==========================================
 
   void _showProductFormDialog(BuildContext context, ProductProvider provider, {Product? product}) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: product?.name);
     final barcodeController = TextEditingController(text: product?.barcode);
@@ -769,7 +777,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
         return StatefulBuilder(
           builder: (context, setModalState) {
             return AlertDialog(
-              backgroundColor: Colors.white,
+              backgroundColor: theme.colorScheme.surface,
               surfaceTintColor: Colors.transparent,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
               titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
@@ -779,7 +787,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                 children: [
                   Icon(
                     product == null ? Icons.add_shopping_cart_rounded : Icons.edit_note_rounded,
-                    color: const Color(0xFF2563EB),
+                    color: theme.colorScheme.primary,
                   ),
                   const SizedBox(width: 10),
                   Text(
@@ -805,9 +813,9 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                                 width: 100,
                                 height: 100,
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFFF8FAFC),
+                                  color: isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF8FAFC),
                                   borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                                  border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                                   image: currentImagePath != null && currentImagePath!.isNotEmpty && File(currentImagePath!).existsSync()
                                       ? DecorationImage(
                                           image: FileImage(File(currentImagePath!)),
@@ -816,7 +824,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                                       : null,
                                 ),
                                 child: currentImagePath == null || currentImagePath!.isEmpty || !File(currentImagePath!).existsSync()
-                                    ? const Icon(Icons.add_photo_alternate_outlined, size: 36, color: Color(0xFF94A3B8))
+                                    ? Icon(Icons.add_photo_alternate_outlined, size: 36, color: isDark ? const Color(0xFF475569) : const Color(0xFF94A3B8))
                                     : null,
                               ),
                               Positioned(
@@ -824,9 +832,9 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                                 right: 0,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF2563EB),
+                                    color: theme.colorScheme.primary,
                                     shape: BoxShape.circle,
-                                    border: Border.all(color: Colors.white, width: 2),
+                                    border: Border.all(color: theme.colorScheme.surface, width: 2),
                                   ),
                                   child: IconButton(
                                     constraints: const BoxConstraints(),
@@ -1057,7 +1065,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("Cancel", style: TextStyle(color: Color(0xFF64748B))),
+                  child: Text("Cancel", style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B))),
                 ),
                 if (product != null)
                   TextButton(
@@ -1124,8 +1132,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF2563EB),
-                    foregroundColor: Colors.white,
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
                     elevation: 0,
                   ),
                   child: const Text("Save"),
@@ -1139,10 +1147,12 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   }
 
   Future<bool?> _showProductDeleteConfirmDialog(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text("Delete Product?", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -1150,7 +1160,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text("Cancel", style: TextStyle(color: Color(0xFF64748B))),
+            child: Text("Cancel", style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B))),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
@@ -1171,6 +1181,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   // ==========================================
 
   void _showCategoryFormDialog(BuildContext context, ProductProvider provider, {Category? category}) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final formKey = GlobalKey<FormState>();
     final nameController = TextEditingController(text: category?.name);
     final descController = TextEditingController(text: category?.description);
@@ -1179,7 +1191,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
@@ -1189,7 +1201,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
           children: [
             Icon(
               category == null ? Icons.create_new_folder_rounded : Icons.folder_shared_rounded,
-              color: const Color(0xFF2563EB),
+              color: theme.colorScheme.primary,
             ),
             const SizedBox(width: 10),
             Text(
@@ -1259,8 +1271,8 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2563EB),
-              foregroundColor: Colors.white,
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
               elevation: 0,
             ),
             child: const Text("Save"),
@@ -1271,10 +1283,12 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   }
 
   void _showCategoryDeleteDialog(BuildContext context, ProductProvider provider, int id) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.colorScheme.surface,
         surfaceTintColor: Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         title: const Text("Delete Category?", style: TextStyle(fontWeight: FontWeight.bold)),
@@ -1284,7 +1298,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Cancel", style: TextStyle(color: Color(0xFF64748B))),
+            child: Text("Cancel", style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B))),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -1312,6 +1326,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
   }
 
   Widget _buildAllTab(ProductProvider provider, ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
     return Column(
       children: [
         // Search header
@@ -1324,7 +1339,7 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
               hintText: "Search by name or barcode...",
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: IconButton(
-                icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
+                icon: Icon(Icons.qr_code_scanner_rounded, color: theme.colorScheme.primary),
                 tooltip: "Scan Barcode to Search",
                 onPressed: () async {
                   final scannedCode = await Navigator.push(
@@ -1355,11 +1370,11 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.inventory_2_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
+                                Icon(Icons.inventory_2_outlined, size: 64, color: isDark ? const Color(0xFF94A3B8).withOpacity(0.2) : const Color(0xFF94A3B8).withOpacity(0.4)),
                                 const SizedBox(height: 16),
-                                const Text(
+                                Text(
                                   "No products found",
-                                  style: TextStyle(color: Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
+                                  style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
                                 ),
                               ],
                             ),

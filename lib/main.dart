@@ -167,6 +167,20 @@ class MyApp extends StatelessWidget {
           onBackground: Colors.white,
           onSurface: Colors.white,
         ),
+        textTheme: const TextTheme(
+          titleLarge: TextStyle(color: Colors.white),
+          titleMedium: TextStyle(color: Colors.white),
+          titleSmall: TextStyle(color: Colors.white70),
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white),
+          bodySmall: TextStyle(color: Colors.white70),
+        ),
+        dialogTheme: DialogTheme(
+          backgroundColor: const Color(0xFF1E293B),
+          surfaceTintColor: Colors.transparent,
+          titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+          contentTextStyle: const TextStyle(color: Colors.white70, fontSize: 16),
+        ),
         cardTheme: CardThemeData(
           color: const Color(0xFF1E293B),
           elevation: 0,

@@ -79,7 +79,7 @@ class ProductProvider extends ChangeNotifier {
         await loadProducts();
         final catName = _categories.firstWhere(
           (c) => c.id == product.categoryId,
-          orElse: () => Category(id: -1, name: 'Uncategorized'),
+          orElse: () => Category(id: -1, name: 'Uncategorized', description: ''),
         ).name;
         AnalyticsService.logProductCreated(
           productId: id.toString(),

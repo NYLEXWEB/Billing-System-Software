@@ -31,6 +31,8 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
   List<Product> _searchResults = [];
   bool _isSearching = false;
 
+  bool get isDark => Theme.of(context).brightness == Brightness.dark;
+
   @override
   void initState() {
     super.initState();
@@ -104,9 +106,10 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
     final currency = shop?.currency ?? '₹';
     final allProducts = productProvider.products;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("POS Checkout", style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
@@ -217,9 +220,9 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
         return Container(
           margin: const EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(12),
@@ -246,7 +249,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                 ),
                 title: Text(
                   product.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F172A)),
+                  style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                 ),
                 subtitle: Wrap(
                   spacing: 12,
@@ -255,12 +258,14 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                   children: [
                     Text(
                       "Price: $currency${product.price.toStringAsFixed(2)}",
-                      style: const TextStyle(color: Color(0xFF475569), fontWeight: FontWeight.w600),
+                      style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569), fontWeight: FontWeight.w600),
                     ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: isOutOfStock ? const Color(0xFFFEF2F2) : const Color(0xFFECFDF5),
+                        color: isOutOfStock 
+                            ? (isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEF2F2)) 
+                            : (isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5)),
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
@@ -268,7 +273,9 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: isOutOfStock ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                          color: isOutOfStock 
+                              ? (isDark ? const Color(0xFFFCA5A5) : const Color(0xFFEF4444)) 
+                              : (isDark ? const Color(0xFF34D399) : const Color(0xFF10B981)),
                         ),
                       ),
                     ),
@@ -341,9 +348,9 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,7 +358,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           children: [
                             Text(
                               p.name,
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF0F172A)),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -362,7 +369,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                                 Expanded(
                                   child: Text(
                                     "$currency${p.price.toStringAsFixed(0)}",
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF2563EB)),
+                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
@@ -371,7 +378,9 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
                                   decoration: BoxDecoration(
-                                    color: isOutOfStock ? const Color(0xFFFEF2F2) : const Color(0xFFECFDF5),
+                                    color: isOutOfStock 
+                                        ? (isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEF2F2)) 
+                                        : (isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5)),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   child: Text(
@@ -379,7 +388,9 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                                     style: TextStyle(
                                       fontSize: 8,
                                       fontWeight: FontWeight.bold,
-                                      color: isOutOfStock ? const Color(0xFFEF4444) : const Color(0xFF10B981),
+                                      color: isOutOfStock 
+                                          ? (isDark ? const Color(0xFFFCA5A5) : const Color(0xFFEF4444)) 
+                                          : (isDark ? const Color(0xFF34D399) : const Color(0xFF10B981)),
                                     ),
                                   ),
                                 ),
@@ -461,17 +472,16 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
           (p) => p.id == item.productId,
           orElse: () => Product(id: item.productId, name: item.productName, barcode: '', price: item.price),
         );
-
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE2E8F0)),
+            border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF0F172A).withOpacity(0.01),
+                color: isDark ? Colors.black.withOpacity(0.2) : const Color(0xFF0F172A).withOpacity(0.01),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -509,10 +519,10 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                         Expanded(
                           child: Text(
                             item.productName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
-                              color: Color(0xFF0F172A),
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                             ),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -534,7 +544,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                         Flexible(
                           child: Text(
                             "$currency${item.price.toStringAsFixed(2)} each",
-                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                            style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), fontSize: 12),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -544,14 +554,14 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF1F5F9),
+                                color: isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF1F5F9),
                                 borderRadius: BorderRadius.circular(12),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   IconButton(
-                                    icon: const Icon(Icons.remove, size: 16, color: Color(0xFF475569)),
+                                    icon: Icon(Icons.remove, size: 16, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
                                     onPressed: () {
                                       cart.updateQuantity(item.productId, item.quantity - 1, product);
                                     },
@@ -564,18 +574,18 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                       constraints: const BoxConstraints(minWidth: 24),
                                       decoration: BoxDecoration(
-                                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                                        border: Border.all(color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1)),
                                         borderRadius: BorderRadius.circular(6),
                                       ),
                                       child: Text(
                                         item.quantity.toString(),
                                         textAlign: TextAlign.center,
-                                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A)),
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                                       ),
                                     ),
                                   ),
                                   IconButton(
-                                    icon: const Icon(Icons.add, size: 16, color: Color(0xFF2563EB)),
+                                    icon: Icon(Icons.add, size: 16, color: theme.colorScheme.primary),
                                     onPressed: () {
                                       final ok = cart.updateQuantity(item.productId, item.quantity + 1, product);
                                       if (!ok) {
@@ -596,16 +606,16 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                             const SizedBox(width: 8),
                             Text(
                               "$currency${item.subtotal.toStringAsFixed(2)}",
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
-                                color: Color(0xFF0F172A),
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
                               ),
                             ),
                           ],
                         ),
                       ],
-                    ),
+                    ),),
                   ],
                 ),
               ),
@@ -629,11 +639,11 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFF0F172A).withOpacity(0.06),
+            color: isDark ? Colors.black.withOpacity(0.3) : const Color(0xFF0F172A).withOpacity(0.06),
             blurRadius: 20,
             offset: const Offset(0, -4),
           )
@@ -649,11 +659,11 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
               children: [
                 Text(
                   "Subtotal (${cart.items.length} items)",
-                  style: const TextStyle(color: Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
+                  style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
                 ),
                 Text(
                   "$currency${cart.totalAmount.toStringAsFixed(2)}",
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF0F172A)),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                 ),
               ],
             ),
@@ -671,9 +681,9 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                       decoration: BoxDecoration(
                         color: hasDiscount 
                             ? Colors.red.withOpacity(0.06) 
-                            : const Color(0xFFF1F5F9),
+                            : (isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF1F5F9)),
                         border: Border.all(
-                          color: hasDiscount ? Colors.red.withOpacity(0.3) : const Color(0xFFE2E8F0),
+                          color: hasDiscount ? Colors.red.withOpacity(0.3) : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           width: 1.5,
                         ),
                         borderRadius: BorderRadius.circular(12),
@@ -684,7 +694,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           Icon(
                             Icons.local_offer_outlined,
                             size: 16,
-                            color: hasDiscount ? Colors.red : const Color(0xFF64748B),
+                            color: hasDiscount ? Colors.red : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                           ),
                           const SizedBox(width: 6),
                           Flexible(
@@ -693,7 +703,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: hasDiscount ? FontWeight.bold : FontWeight.normal,
-                                color: hasDiscount ? Colors.red : const Color(0xFF64748B),
+                                color: hasDiscount ? Colors.red : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -713,10 +723,10 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 12),
                       decoration: BoxDecoration(
                         color: hasTax 
-                            ? const Color(0xFFEFF6FF) 
-                            : const Color(0xFFF1F5F9),
+                            ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFFEFF6FF)) 
+                            : (isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF1F5F9)),
                         border: Border.all(
-                          color: hasTax ? const Color(0xFF2563EB).withOpacity(0.3) : const Color(0xFFE2E8F0),
+                          color: hasTax ? theme.colorScheme.primary.withOpacity(0.3) : (isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
                           width: 1.5,
                         ),
                         borderRadius: BorderRadius.circular(12),
@@ -727,7 +737,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           Icon(
                             Icons.receipt_outlined,
                             size: 16,
-                            color: hasTax ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                            color: hasTax ? theme.colorScheme.primary : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                           ),
                           const SizedBox(width: 6),
                           Flexible(
@@ -736,7 +746,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: hasTax ? FontWeight.bold : FontWeight.normal,
-                                color: hasTax ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                                color: hasTax ? theme.colorScheme.primary : (isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -750,7 +760,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
             ),
 
             const SizedBox(height: 16),
-            const Divider(height: 1, color: Color(0xFFE2E8F0)),
+            Divider(height: 1, color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
             const SizedBox(height: 16),
 
             Row(
@@ -758,14 +768,14 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
               children: [
                 const Text(
                   "Grand Total",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF0F172A)),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
                 ),
                 Text(
                   "$currency${cart.grandTotal.toStringAsFixed(2)}",
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w800,
                     fontSize: 26,
-                    color: Color(0xFF2563EB),
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ],
@@ -775,8 +785,8 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
             ElevatedButton(
               onPressed: () => _showCheckoutModal(cart, invoiceProvider, shop, currency, theme),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
-                foregroundColor: Colors.white,
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
                 elevation: 0,
                 padding: const EdgeInsets.symmetric(vertical: 18),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -928,9 +938,9 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
             }
 
             return Container(
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
               ),
               padding: EdgeInsets.only(
                 top: 24,
@@ -949,7 +959,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                         width: 48,
                         height: 5,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFE2E8F0),
+                          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
@@ -962,18 +972,18 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               "Payment Settlement",
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Color(0xFF0F172A)),
+                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                             ),
                             Text(
                               invoiceNum,
-                              style: const TextStyle(color: Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w500),
+                              style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), fontSize: 13, fontWeight: FontWeight.w500),
                             ),
                           ],
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close_rounded, color: Color(0xFF64748B)),
+                          icon: Icon(Icons.close_rounded, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B)),
                           onPressed: () => Navigator.pop(context),
                         )
                       ],
@@ -1288,26 +1298,26 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                       const SizedBox(height: 24),
                     ] else if (selectedPayment == 'UPI') ...[
                       if (upiString.isNotEmpty) ...[
-                        const Text(
-                          "Verify Customer Payment QR",
+                        Text(
+                           "Verify Customer Payment QR",
                           textAlign: TextAlign.center,
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                         ),
                         const SizedBox(height: 14),
                         Center(
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: theme.cardColor,
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFF2563EB).withOpacity(0.08),
+                                  color: isDark ? Colors.black.withOpacity(0.2) : const Color(0xFF2563EB).withOpacity(0.08),
                                   blurRadius: 20,
                                   offset: const Offset(0, 6),
                                 )
                               ],
-                              border: Border.all(color: const Color(0xFF2563EB).withOpacity(0.15), width: 1.5),
+                              border: Border.all(color: theme.colorScheme.primary.withOpacity(0.15), width: 1.5),
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -1317,7 +1327,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                                   height: 180,
                                   decoration: BoxDecoration(
                                     borderRadius: BorderRadius.circular(16),
-                                    color: const Color(0xFFF8FAFC),
+                                    color: isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF8FAFC),
                                   ),
                                   child: Image.network(
                                     "https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${Uri.encodeComponent(upiString)}",
@@ -1336,11 +1346,11 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                                 Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(Icons.check_circle_rounded, color: Color(0xFF2563EB), size: 16),
+                                    Icon(Icons.check_circle_rounded, color: theme.colorScheme.primary, size: 16),
                                     const SizedBox(width: 6),
                                     Text(
                                       "Pay ₹${cart.grandTotal.toStringAsFixed(2)}",
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: isDark ? Colors.white : const Color(0xFF0F172A)),
                                     ),
                                   ],
                                 ),

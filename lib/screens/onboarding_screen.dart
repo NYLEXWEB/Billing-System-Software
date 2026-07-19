@@ -476,6 +476,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final authProvider = Provider.of<AuthProvider>(context);
 
     if (!authProvider.isAuthenticated) {
@@ -483,7 +484,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -496,11 +497,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   Container(
                     padding: const EdgeInsets.all(4),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? theme.colorScheme.surface : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF2563EB).withOpacity(0.08),
+                          color: isDark ? Colors.black.withOpacity(0.2) : const Color(0xFF2563EB).withOpacity(0.08),
                           blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
@@ -522,7 +523,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     "Setup your business",
                     style: theme.textTheme.headlineMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0F172A),
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                     ),
                   ),
                   const SizedBox(height: 8),
@@ -531,7 +532,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     "Fill in your details to personalize invoices\nand configure local backups.",
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: const Color(0xFF64748B),
+                      color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
                       fontSize: 15,
                       height: 1.4,
                     ),
@@ -540,12 +541,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? theme.colorScheme.surface : Colors.white,
                       borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
+                      border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0), width: 1),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF0F172A).withOpacity(0.03),
+                          color: isDark ? Colors.black.withOpacity(0.2) : const Color(0xFF0F172A).withOpacity(0.03),
                           blurRadius: 16,
                           offset: const Offset(0, 8),
                         ),
@@ -555,7 +556,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Theme(
                       data: theme.copyWith(
                         inputDecorationTheme: theme.inputDecorationTheme.copyWith(
-                          fillColor: const Color(0xFFF8FAFC),
+                          fillColor: isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF8FAFC),
                         ),
                       ),
                       child: _buildStepper(theme),
@@ -580,40 +581,46 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildInputLabel(String label) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0, left: 2.0),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 13,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF475569),
+          color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
         ),
       ),
     );
   }
 
   Widget _buildStepper(ThemeData theme) {
+    final isDark = theme.brightness == Brightness.dark;
+    final titleColor = isDark ? Colors.white : const Color(0xFF0F172A);
+    final subtitleColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
     if (_currentStep == 0) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildStepIndicator(0),
           const SizedBox(height: 32),
-          const Text(
+          Text(
             "Basic information",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: titleColor,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             "This appears on every invoice you send.",
             style: TextStyle(
               fontSize: 13,
-              color: Color(0xFF64748B),
+              color: subtitleColor,
             ),
           ),
           const SizedBox(height: 24),
@@ -688,20 +695,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           _buildStepIndicator(1),
           const SizedBox(height: 32),
-          const Text(
+          Text(
             "Billing & payments",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: titleColor,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             "Configure tax and UPI details for easy invoicing.",
             style: TextStyle(
               fontSize: 13,
-              color: Color(0xFF64748B),
+              color: subtitleColor,
             ),
           ),
           const SizedBox(height: 24),
@@ -775,20 +782,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         children: [
           _buildStepIndicator(2),
           const SizedBox(height: 32),
-          const Text(
+          Text(
             "Security & backups",
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: titleColor,
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
+          Text(
             "Set a recovery passphrase to encrypt local and cloud backups.",
             style: TextStyle(
               fontSize: 13,
-              color: Color(0xFF64748B),
+              color: subtitleColor,
             ),
           ),
           const SizedBox(height: 24),
@@ -857,6 +864,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildStepIndicator(int step) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final primaryColor = theme.colorScheme.primary;
+    final unselectedBg = isDark ? theme.colorScheme.surface : Colors.white;
+    final unselectedBorder = isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0);
+    
     final stepLabels = ["Business", "Contact", "Review"];
     return Column(
       children: [
@@ -870,13 +883,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 height: 32,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: i <= step
-                      ? const Color(0xFF2563EB)
-                      : Colors.white,
+                  color: i <= step ? primaryColor : unselectedBg,
                   border: Border.all(
-                    color: i <= step
-                        ? const Color(0xFF2563EB)
-                        : const Color(0xFFE2E8F0),
+                    color: i <= step ? primaryColor : unselectedBorder,
                     width: 2,
                   ),
                 ),
@@ -884,9 +893,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Text(
                     (i + 1).toString(),
                     style: TextStyle(
-                      color: i <= step
-                          ? Colors.white
-                          : const Color(0xFF94A3B8),
+                      color: i <= step ? Colors.white : const Color(0xFF94A3B8),
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
                     ),
@@ -898,7 +905,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 Container(
                   width: 70,
                   height: 2,
-                  color: i < step ? const Color(0xFF2563EB) : const Color(0xFFE2E8F0),
+                  color: i < step ? primaryColor : unselectedBorder,
                 ),
             ]
           ],
@@ -916,7 +923,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: i == step ? const Color(0xFF2563EB) : const Color(0xFF94A3B8),
+                    color: i == step ? primaryColor : const Color(0xFF94A3B8),
                   ),
                 ),
               ),

@@ -73,6 +73,11 @@ class _NavigationShellState extends State<NavigationShell> {
 
   Widget _buildNavItem(int index, IconData outlineIcon, IconData solidIcon, String label) {
     final isSelected = _selectedIndex == index;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final selectedColor = theme.colorScheme.primary;
+    final unselectedColor = isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B);
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () {
@@ -87,7 +92,7 @@ class _NavigationShellState extends State<NavigationShell> {
           children: [
             Icon(
               isSelected ? solidIcon : outlineIcon,
-              color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+              color: isSelected ? selectedColor : unselectedColor,
               size: 24,
             ),
             const SizedBox(height: 4),
@@ -96,7 +101,7 @@ class _NavigationShellState extends State<NavigationShell> {
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? const Color(0xFF2563EB) : const Color(0xFF64748B),
+                color: isSelected ? selectedColor : unselectedColor,
               ),
             ),
           ],
@@ -107,8 +112,11 @@ class _NavigationShellState extends State<NavigationShell> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: IndexedStack(
         index: _selectedIndex,
         children: _screens,
@@ -118,11 +126,11 @@ class _NavigationShellState extends State<NavigationShell> {
           height: 72,
           margin: const EdgeInsets.fromLTRB(16, 0, 16, 12),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(24),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF0F172A).withOpacity(0.08),
+                color: isDark ? Colors.black.withOpacity(0.3) : const Color(0xFF0F172A).withOpacity(0.08),
                 blurRadius: 20,
                 offset: const Offset(0, 4),
               ),
@@ -150,17 +158,17 @@ class _NavigationShellState extends State<NavigationShell> {
                   height: 56,
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF2563EB),
+                    color: theme.colorScheme.primary,
                     shape: BoxShape.circle,
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF2563EB).withOpacity(0.3),
+                        color: theme.colorScheme.primary.withOpacity(0.3),
                         blurRadius: 12,
                         offset: const Offset(0, 6),
                       ),
                     ],
                   ),
-                  child: const Icon(Icons.qr_code_scanner_rounded, color: Colors.white, size: 26),
+                  child: Icon(Icons.qr_code_scanner_rounded, color: theme.colorScheme.onPrimary, size: 26),
                 ),
               ),
               

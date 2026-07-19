@@ -77,12 +77,16 @@ class _InventoryScreenState extends State<InventoryScreen> {
                 ),
 
                 const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       "Stock Movements Ledger",
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.blueGrey),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: theme.brightness == Brightness.dark ? theme.colorScheme.secondary : Colors.blueGrey,
+                      ),
                     ),
                   ),
                 ),
@@ -96,7 +100,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             children: [
                               Icon(Icons.history_toggle_off, size: 64, color: theme.hintColor.withOpacity(0.3)),
                               const SizedBox(height: 16),
-                              const Text("No inventory movements logged yet", style: TextStyle(color: Colors.grey)),
+                              Text("No inventory movements logged yet", style: TextStyle(color: theme.hintColor)),
                             ],
                           ),
                         )
@@ -107,27 +111,40 @@ class _InventoryScreenState extends State<InventoryScreen> {
                             final movement = _movements[index];
                             final isPositive = movement.quantity > 0;
                             final type = movement.type; // 'IN', 'OUT', 'SET'
+                            final isDark = theme.brightness == Brightness.dark;
 
                             return Card(
                               margin: const EdgeInsets.only(bottom: 8),
                               child: ListTile(
                                 leading: CircleAvatar(
-                                  backgroundColor: type == 'IN'
-                                      ? Colors.green.shade50
-                                      : type == 'OUT'
-                                          ? Colors.red.shade50
-                                          : Colors.blue.shade50,
+                                  backgroundColor: isDark
+                                      ? (type == 'IN'
+                                          ? Colors.green.withOpacity(0.15)
+                                          : type == 'OUT'
+                                              ? Colors.red.withOpacity(0.15)
+                                              : Colors.blue.withOpacity(0.15))
+                                      : (type == 'IN'
+                                          ? Colors.green.shade50
+                                          : type == 'OUT'
+                                              ? Colors.red.shade50
+                                              : Colors.blue.shade50),
                                   child: Icon(
                                     type == 'IN'
                                         ? Icons.arrow_downward
                                         : type == 'OUT'
                                             ? Icons.arrow_upward
                                             : Icons.pin_drop,
-                                    color: type == 'IN'
-                                        ? Colors.green.shade700
-                                        : type == 'OUT'
-                                            ? Colors.red.shade700
-                                            : Colors.blue.shade700,
+                                    color: isDark
+                                        ? (type == 'IN'
+                                            ? Colors.green.shade300
+                                            : type == 'OUT'
+                                                ? Colors.red.shade300
+                                                : Colors.blue.shade300)
+                                        : (type == 'IN'
+                                            ? Colors.green.shade700
+                                            : type == 'OUT'
+                                                ? Colors.red.shade700
+                                                : Colors.blue.shade700),
                                   ),
                                 ),
                                 title: Text(
@@ -149,11 +166,17 @@ class _InventoryScreenState extends State<InventoryScreen> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: type == 'IN'
-                                        ? Colors.green
-                                        : type == 'OUT'
-                                            ? Colors.red
-                                            : Colors.blue,
+                                    color: isDark
+                                        ? (type == 'IN'
+                                            ? Colors.green.shade300
+                                            : type == 'OUT'
+                                                ? Colors.red.shade300
+                                                : Colors.blue.shade300)
+                                        : (type == 'IN'
+                                            ? Colors.green
+                                            : type == 'OUT'
+                                                ? Colors.red
+                                                : Colors.blue),
                                   ),
                                 ),
                               ),
