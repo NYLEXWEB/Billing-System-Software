@@ -76,7 +76,7 @@ class _InventoryScreenState extends State<InventoryScreen> {
                   ),
                 ),
 
-                const Padding(
+                Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6.0),
                   child: Align(
                     alignment: Alignment.centerLeft,
