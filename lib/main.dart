@@ -258,7 +258,7 @@ class MyApp extends StatelessWidget {
     final authProvider = Provider.of<AuthProvider>(context);
     final consentProvider = Provider.of<ConsentProvider>(context);
 
-    if (!provider.isInitialized || !consentProvider.isInitialized) {
+    if (!provider.isInitialized || !consentProvider.isInitialized || !authProvider.isInitialized) {
       // Splash/Loading State
       return Scaffold(
         body: Center(
@@ -286,14 +286,10 @@ class MyApp extends StatelessWidget {
       return const UserAgreementScreen();
     }
 
-    if (!authProvider.isAuthenticated) {
-      return const OnboardingScreen();
+    if (provider.isOnboarded) {
+      return const NavigationShell();
     }
 
-    if (!provider.isOnboarded) {
-      return const OnboardingScreen();
-    }
-
-    return const NavigationShell();
+    return const OnboardingScreen();
   }
 }

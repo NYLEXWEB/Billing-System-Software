@@ -17,10 +17,12 @@ class AuthProvider extends ChangeNotifier {
   GoogleSignInAccount? _currentUser;
   User? _firebaseUser;
   bool _isLoading = false;
+  bool _isInitialized = false;
 
   GoogleSignInAccount? get currentUser => _currentUser;
   User? get firebaseUser => _firebaseUser;
   bool get isLoading => _isLoading;
+  bool get isInitialized => _isInitialized;
   bool get isAuthenticated => _currentUser != null && _firebaseUser != null;
   GoogleSignIn get googleSignIn => _googleSignIn;
 
@@ -77,6 +79,9 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       debugPrint("Silent Google Sign-In / Firebase Sync failed: $e");
+    } finally {
+      _isInitialized = true;
+      notifyListeners();
     }
   }
 

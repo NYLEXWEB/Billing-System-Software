@@ -596,63 +596,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 12),
-
-                      // Sub-card 3: Test Crashlytics Integration
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF334155) : const Color(0xFFF1F5F9),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: isDark ? const Color(0xFF475569) : const Color(0xFFE2E8F0),
-                            width: 1,
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: const [
-                                  Text(
-                                    "Test Crashlytics Setup",
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  SizedBox(height: 4),
-                                  Text(
-                                    "Simulate a non-fatal crash to verify integration",
-                                    style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                FirebaseCrashlytics.instance.log("User triggered a test crash from SettingsScreen");
-                                FirebaseCrashlytics.instance.recordError(
-                                  StateError("Crashlytics Test Crash: Verification of integration."),
-                                  StackTrace.current,
-                                  reason: "Test Crash Button Pressed",
-                                  fatal: false,
-                                );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text("Test crash logged to Crashlytics.")),
-                                );
-                              },
-                              style: TextButton.styleFrom(
-                                foregroundColor: Colors.purple,
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              ),
-                              child: const Text("Trigger", style: TextStyle(fontWeight: FontWeight.bold)),
-                            ),
-                          ],
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -1346,13 +1289,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setState) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
           return AlertDialog(
-            title: const Text("Edit Shop Profile"),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            title: Row(
+              children: const [
+                Icon(Icons.storefront_rounded, color: Colors.blueAccent),
+                SizedBox(width: 12),
+                Text("Edit Shop Profile", style: TextStyle(fontWeight: FontWeight.bold)),
+              ],
+            ),
             content: Form(
               key: formKey,
               child: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     // Shop Logo Picker Preview
                     Center(
@@ -1452,63 +1404,106 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 16),
-                    TextFormField(
+                    const SizedBox(height: 24),
+                    
+                    _buildDialogField(
                       controller: nameController,
-                      decoration: const InputDecoration(labelText: "Shop Name *"),
+                      labelText: "Shop Name *",
+                      hintText: "e.g. Al Manar Textiles",
+                      icon: Icons.storefront_outlined,
+                      isDark: isDark,
                       validator: (v) => v == null || v.trim().isEmpty ? "Required" : null,
                     ),
-                    TextFormField(
+                    const SizedBox(height: 16),
+                    
+                    _buildDialogField(
                       controller: phoneController,
+                      labelText: "Phone Number *",
+                      hintText: "+91 98765 43210",
+                      icon: Icons.phone_outlined,
                       keyboardType: TextInputType.phone,
-                      decoration: const InputDecoration(labelText: "Phone Number *"),
+                      isDark: isDark,
                       validator: (v) => v == null || v.trim().isEmpty ? "Required" : null,
                     ),
-                    TextFormField(
+                    const SizedBox(height: 16),
+                    
+                    _buildDialogField(
                       controller: emailController,
+                      labelText: "Email Address",
+                      hintText: "you@business.com",
+                      icon: Icons.mail_outline_rounded,
                       keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(labelText: "Email"),
+                      isDark: isDark,
                     ),
-                    TextFormField(
+                    const SizedBox(height: 16),
+                    
+                    _buildDialogField(
                       controller: addressController,
-                      decoration: const InputDecoration(labelText: "Address"),
+                      labelText: "Business Address",
+                      hintText: "Shop no, street, city",
+                      icon: Icons.location_on_outlined,
+                      isDark: isDark,
                     ),
-                    TextFormField(
+                    const SizedBox(height: 16),
+                    
+                    _buildDialogField(
                       controller: gstController,
-                      decoration: const InputDecoration(labelText: "GST / TAX No"),
+                      labelText: "GST / TAX No",
+                      hintText: "Optional",
+                      icon: Icons.receipt_long_outlined,
+                      isDark: isDark,
                     ),
-                    TextFormField(
+                    const SizedBox(height: 16),
+                    
+                    _buildDialogField(
                       controller: upiController,
-                      decoration: const InputDecoration(labelText: "UPI ID for Payments (Optional)"),
+                      labelText: "UPI ID for Payments",
+                      hintText: "e.g. name@oksbi",
+                      icon: Icons.qr_code_scanner_outlined,
+                      isDark: isDark,
                       validator: (v) {
                         if (v == null || v.trim().isEmpty) return null;
                         if (!v.trim().contains('@')) return "Valid UPI ID required";
                         return null;
                       },
                     ),
-                    TextFormField(
+                    const SizedBox(height: 16),
+                    
+                    _buildDialogField(
                       controller: headerController,
+                      labelText: "Custom Receipt Header",
+                      hintText: "e.g. Welcome to Our Shop!",
+                      icon: Icons.vertical_align_top_rounded,
                       maxLines: 2,
-                      decoration: const InputDecoration(
-                        labelText: "Custom Receipt Header",
-                        hintText: "e.g. Welcome to Our Shop!",
-                      ),
+                      isDark: isDark,
                     ),
-                    TextFormField(
+                    const SizedBox(height: 16),
+                    
+                    _buildDialogField(
                       controller: footerController,
+                      labelText: "Custom Receipt Footer",
+                      hintText: "e.g. Thanks for shopping! No return.",
+                      icon: Icons.vertical_align_bottom_rounded,
                       maxLines: 2,
-                      decoration: const InputDecoration(
-                        labelText: "Custom Receipt Footer",
-                        hintText: "e.g. Thanks for shopping! No return.",
-                      ),
+                      isDark: isDark,
                     ),
                   ],
                 ),
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Cancel", style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF64748B))),
+              ),
               ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2563EB),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
                 onPressed: () async {
                   if (!formKey.currentState!.validate()) return;
                   final updated = shop.copyWith(
@@ -1536,6 +1531,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildDialogField({
+    required TextEditingController controller,
+    required String labelText,
+    required String hintText,
+    required IconData icon,
+    required bool isDark,
+    TextInputType? keyboardType,
+    int maxLines = 1,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      validator: validator,
+      style: const TextStyle(fontSize: 14),
+      decoration: InputDecoration(
+        labelText: labelText,
+        hintText: hintText,
+        alignLabelWithHint: maxLines > 1,
+        prefixIcon: Icon(icon, size: 20),
+        filled: true,
+        fillColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            width: 1,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(
+            color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+            width: 1,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(
+            color: Color(0xFF2563EB),
+            width: 1.5,
+          ),
+        ),
       ),
     );
   }
