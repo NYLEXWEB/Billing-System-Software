@@ -30,6 +30,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
   
   List<Product> _searchResults = [];
   bool _isSearching = false;
+  bool _viewingCart = false;
 
   bool get isDark => Theme.of(context).brightness == Brightness.dark;
 
@@ -111,7 +112,17 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("POS Checkout", style: TextStyle(fontWeight: FontWeight.bold)),
+        leading: _viewingCart
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_rounded),
+                onPressed: () {
+                  setState(() {
+                    _viewingCart = false;
+                  });
+                },
+              )
+            : null,
+        title: Text(_viewingCart ? "Checkout Cart" : "POS Checkout", style: const TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
         actions: [
           IconButton(
@@ -149,6 +160,9 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
             onPressed: () {
               if (cartProvider.items.isNotEmpty) {
                 cartProvider.clear();
+                setState(() {
+                  _viewingCart = false;
+                });
               }
             },
           )
@@ -156,38 +170,46 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
       ),
       body: Column(
         children: [
-          // 1. Search Bar
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              focusNode: _searchFocusNode,
-              onChanged: (val) => _onSearchChanged(val, allProducts),
-              decoration: InputDecoration(
-                hintText: "Search by Name or Barcode...",
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded),
-                        onPressed: () {
-                          _searchController.clear();
-                          _onSearchChanged('', allProducts);
-                        },
-                      )
-                    : null,
+          if (!_viewingCart) ...[
+            // 1. Search Bar
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              child: TextField(
+                controller: _searchController,
+                focusNode: _searchFocusNode,
+                onChanged: (val) => _onSearchChanged(val, allProducts),
+                decoration: InputDecoration(
+                  hintText: "Search by Name or Barcode...",
+                  prefixIcon: const Icon(Icons.search_rounded),
+                  suffixIcon: _searchController.text.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear_rounded),
+                          onPressed: () {
+                            _searchController.clear();
+                            _onSearchChanged('', allProducts);
+                          },
+                        )
+                      : null,
+                ),
               ),
             ),
-          ),
+          ],
 
           // 2. Main Content
           Expanded(
-            child: _isSearching
-                ? _buildSearchResults(cartProvider, currency)
-                : _buildCartView(cartProvider, currency, theme),
+            child: _viewingCart
+                ? _buildCartView(cartProvider, currency, theme)
+                : (_isSearching
+                    ? _buildSearchResults(cartProvider, currency)
+                    : _buildCatalogView(cartProvider, currency, theme)),
           ),
 
-          // 3. Checkout summary card
-          if (cartProvider.items.isNotEmpty && !_isSearching)
+          // 3. Bottom Bar (if in catalog view and cart is not empty)
+          if (!_viewingCart && cartProvider.items.isNotEmpty)
+            _buildCartBottomBar(cartProvider, currency, theme),
+
+          // 4. Checkout summary card (if in cart view and cart is not empty)
+          if (_viewingCart && cartProvider.items.isNotEmpty)
             _buildCheckoutSection(cartProvider, invoiceProvider, shop, currency, theme),
         ],
       ),
@@ -301,114 +323,388 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
 
   Widget _buildCartView(CartProvider cart, String currency, ThemeData theme) {
     if (cart.items.isEmpty) {
-      final productProvider = Provider.of<ProductProvider>(context);
-      final popularProducts = productProvider.products.take(6).toList();
-
-      return Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.shopping_cart_outlined, size: 72, color: const Color(0xFF94A3B8).withOpacity(0.3)),
-              const SizedBox(height: 16),
-              const Text(
-                "Your checkout cart is empty",
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 16, fontWeight: FontWeight.w500),
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _viewingCart) {
+          setState(() {
+            _viewingCart = false;
+          });
+        }
+      });
+      return const SizedBox.shrink();
+    }
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: cart.items.length,
+      itemBuilder: (context, index) {
+        final item = cart.items[index];
+        final productProvider = Provider.of<ProductProvider>(context, listen: false);
+        final product = productProvider.products.firstWhere(
+          (p) => p.id == item.productId,
+          orElse: () => Product(id: item.productId, name: item.productName, barcode: '', price: item.price),
+        );
+        return Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: theme.cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: isDark ? Colors.black.withOpacity(0.2) : const Color(0xFF0F172A).withOpacity(0.01),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              if (popularProducts.isNotEmpty) ...[
-                const SizedBox(height: 32),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: Row(
-                    children: [
-                      Text(
-                        "Quick Add Products",
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF475569)),
-                      ),
-                    ],
-                  ),
+            ],
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Product Thumbnail
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: Colors.grey.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  image: product.imagePath != null && product.imagePath!.isNotEmpty && File(product.imagePath!).existsSync()
+                      ? DecorationImage(
+                          image: FileImage(File(product.imagePath!)),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                const SizedBox(height: 12),
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 10,
-                    crossAxisSpacing: 10,
-                    childAspectRatio: 2.2,
-                  ),
-                  itemCount: popularProducts.length,
-                  itemBuilder: (context, index) {
-                    final p = popularProducts[index];
-                    final isOutOfStock = p.isTracked && p.stockQuantity == 0;
-                    return InkWell(
-                      onTap: isOutOfStock ? null : () => _addToCart(p, cart),
-                      borderRadius: BorderRadius.circular(12),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: theme.cardColor,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              p.name,
-                              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: isDark ? Colors.white : const Color(0xFF0F172A)),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                child: product.imagePath == null || product.imagePath!.isEmpty || !File(product.imagePath!).existsSync()
+                    ? const Icon(Icons.shopping_bag_outlined, size: 20, color: Color(0xFF94A3B8))
+                    : null,
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.productName,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 15,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
                             ),
-                            const SizedBox(height: 4),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    "$currency${p.price.toStringAsFixed(0)}",
-                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: theme.colorScheme.primary),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline_rounded, color: Colors.redAccent, size: 20),
+                          onPressed: () => cart.removeItem(item.productId),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            "$currency${item.price.toStringAsFixed(2)} each",
+                            style: TextStyle(color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), fontSize: 12),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: isDark ? theme.scaffoldBackgroundColor : const Color(0xFFF1F5F9),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(Icons.remove, size: 16, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+                                    onPressed: () {
+                                      cart.updateQuantity(item.productId, item.quantity - 1, product);
+                                    },
+                                    padding: EdgeInsets.zero,
+                                    constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
                                   ),
-                                ),
-                                const SizedBox(width: 4),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                  decoration: BoxDecoration(
-                                    color: isOutOfStock 
-                                        ? (isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEF2F2)) 
-                                        : (isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5)),
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                  child: Text(
-                                    p.isTracked ? "${p.stockQuantity} Left" : "Unlimited",
-                                    style: TextStyle(
-                                      fontSize: 8,
-                                      fontWeight: FontWeight.bold,
-                                      color: isOutOfStock 
-                                          ? (isDark ? const Color(0xFFFCA5A5) : const Color(0xFFEF4444)) 
-                                          : (isDark ? const Color(0xFF34D399) : const Color(0xFF10B981)),
+                                  InkWell(
+                                    onTap: () => _showQuantityEditDialog(context, item, product, cart),
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                      constraints: const BoxConstraints(minWidth: 24),
+                                      decoration: BoxDecoration(
+                                        border: Border.all(color: isDark ? const Color(0xFF475569) : const Color(0xFFCBD5E1)),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        item.quantity.toString(),
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                  IconButton(
+                                    icon: Icon(Icons.add, size: 16, color: theme.colorScheme.primary),
+                                    onPressed: () {
+                                      final ok = cart.updateQuantity(item.productId, item.quantity + 1, product);
+                                      if (!ok) {
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          const SnackBar(
+                                            content: Text("Insufficient stock quantity!"),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "$currency${item.subtotal.toStringAsFixed(2)}",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  },
+                      ],
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ],
           ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCatalogView(CartProvider cart, String currency, ThemeData theme) {
+    final productProvider = Provider.of<ProductProvider>(context);
+    final popularProducts = productProvider.products.take(6).toList();
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (cart.items.isEmpty) ...[
+            const SizedBox(height: 32),
+            Center(
+              child: Column(
+                children: [
+                  Icon(Icons.shopping_cart_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.3)),
+                  const SizedBox(height: 12),
+                  const Text(
+                    "Your checkout cart is empty",
+                    style: TextStyle(color: Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                ],
+              ),
+            ),
+          ],
+          if (popularProducts.isNotEmpty) ...[
+            const SizedBox(height: 24),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Row(
+                children: [
+                  Text(
+                    "Quick Add Products",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569)),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 12),
+            GridView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+                childAspectRatio: 2.2,
+              ),
+              itemCount: popularProducts.length,
+              itemBuilder: (context, index) {
+                final p = popularProducts[index];
+                final isOutOfStock = p.isTracked && p.stockQuantity == 0;
+                return InkWell(
+                  onTap: isOutOfStock ? null : () => _addToCart(p, cart),
+                  borderRadius: BorderRadius.circular(12),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0)),
+                    ),
+                    child: Row(
+                      children: [
+                        // Image Thumbnail
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            image: p.imagePath != null && p.imagePath!.isNotEmpty && File(p.imagePath!).existsSync()
+                                ? DecorationImage(
+                                    image: FileImage(File(p.imagePath!)),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
+                          ),
+                          child: p.imagePath == null || p.imagePath!.isEmpty || !File(p.imagePath!).existsSync()
+                              ? const Icon(Icons.shopping_bag_outlined, size: 16, color: Color(0xFF94A3B8))
+                              : null,
+                        ),
+                        const SizedBox(width: 8),
+                        // Details Column
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                p.name,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 12,
+                                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      "$currency${p.price.toStringAsFixed(0)}",
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: theme.colorScheme.primary,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color: isOutOfStock 
+                                          ? (isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFEF2F2)) 
+                                          : (isDark ? const Color(0xFF064E3B) : const Color(0xFFECFDF5)),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      p.isTracked ? "${p.stockQuantity}" : "∞",
+                                      style: TextStyle(
+                                        fontSize: 7,
+                                        fontWeight: FontWeight.bold,
+                                        color: isOutOfStock 
+                                            ? (isDark ? const Color(0xFFFCA5A5) : const Color(0xFFEF4444)) 
+                                            : (isDark ? const Color(0xFF34D399) : const Color(0xFF10B981)),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCartBottomBar(CartProvider cart, String currency, ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withOpacity(0.3) : const Color(0xFF0F172A).withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          )
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "${cart.items.length} ${cart.items.length == 1 ? 'Item' : 'Items'}",
+                  style: TextStyle(fontSize: 12, color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B), fontWeight: FontWeight.w500),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  "Total: $currency${cart.totalAmount.toStringAsFixed(2)}",
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+                ),
+              ],
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: theme.colorScheme.primary,
+                foregroundColor: theme.colorScheme.onPrimary,
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () {
+                setState(() {
+                  _viewingCart = true;
+                });
+              },
+              child: const Row(
+                children: [
+                  Text("VIEW CART", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5)),
+                  SizedBox(width: 6),
+                  Icon(Icons.arrow_forward_rounded, size: 16),
+                ],
+              ),
+            ),
+          ],
         ),
-      );
-    }
+      ),
+    );
+  }
 
   void _showQuantityEditDialog(BuildContext context, InvoiceItem item, Product product, CartProvider cart) {
     final controller = TextEditingController(text: item.quantity.toString());
@@ -1465,6 +1761,9 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           
                           if (context.mounted) {
                             cart.clear();
+                            setState(() {
+                              _viewingCart = false;
+                            });
                             Navigator.pop(context);
 
                             if (finalInvoice != null) {
