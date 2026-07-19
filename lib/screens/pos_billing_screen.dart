@@ -195,6 +195,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
   }
 
   Widget _buildSearchResults(CartProvider cart, String currency) {
+    final theme = Theme.of(context);
     if (_searchResults.isEmpty) {
       return Center(
         child: Column(
@@ -615,7 +616,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                           ],
                         ),
                       ],
-                    ),),
+                    ),
                   ],
                 ),
               ),

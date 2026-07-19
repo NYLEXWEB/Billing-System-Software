@@ -175,7 +175,7 @@ class MyApp extends StatelessWidget {
           bodyMedium: TextStyle(color: Colors.white),
           bodySmall: TextStyle(color: Colors.white70),
         ),
-        dialogTheme: DialogTheme(
+        dialogTheme: DialogThemeData(
           backgroundColor: const Color(0xFF1E293B),
           surfaceTintColor: Colors.transparent,
           titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
