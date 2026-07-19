@@ -1,0 +1,329 @@
+EASYTOBILL END USER LICENSE AGREEMENT (EULA)
+
+Effective Date: July 18, 2026
+Last Updated: July 18, 2026
+Version: 1.0
+
+---
+
+1. Introduction
+
+This End User License Agreement ("EULA") is a legally binding agreement between NYLEX ("Licensor", "Company", "we", "our", or "us") and the individual or business ("Licensee", "User", or "you") who installs, accesses, purchases, or uses the EasyToBill software.
+
+EasyToBill is licensed, not sold, to the user.
+This Agreement governs the installation, licensing, use, updates, and protection of EasyToBill.
+By installing or using EasyToBill, you agree to be bound by this EULA.
+If you do not agree, you must not install or use the Software.
+
+---
+
+2. Definitions
+
+For this Agreement:
+- "Software" means EasyToBill, including all versions, updates, patches, modules, documentation, images, icons, source code, object code, databases, APIs, and associated materials.
+- "License" means the limited permission granted by NYLEX to use EasyToBill.
+- "Licensed Device" means an Android device authorized to run EasyToBill.
+- "Licensed Business" means the single business or shop authorized to use the purchased license.
+- "User Data" means business information created by the user, including products, invoices, inventory, customers, reports, transactions, and backups.
+
+---
+
+3. Ownership
+
+EasyToBill remains the exclusive intellectual property of NYLEX.
+Nothing in this Agreement transfers ownership of: Source Code, Application Architecture, UI/UX Design, Database Structure, Graphics, Logos, Icons, Documentation, Trademarks, Brand Name, Business Logic, or Security Systems.
+The user receives only a limited right to use the Software.
+
+---
+
+4. License Grant
+
+Subject to this Agreement, NYLEX grants the user a:
+- Limited License
+- Non-exclusive License
+- Non-transferable License
+- Revocable License
+- Non-sublicensable License
+
+to install and use EasyToBill solely for lawful business purposes. This license is personal to the licensed business.
+
+---
+
+5. One Business License
+
+Unless expressly authorized by NYLEX in writing:
+- One purchased license is valid for one business/shop.
+- The license may not be shared between multiple independent businesses.
+- Separate businesses require separate licenses.
+
+---
+
+6. Multiple Device Usage
+
+The same licensed Google account may be used on multiple compatible devices only if:
+- All devices belong to the same licensed business.
+- The account is not shared with unauthorized persons.
+- Such usage complies with this Agreement.
+
+NYLEX may monitor unusual activity to protect against misuse.
+
+---
+
+7. Software Updates
+
+NYLEX may release: Security Updates, Bug Fixes, Feature Updates, Compatibility Updates, and Performance Improvements.
+Version 1 license holders retain access to Version 1 features.
+Future premium services or major commercial features may require separate licensing or subscription.
+
+---
+
+8. License Restrictions
+
+Except where expressly permitted by law, users shall not:
+- Sell, rent, lease, sublicense, copy, modify, distribute, or publish the Software.
+- Transfer the License.
+- Use EasyToBill for unlawful purposes.
+
+Violation of these restrictions constitutes a material breach of this Agreement.
+
+---
+
+9. Authorized Installation
+
+EasyToBill shall be installed only through: Google Play Store, NYLEX, or authorized distribution channels approved by NYLEX.
+Users should never install modified or unofficial copies.
+
+---
+
+10. User Responsibilities
+
+The Licensee agrees to:
+- Maintain account security and protect Google account credentials.
+- Protect the EasyToBill security password.
+- Maintain Google Drive backups.
+- Use EasyToBill lawfully and keep the Software reasonably updated.
+- Report security issues promptly.
+
+Failure to comply may result in suspension or termination of the license.
+
+---
+
+11. Reservation of Rights
+
+All rights not expressly granted under this Agreement remain reserved by NYLEX.
+No implied licenses are granted.
+
+---
+
+12. Reverse Engineering Prohibition
+
+Except to the extent expressly permitted by applicable law, the Licensee shall not reverse engineer, decompile, disassemble, decode, analyze the source code, attempt to recreate the Software, circumvent any security mechanism, or derive the underlying algorithms, architecture, or business logic.
+Any such attempt constitutes a material breach of this Agreement.
+
+---
+
+13. Source Code Protection
+
+The EasyToBill source code, application architecture, algorithms, database schema, APIs, scripts, libraries, and development resources are confidential and proprietary to NYLEX.
+The Licensee shall not:
+- Access the source code without authorization.
+- Copy or reproduce any part of the source code.
+- Create derivative works based on the source code.
+- Publish or disclose confidential technical information.
+
+All proprietary rights remain exclusively with NYLEX.
+
+---
+
+14. APK Distribution Restrictions
+
+EasyToBill is licensed for personal business use and may only be obtained through official distribution channels.
+The Licensee shall not share the APK, upload the APK to websites or cloud storage, redistribute installation files, create mirrors, modify or repackage the APK, or remove or alter digital signatures.
+Unauthorized distribution may result in immediate termination of the license and legal action where permitted by law.
+
+---
+
+15. Anti-Piracy Policy
+
+The Licensee agrees not to use pirated versions of EasyToBill, install cracked/modified versions, remove licensing protections, bypass activation/authentication, or use tools to defeat copy protection.
+NYLEX reserves the right to investigate suspected piracy and take appropriate action.
+
+---
+
+16. Unauthorized Commercial Use
+
+Without prior written authorization from NYLEX, the Licensee shall not resell, lease, or rent the Software, offer the Software as a hosted service, bundle EasyToBill with unrelated commercial products, sell activation keys, or charge third parties for unauthorized copies.
+Separate reseller or partner agreements may be offered by NYLEX in the future.
+
+---
+
+17. Trademark Protection
+
+The following, including any future branding associated with EasyToBill, are protected intellectual property: EasyToBill, NYLEX, Logos, Icons, Brand/Product names, Slogans, and Visual identity.
+No Licensee may use NYLEX trademarks in a manner that suggests endorsement, ownership, or affiliation without prior written consent.
+
+---
+
+18. Copyright
+
+EasyToBill is protected by applicable copyright laws and international intellectual property principles.
+The Licensee shall not copy the Software, reproduce documentation, publish assets, commercially exploit the Software, remove copyright notices, or claim ownership.
+© 2026 NYLEX. All Rights Reserved.
+
+---
+
+19. Confidential Information
+
+Certain aspects of EasyToBill, including technical documentation, internal processes, development methods, security implementations, and non-public features, constitute confidential information.
+The Licensee agrees not to disclose such information to any third party without prior written consent from NYLEX.
+
+---
+
+20. Security Measures
+
+EasyToBill includes technical measures designed to protect the Software and user accounts.
+The Licensee shall not attempt to disable security features, bypass authentication, interfere with application integrity, exploit vulnerabilities, or gain unauthorized access.
+Any security incident should be reported promptly to NYLEX.
+
+---
+
+21. Monitoring and Compliance
+
+To protect the Software and enforce this Agreement, NYLEX may perform reasonable checks related to license validity, application version, authentication status, security events, and suspected misuse.
+Such checks are conducted in accordance with applicable privacy laws and the EasyToBill Privacy Policy.
+
+---
+
+22. Suspension of License
+
+NYLEX may temporarily suspend a license if there is reasonable evidence of fraud, license sharing, unauthorized commercial use, security threats, or violation of this Agreement.
+Where practical, NYLEX may notify the Licensee of the suspension and provide an opportunity to resolve the issue.
+
+---
+
+23. Revocation of License
+
+NYLEX may permanently revoke the license in cases of serious or repeated violations, including software piracy, APK redistribution, reverse engineering, intellectual property infringement, fraudulent use, or deliberate security attacks.
+Upon revocation, the Licensee must immediately stop using the Software and remove all installed copies.
+
+---
+
+24. Data Ownership
+
+The Licensee retains ownership of business data created within EasyToBill, including invoices, inventory records, customer information, reports, and transactions.
+NYLEX does not claim ownership of user-generated business data. The Licensee remains solely responsible for the legality, accuracy, and completeness of such data.
+
+---
+
+25. No Assignment
+
+The rights granted under this EULA are personal to the Licensee and may not be assigned, transferred, sublicensed, or otherwise conveyed to another person or business without prior written approval from NYLEX.
+Any unauthorized transfer is void.
+
+---
+
+26. Survival
+
+The following provisions shall survive the termination or expiration of this Agreement: Ownership, Intellectual Property Rights, Confidentiality, Copyright, Limitation of Liability, Indemnification, Governing Law, Dispute Resolution, and any other provisions that by their nature survive.
+
+---
+
+27. Warranty Disclaimer
+
+EasyToBill is provided on an "AS IS" and "AS AVAILABLE" basis to the maximum extent permitted by applicable law.
+While NYLEX makes reasonable efforts to provide a reliable and secure software experience, NYLEX does not guarantee that the Software will operate without interruption, be error-free or free from defects, meet every individual business requirement, or be compatible with every Android device or third-party hardware.
+Except where prohibited by law, all express, implied, and statutory warranties, including implied warranties of merchantability, fitness for a particular purpose, and non-infringement, are disclaimed.
+
+---
+
+28. Limitation of Liability
+
+To the fullest extent permitted by applicable law, NYLEX, its partners, employees, contractors, licensors, affiliates, and representatives shall not be liable for any direct, indirect, incidental, consequential, special, exemplary, or punitive damages arising from or related to loss of profits, business, revenue, customers, goodwill, data loss or corruption, device malfunction, printer hardware failure, internet outages, Google service interruptions, user configuration errors, tax or accounting errors, or unauthorized access.
+Where liability cannot be excluded, NYLEX's total liability shall not exceed the amount paid by the Licensee for the software license.
+
+---
+
+29. Indemnification
+
+The Licensee agrees to defend, indemnify, and hold harmless NYLEX, its partners, employees, contractors, affiliates, successors, and representatives from any claims, actions, damages, liabilities, losses, penalties, expenses, and reasonable legal fees arising out of breach of this EULA, violation of laws, misuse of the Software, intellectual property infringement, or fraudulent activities.
+
+---
+
+30. Termination
+
+This EULA remains effective until terminated.
+The Licensee may terminate this Agreement at any time by uninstalling EasyToBill, ceasing all use, and deleting all installed copies.
+NYLEX may terminate this Agreement immediately if the Licensee violates this EULA, engages in software piracy, distributes unauthorized APK files, attempts reverse engineering, or commits fraud.
+Upon termination, all rights granted under this EULA immediately cease.
+
+---
+
+31. Effect of Termination
+
+Upon termination, the Licensee shall stop using EasyToBill immediately, delete all installed copies of the Software, cease unauthorized distribution, and comply with any surviving obligations under this EULA.
+
+---
+
+32. Force Majeure
+
+NYLEX shall not be responsible for delays or failures in performance resulting from events beyond its reasonable control, including natural disasters, war, civil unrest, government actions, internet disruptions, cyber attacks, power failures, cloud failures, or public health emergencies.
+
+---
+
+33. Governing Law
+
+This EULA shall be governed by and interpreted in accordance with the laws of India, without regard to conflict of law principles.
+
+---
+
+34. Jurisdiction
+
+Subject to applicable law, any dispute arising out of or relating to this EULA shall fall under the exclusive jurisdiction of the competent courts located in Kozhikode, Kerala, India.
+
+---
+
+35. Dispute Resolution
+
+Before initiating legal proceedings, the parties agree to make reasonable efforts to resolve disputes through good-faith discussions by contacting NYLEX using the official support channels.
+
+---
+
+36. Severability
+
+If any provision of this EULA is found to be invalid, illegal, or unenforceable by a court of competent jurisdiction, the remaining provisions shall continue in full force and effect.
+
+---
+
+37. Entire Agreement
+
+This EULA, together with the EasyToBill Terms & Conditions and Privacy Policy, constitutes the complete agreement between NYLEX and the Licensee regarding the use of EasyToBill.
+
+---
+
+38. Waiver
+
+Failure by NYLEX to enforce any provision of this EULA shall not constitute a waiver of that provision or any other rights under this Agreement. Any waiver must be made in writing by an authorized representative of NYLEX.
+
+---
+
+39. Contact Information
+
+NYLEX
+Support Email: buildwithnylex@gmail.com
+Support Phone: +91 8921442748
+Website: https://nylex.online
+Location: Kozhikode, Kerala, India
+
+---
+
+40. Acceptance of Agreement
+
+By installing, accessing, activating, purchasing, or using EasyToBill, the Licensee acknowledges that they have read this EULA, understand its contents, agree to be legally bound by its terms, and accept responsibility for compliance.
+
+---
+
+41. Copyright Notice
+
+© 2026 NYLEX. All Rights Reserved.
+EasyToBill, NYLEX, and all associated software, source code, user interface designs, documentation, graphics, logos, icons, trademarks, and other intellectual property are owned by NYLEX and protected under applicable copyright, trademark, and intellectual property laws.
+No part of the Software may be copied, reproduced, modified, reverse engineered, distributed, or commercially exploited without the prior written consent of NYLEX.

@@ -18,6 +18,8 @@ import '../data/db_helper.dart';
 import '../utils/crypto_utils.dart';
 import '../services/analytics_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../providers/consent_provider.dart';
+import 'legal_menu_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -549,6 +551,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(height: 12),
 
+                      // Sub-card 2.5: Account Deletion (Danger Zone style)
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF7F1D1D).withOpacity(0.15) : const Color(0xFFFEF2F2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF991B1B).withOpacity(0.3) : const Color(0xFFFEE2E2),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Delete My Account",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: isDark ? Colors.red.shade300 : const Color(0xFF991B1B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  const Text(
+                                    "Permanently delete your account and wipe all local databases",
+                                    style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            TextButton(
+                              onPressed: () => _handleAccountDeletion(context, businessProvider, authProvider),
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color(0xFFEF4444),
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              ),
+                              child: const Text("Delete", style: TextStyle(fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
                       // Sub-card 3: Test Crashlytics Integration
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -703,6 +752,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                     ],
                   ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // 6. Legal & Compliance
+            _buildSectionLabel("Legal & Compliance"),
+            _buildGroupCard(
+              isDark: isDark,
+              children: [
+                _buildSettingsTile(
+                  isDark: isDark,
+                  icon: Icons.gavel_rounded,
+                  iconColor: const Color(0xFF3B82F6),
+                  title: "Legal Agreements",
+                  subtitle: "Terms of Service, Privacy Policy, EULA, and more",
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const LegalMenuScreen(),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -1556,6 +1628,137 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }
             },
             child: const Text("Log Out"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _handleAccountDeletion(BuildContext context, BusinessProvider businessProvider, AuthProvider authProvider) {
+    final TextEditingController passwordController = TextEditingController();
+    final shop = businessProvider.business;
+    
+    if (shop == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No active shop/account profile found.")),
+      );
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text("Verify Security Password"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text("To proceed with account deletion, please enter your EasyToBill Security Password:"),
+            const SizedBox(height: 12),
+            TextField(
+              controller: passwordController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: "Security Password",
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final password = passwordController.text;
+              if (password.isEmpty) return;
+
+              final hash = CryptoUtils.hashPassword(password);
+              if (hash != shop.recoveryPasswordHash) {
+                ScaffoldMessenger.of(dialogContext).showSnackBar(
+                  const SnackBar(
+                    content: Text("Incorrect Security Password!"),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              Navigator.pop(dialogContext); // Close verification dialog
+              _showFinalDeletionConfirmation(context, businessProvider, authProvider);
+            },
+            child: const Text("Verify"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFinalDeletionConfirmation(BuildContext context, BusinessProvider businessProvider, AuthProvider authProvider) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Row(
+          children: const [
+            Icon(Icons.warning_amber_rounded, color: Colors.red),
+            SizedBox(width: 10),
+            Flexible(child: Text("Permanently Delete Account?")),
+          ],
+        ),
+        content: const Text(
+          "WARNING: Account deletion is permanent and cannot be undone!\n\n"
+          "This will:\n"
+          "1. Permanently delete all local business data, products, inventory, transactions, and settings from this device.\n"
+          "2. Sign you out of your Google Account connection.\n"
+          "3. Reset the application to its first-launch state.\n\n"
+          "Your Google Drive backup files will not be deleted, but you will lose access to them from this device. Please refer to the Account Deletion Policy for details.",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            onPressed: () async {
+              Navigator.pop(dialogContext); // Close dialog
+
+              // Clear local database
+              await DbHelper().clearDatabase();
+              
+              // Clear consent status so next login/onboarding re-triggers consent
+              final consentProvider = Provider.of<ConsentProvider>(context, listen: false);
+              await consentProvider.clearConsent();
+
+              // Sign out of auth provider
+              await authProvider.signOut();
+
+              // Reload all providers to clean state
+              final productProvider = Provider.of<ProductProvider>(context, listen: false);
+              final invoiceProvider = Provider.of<InvoiceProvider>(context, listen: false);
+              
+              await businessProvider.loadBusiness();
+              await productProvider.loadProducts();
+              await productProvider.loadCategories();
+              await invoiceProvider.loadInvoices();
+
+              if (context.mounted) {
+                // Navigate back to the home page (which will redirect to user agreement/onboarding)
+                Navigator.of(context).popUntil((route) => route.isFirst);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Account successfully deleted and local data cleared."),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+            child: const Text("Delete Account"),
           ),
         ],
       ),

@@ -1,0 +1,461 @@
+EASYTOBILL TERMS & CONDITIONS
+
+Effective Date: July 18, 2026
+Last Updated: July 18, 2026
+Version: 1.0
+
+---
+
+1. Introduction
+
+Welcome to EasyToBill ("EasyToBill", "Software", "Application", "App", "Service"), developed and operated by NYLEX, an independent software partnership located in Kozhikode, Kerala, India.
+
+These Terms & Conditions ("Terms") constitute a legally binding agreement between NYLEX and every individual or business that accesses, installs, registers, purchases, or uses EasyToBill.
+
+By installing, accessing, registering, purchasing, or using EasyToBill, you acknowledge that you have read, understood, and agree to be legally bound by these Terms.
+
+If you do not agree with any provision of these Terms, you must immediately discontinue use of the Software.
+
+---
+
+2. Acceptance of Terms
+
+By using EasyToBill, you agree that:
+- You have read these Terms in full.
+- You understand your rights and obligations.
+- You agree to comply with all applicable laws.
+- You are legally permitted to use this Software.
+- You accept future updates to these Terms as published by NYLEX.
+
+Your continued use of EasyToBill after any modification constitutes acceptance of the updated Terms.
+
+---
+
+3. Definitions
+
+For the purposes of these Terms:
+"Application" means EasyToBill mobile software.
+"Company" means NYLEX.
+"User" means any individual, retailer, business owner, organization, employee, representative, or authorized operator using EasyToBill.
+"License" means the limited right granted by NYLEX to use the Software.
+"Business Data" includes: Products, Inventory, Categories, Bills, Customers, Reports, Expenses, Transactions, Business Settings, Invoice Records.
+"Device" means any Android smartphone or tablet capable of running EasyToBill.
+"Google Account" means the account used for authentication.
+"Printer" means any supported Bluetooth or Wi-Fi receipt printer.
+
+---
+
+4. Eligibility
+
+To use EasyToBill:
+- You must be at least 13 years of age.
+- You must have legal authority to operate the business or use the Software on behalf of the business.
+- You must comply with all applicable laws of India.
+
+If you use EasyToBill on behalf of an organization, you confirm that you have authority to bind that organization to these Terms.
+
+---
+
+5. User Account
+
+EasyToBill requires a valid Google account for authentication.
+Users are responsible for:
+- Maintaining account security.
+- Keeping account information accurate.
+- Protecting login credentials.
+- Preventing unauthorized access.
+
+Users remain responsible for all activities performed through their account.
+
+---
+
+6. Google Sign-In
+
+EasyToBill currently supports authentication through Google Sign-In.
+By signing in, you authorize EasyToBill to access the minimum information required for authentication, including: Name, Email Address, Google Account Identifier, Profile Picture (if available).
+EasyToBill never receives or stores your Google Account password.
+Authentication is securely managed through Firebase Authentication.
+
+---
+
+7. Security Password
+
+EasyToBill allows users to create an application-specific security password.
+This password is required for sensitive operations, including but not limited to: Backup Restoration, Account Deletion, Security Verification.
+Users are solely responsible for maintaining the confidentiality of this password.
+NYLEX cannot recover forgotten security passwords.
+Users acknowledge that loss of this password may prevent access to certain security functions.
+
+---
+
+8. License Grant
+
+Subject to these Terms, NYLEX grants the user a limited, non-exclusive, non-transferable, non-sublicensable, revocable license to install and use EasyToBill solely for lawful business purposes.
+This license does not transfer ownership of the Software.
+All intellectual property rights remain exclusively owned by NYLEX.
+
+---
+
+9. One License = One Business
+
+Unless otherwise expressly authorized in writing by NYLEX:
+- Each purchased license is intended for use by one business/shop.
+- A single license must not be used simultaneously to operate multiple independent businesses.
+- Separate businesses may require separate licenses.
+
+NYLEX reserves the right to verify license compliance.
+
+---
+
+10. Multiple Device Usage
+
+EasyToBill permits users to access their account on multiple compatible devices using the same authorized Google account, provided that:
+- All devices belong to the same licensed business.
+- The account is not shared with unauthorized persons.
+- Such use complies with these Terms.
+
+NYLEX may investigate unusual login activity or suspected misuse.
+
+---
+
+11. License Restrictions
+
+The license granted under these Terms does not permit users to:
+- Sell, rent, or lease the Software.
+- Transfer the license without written approval.
+- Distribute copies of the Software.
+- Provide commercial hosting services using EasyToBill.
+- Use EasyToBill for unlawful activities.
+
+Any unauthorized use immediately terminates the granted license.
+
+---
+
+12. Account Security
+
+Users agree to:
+- Immediately report suspected unauthorized access.
+- Protect their Google account.
+- Protect their EasyToBill security password.
+- Keep their device reasonably secure.
+- Use appropriate device lock mechanisms.
+
+Failure to maintain account security may result in unauthorized access for which the user remains responsible.
+
+---
+
+13. User Responsibilities
+
+Users agree that they are solely responsible for:
+- The accuracy of invoices.
+- Product pricing.
+- GST configuration.
+- Business information.
+- Inventory records.
+- Customer information entered into the Software.
+- Financial records.
+- Compliance with tax and regulatory obligations.
+
+EasyToBill is a business management tool. Final responsibility for business operations always remains with the user.
+
+---
+
+14. Business Records
+
+Users acknowledge that:
+- They own their business data.
+- They are responsible for verifying all records before issuing invoices.
+- They should maintain regular backups and periodically verify restored backup data.
+
+NYLEX does not guarantee that user-entered information is accurate.
+
+---
+
+15. Future Features
+
+EasyToBill may introduce new features, services, integrations, or subscription-based functionality in future versions.
+Unless expressly stated otherwise:
+- Existing Version 1 license holders may continue using the features included in their licensed version.
+- Newly introduced premium features may require a separate purchase or subscription.
+- NYLEX reserves the right to determine pricing, licensing, and availability of future features.
+
+---
+
+16. Reservation of Rights
+
+Except for the limited license expressly granted under these Terms:
+- All rights are reserved by NYLEX.
+- No ownership rights are transferred.
+- No implied licenses are granted.
+
+Users obtain only the right to use the Software in accordance with these Terms.
+
+---
+
+17. Software Updates
+
+EasyToBill may periodically release updates, bug fixes, security patches, feature enhancements, compatibility improvements, and performance optimizations.
+Users are encouraged to install updates only through official distribution channels, including the Google Play Store.
+Failure to install recommended updates may result in reduced functionality, compatibility issues, or security vulnerabilities.
+NYLEX reserves the right to discontinue support for outdated application versions where reasonably necessary.
+
+---
+
+18. Version 1 Lifetime License
+
+EasyToBill Version 1 is offered as a one-time purchase.
+Unless otherwise specified in writing by NYLEX:
+- Version 1 customers receive a lifetime license for Version 1 features.
+- Major future premium features may require a separate purchase or subscription.
+- Bug fixes, security improvements, and compatibility updates may continue to be provided at NYLEX's discretion.
+
+A Version 1 lifetime license does not automatically include all future commercial products or premium services.
+
+---
+
+19. Future Subscription Services
+
+NYLEX reserves the right to introduce subscription-based services in future versions of EasyToBill.
+Examples may include: Cloud synchronization, Advanced analytics, Multi-branch management, Online reporting, Premium business features, AI-powered functionality, Additional cloud storage.
+Existing Version 1 customers may continue using the features included in their purchased version, subject to these Terms.
+
+---
+
+20. Prohibited Activities
+
+Users shall not:
+- Use EasyToBill for illegal activities or to violate applicable laws.
+- Attempt unauthorized access to company systems or upload malicious software.
+- Circumvent application security or use automated tools to exploit the Software.
+- Interfere with application functionality or abuse customer support services.
+- Misrepresent ownership of EasyToBill or use the app in a manner that harms NYLEX or other users.
+
+Violation of these Terms may result in suspension or termination of the license.
+
+---
+
+21. APK Sharing Prohibited
+
+The EasyToBill application is licensed, not sold.
+Users shall not:
+- Share APK files or upload the application to file-sharing platforms.
+- Distribute modified versions or provide unauthorized downloads.
+- Copy installation packages or make the Software publicly available without authorization.
+
+Any unauthorized distribution constitutes copyright infringement and may result in legal action.
+
+---
+
+22. Software Piracy
+
+Users shall not pirate the Software, install unauthorized copies, remove licensing protections, use cracked versions, or use illegally modified versions.
+NYLEX reserves all legal rights available under applicable intellectual property laws against software piracy.
+
+---
+
+23. Reverse Engineering
+
+Except where expressly permitted by applicable law, users shall not reverse engineer, decompile, disassemble, decode, modify, adapt, translate, derive source code, attempt to bypass application security, or create derivative works based upon EasyToBill.
+These restrictions protect the intellectual property rights of NYLEX.
+
+---
+
+24. Unauthorized Resale
+
+Unless expressly authorized in writing by NYLEX, users may not resell EasyToBill, redistribute licenses, act as an unauthorized dealer, offer installation services under the EasyToBill brand, charge customers for unauthorized copies, or market EasyToBill as their own product.
+Authorized reseller programs, if introduced, shall operate under separate agreements.
+
+---
+
+25. Intellectual Property Rights
+
+EasyToBill, including but not limited to Software, source code, application architecture, database structure, User Interface (UI), User Experience (UX), graphics, logos, icons, business logic, documentation, branding, trademarks, and design elements, are the exclusive intellectual property of NYLEX unless otherwise stated.
+No ownership rights are transferred to users.
+
+---
+
+26. Copyright Protection
+
+EasyToBill is protected under applicable copyright laws.
+Unauthorized copying, reproduction, modification, redistribution, commercial exploitation, or publication of any part of the Software is strictly prohibited without prior written permission from NYLEX.
+© 2026 NYLEX. All Rights Reserved.
+
+---
+
+27. Printer Usage
+
+EasyToBill supports compatible Bluetooth and Wi-Fi receipt printers.
+Users acknowledge that:
+- Printer compatibility depends on supported hardware.
+- Printer manufacturers are responsible for hardware defects and warranty decisions.
+- NYLEX is not responsible for physical hardware failures, manufacturing defects, shipping damage, or printer warranty decisions.
+
+Users should follow the manufacturer's instructions regarding installation, maintenance, and warranty claims.
+
+---
+
+28. Google Drive Backup
+
+EasyToBill allows users to back up eligible business data to their own Google Drive account.
+Users acknowledge that:
+- Backup files remain under the control of the user.
+- Users are responsible for maintaining access to their Google Account and verifying backup integrity.
+- Backup availability depends upon Google Drive services.
+
+NYLEX cannot recover backup files deleted from the user's Google Drive account.
+
+---
+
+29. Data Accuracy
+
+Users remain solely responsible for ensuring the accuracy of product prices, inventory quantities, customer information, tax configuration, business details, sales records, reports, and invoices.
+EasyToBill performs calculations based upon information entered by the user. Incorrect user input may result in incorrect business records.
+
+---
+
+30. GST & Tax Responsibility
+
+EasyToBill provides tools to assist users in calculating taxes based on user-configured settings.
+Users remain solely responsible for:
+- Configuring GST correctly and entering applicable tax rates.
+- Maintaining HSN/SAC codes where required.
+- Compliance with applicable tax laws, filing tax returns, and maintaining accounting records.
+
+EasyToBill does not provide tax, accounting, or legal advice. NYLEX is not responsible for tax penalties, incorrect filings, or financial losses resulting from incorrect user configuration or misuse of the Software.
+
+---
+
+31. Payments
+
+EasyToBill Version 1 currently does not process payments through the application.
+Customers are responsible for collecting payments from their own customers using their preferred payment methods, including but not limited to cash, UPI, bank transfer, or third-party payment providers.
+NYLEX does not process, receive, hold, or manage payments made between a business and its customers through EasyToBill.
+
+---
+
+32. Official Distribution
+
+Users should obtain EasyToBill only through the Google Play Store, NYLEX, or authorized distribution channels approved by NYLEX.
+NYLEX cannot guarantee the security, integrity, or authenticity of copies obtained from unofficial sources.
+
+---
+
+33. Fraud Prevention
+
+NYLEX reserves the right to investigate suspected license abuse, account sharing, software piracy, unauthorized commercial use, fraudulent activities, and security violations.
+Where reasonably necessary, NYLEX may:
+- Request additional verification or temporarily suspend accounts.
+- Restrict access or permanently terminate licenses for serious or repeated violations.
+- Pursue civil or criminal remedies where permitted by law.
+
+---
+
+34. Business Continuity
+
+Users are encouraged to create regular backups, keep application updates current, maintain alternative records where appropriate, and verify reports before relying upon them for business decisions.
+EasyToBill is intended to assist business operations but should not be the sole safeguard against data loss or operational disruptions.
+
+---
+
+35. Refund & Cancellation Policy
+
+(Please refer to the separate Refund Policy document for detailed terms and conditions regarding cancellations, exclusions, and refunds.)
+
+---
+
+36. Printer Warranty
+
+EasyToBill may be sold together with supported receipt printers.
+Unless expressly stated otherwise, printer warranty is provided by the respective manufacturer and its duration is determined by their policy. NYLEX is not the manufacturer of the printer, and warranty claims remain subject to the manufacturer's terms.
+
+---
+
+37. Technical Support
+
+NYLEX provides technical support for EasyToBill including installation assistance, login assistance, backup/restore guidance, printer connection assistance, bug reporting, software troubleshooting, and error diagnosis.
+Support does not include third-party hardware repair, device repair, Google account recovery, internet service issues, business accounting advice, or tax consultation.
+
+---
+
+38. Suspension of Account
+
+NYLEX may temporarily suspend user access where reasonably necessary, including but not limited to suspected fraud, license abuse, unauthorized sharing, security investigations, legal compliance, or repeated violations of these Terms.
+
+---
+
+39. Permanent Termination
+
+NYLEX reserves the right to permanently terminate licenses and accounts in cases involving software piracy, APK redistribution, reverse engineering, copyright infringement, repeated fraudulent activity, illegal commercial exploitation, or serious violations of these Terms.
+
+---
+
+40. Limitation of Liability
+
+To the fullest extent permitted by applicable law, NYLEX, its partners, employees, contractors, licensors, affiliates, and representatives shall not be liable for any loss of profits, revenue, customers, business interruption, loss of goodwill, loss of business opportunities, data loss or corruption, device or printer failures, internet outages, Google service interruptions, user errors, incorrect invoices, or consequential, indirect, incidental, special, exemplary, or punitive damages.
+EasyToBill is a software tool intended to assist business operations. Final responsibility for business decisions, invoices, accounting records, tax compliance, and financial transactions remains solely with the user.
+
+---
+
+41. Indemnification
+
+Users agree to defend, indemnify, and hold harmless NYLEX, its partners, employees, contractors, and affiliates from claims, damages, liabilities, losses, expenses, and reasonable legal costs arising from misuse of EasyToBill, violation of these Terms, violation of applicable laws, infringement of third-party rights, or fraudulent activities.
+
+---
+
+42. Third-Party Services
+
+EasyToBill integrates certain third-party services, including but not limited to Google Sign-In, Firebase Authentication, Firebase Analytics, Firebase Crashlytics, Google Drive, and Google Play Services. These services are governed by their own terms and privacy policies. NYLEX is not responsible for outages, policy changes, pricing changes, security incidents, or operational failures of third-party providers.
+
+---
+
+43. Force Majeure
+
+NYLEX shall not be liable for any delay or failure to perform its obligations caused by events beyond its reasonable control, including natural disasters, government actions, war, civil unrest, internet outages, cyber attacks, power failures, cloud service interruptions, labor disputes, or pandemic events.
+
+---
+
+44. Governing Law
+
+These Terms shall be governed by and interpreted in accordance with the laws of India. Subject to applicable law, any dispute arising from or relating to these Terms shall be subject to the exclusive jurisdiction of the competent courts located in Kozhikode, Kerala, India.
+
+---
+
+45. Dispute Resolution
+
+Before initiating formal legal proceedings, users agree to make reasonable efforts to resolve disputes by contacting NYLEX through the official support channels. Where disputes cannot be resolved amicably, either party may pursue available legal remedies before the competent courts identified in these Terms.
+
+---
+
+46. Changes to Terms
+
+NYLEX reserves the right to update, revise, modify, or replace these Terms at any time. Updated versions may be published through the EasyToBill application, official website, Google Play Store listing, or other official communication channels. Continued use of EasyToBill after revised Terms become effective constitutes acceptance of the updated Terms.
+
+---
+
+47. Severability
+
+If any provision of these Terms is determined by a court of competent jurisdiction to be unlawful, invalid, or unenforceable, the remaining provisions shall continue in full force and effect.
+
+---
+
+48. Entire Agreement
+
+These Terms & Conditions, together with the Privacy Policy and End User License Agreement (EULA), constitute the entire agreement between NYLEX and the user concerning EasyToBill. They supersede all prior understandings, communications, representations, and agreements relating to the Software.
+
+---
+
+49. Contact Information
+
+NYLEX
+Email: buildwithnylex@gmail.com
+Phone: +91 8921442748
+Website: https://nylex.online
+Location: Kozhikode, Kerala, India
+
+---
+
+50. Copyright Notice
+
+© 2026 NYLEX. All Rights Reserved.
+EasyToBill, its name, logo, software, source code, user interface, application architecture, documentation, trademarks, graphics, designs, icons, and all associated intellectual property are owned by NYLEX and protected under applicable copyright, trademark, and intellectual property laws.
+No part of EasyToBill may be copied, reproduced, modified, reverse engineered, distributed, sublicensed, sold, leased, publicly displayed, or commercially exploited without prior written permission from NYLEX, except where expressly permitted by applicable law.

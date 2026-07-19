@@ -1,0 +1,70 @@
+EASYTOBILL REFUND & CANCELLATION POLICY
+
+Effective Date: July 18, 2026
+Last Updated: July 18, 2026
+Version: 1.0
+
+---
+
+1. Introduction
+
+This Refund & Cancellation Policy explains the terms and conditions under which refunds may be requested and processed for the EasyToBill software license, developed and operated by NYLEX.
+
+EasyToBill Version 1 is provided as a one-time licensed software product.
+
+---
+
+2. Initial Refund Period (Within 24 Hours)
+
+Customers may request a refund within 24 hours of software activation, provided that:
+- The request is genuine.
+- No fraudulent activity is involved.
+- The software has not been misused.
+- The customer cooperates with any verification requested by NYLEX.
+
+If approved, the full software amount may be refunded.
+
+---
+
+3. Refund Requests After 24 Hours (Within 7 Days)
+
+Refund requests made after the initial 24-hour period and within 7 calendar days will be reviewed individually.
+If approved:
+- Installation, setup, configuration, onboarding, travel, or service charges may be deducted before processing the refund.
+- The deduction amount will depend on the services already provided.
+
+---
+
+4. No Refund After 7 Days
+
+Except where required by applicable law:
+- Software purchases become non-refundable after 7 calendar days from activation.
+- Continued use of the Software after this period constitutes acceptance of the product.
+
+---
+
+5. Refund Exclusions
+
+Refunds will generally not be granted for:
+- Change of mind or lack of product knowledge.
+- User negligence.
+- Device incompatibility not disclosed before purchase.
+- Internet connectivity issues.
+- Printer issues unrelated to EasyToBill.
+- User-entered data errors.
+- Failure to create backups.
+
+---
+
+6. Contact Information
+
+For refund requests or inquiries, please contact:
+NYLEX
+Email: buildwithnylex@gmail.com
+Phone: +91 8921442748
+Website: https://nylex.online
+Location: Kozhikode, Kerala, India
+
+---
+
+© 2026 NYLEX. All Rights Reserved.

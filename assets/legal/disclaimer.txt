@@ -1,0 +1,135 @@
+EASYTOBILL DISCLAIMER
+
+Effective Date: July 18, 2026
+Last Updated: July 18, 2026
+Version: 1.0
+
+---
+
+1. Introduction
+
+This Disclaimer explains the limitations of liability and the intended use of the EasyToBill software ("EasyToBill"), developed and operated by NYLEX.
+
+By installing, accessing, purchasing, or using EasyToBill, you acknowledge that you have read, understood, and agreed to this Disclaimer.
+
+---
+
+2. Software Purpose
+
+EasyToBill is a business management and billing software designed to assist businesses with generating invoices, managing inventory, tracking sales, recording expenses, creating reports, and performing related business functions.
+EasyToBill is intended solely as a software tool to support business operations.
+
+---
+
+3. No Professional Advice
+
+EasyToBill does not provide:
+- Legal advice
+- Tax advice
+- Accounting advice
+- Financial advice
+- Business consultancy
+- Government compliance certification
+
+Users should consult qualified professionals before making legal, tax, accounting, financial, or regulatory decisions.
+
+---
+
+4. User Responsibility
+
+Users are solely responsible for:
+- Business decisions.
+- Product pricing.
+- Inventory accuracy.
+- Customer information.
+- GST configuration.
+- Tax calculations.
+- Invoice verification.
+- Financial records.
+- Regulatory compliance.
+- Backup management.
+
+All information entered into EasyToBill is the responsibility of the user.
+
+---
+
+5. Accuracy of Information
+
+EasyToBill performs calculations based on the information entered by the user.
+NYLEX does not guarantee that:
+- User-entered information is accurate.
+- Reports are free from user errors.
+- Tax settings are correctly configured.
+- Business records are complete.
+
+Users should always verify invoices, reports, and financial records before relying on them.
+
+---
+
+6. Third-Party Services
+
+EasyToBill relies on third-party services, including but not limited to: Google Sign-In, Firebase Authentication, Firebase Analytics, Firebase Crashlytics, Google Drive, and Google Play Services.
+NYLEX is not responsible for interruptions, outages, security incidents, pricing changes, or policy changes relating to these third-party services.
+
+---
+
+7. Printer Compatibility
+
+EasyToBill supports compatible Bluetooth and Wi-Fi receipt printers.
+Printer compatibility may vary depending on: Manufacturer, Hardware model, Firmware version, Android version, Device compatibility.
+NYLEX does not guarantee compatibility with every printer available in the market. Hardware defects and warranty claims are the responsibility of the printer manufacturer.
+
+---
+
+8. Data Backup
+
+EasyToBill provides backup and restore functionality to assist users in protecting business data.
+However:
+- Users are responsible for creating regular backups.
+- Users should verify successful backups.
+- Users should securely maintain access to their Google Drive account.
+
+NYLEX is not responsible for data loss resulting from user error, deleted backups, device failure, third-party service interruptions, or failure to perform backups.
+
+---
+
+9. Limitation of Liability
+
+To the fullest extent permitted by applicable law, NYLEX shall not be liable for:
+- Loss of profits, revenue, business, or customers.
+- Business interruption.
+- Data loss or device failure.
+- Printer malfunction or internet outages.
+- User mistakes.
+- Third-party service failures.
+- Indirect, incidental, consequential, or special damages arising from the use or inability to use EasyToBill.
+
+Nothing in this Disclaimer excludes liability that cannot legally be excluded under applicable law.
+
+---
+
+10. Software Availability
+
+NYLEX aims to keep EasyToBill available and functional but does not guarantee uninterrupted, error-free, or continuous operation.
+Maintenance, updates, security improvements, or events beyond NYLEX's reasonable control may temporarily affect the availability of the Software.
+
+---
+
+11. Changes to this Disclaimer
+
+NYLEX reserves the right to update or modify this Disclaimer at any time. The latest version will be made available through the EasyToBill application, the official website, or other official communication channels.
+Continued use of EasyToBill after changes become effective constitutes acceptance of the updated Disclaimer.
+
+---
+
+12. Contact Information
+
+NYLEX
+Email: buildwithnylex@gmail.com
+Phone: +91 8921442748
+Website: https://nylex.online
+Location: Kozhikode, Kerala, India
+
+---
+
+© 2026 NYLEX. All Rights Reserved.

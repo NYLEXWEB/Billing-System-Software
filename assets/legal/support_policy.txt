@@ -1,0 +1,146 @@
+EASYTOBILL SUPPORT POLICY
+
+Effective Date: July 18, 2026
+Last Updated: July 18, 2026
+Version: 1.0
+
+---
+
+1. Introduction
+
+This Support Policy explains the technical support services provided by NYLEX for EasyToBill. It outlines the scope of support, customer responsibilities, response expectations, and support limitations.
+
+By using EasyToBill, you agree to this Support Policy.
+
+---
+
+2. Support Coverage
+
+NYLEX provides technical assistance for EasyToBill, including:
+- Software installation assistance
+- Initial application setup
+- Google Sign-In issues
+- Backup and restore guidance
+- Bluetooth printer connection
+- Wi-Fi printer connection
+- Bug reporting
+- Performance troubleshooting
+- Software updates
+- Error diagnosis
+- General usage guidance
+
+---
+
+3. Support Availability
+
+Support is available through the official EasyToBill support channels.
+
+Support Channels:
+- Email: buildwithnylex@gmail.com
+- Phone/WhatsApp: +91 8921442748
+
+Support is provided 24 hours a day, 7 days a week, subject to staff availability, scheduled maintenance, public holidays, and circumstances beyond our reasonable control.
+
+---
+
+4. Response Time
+
+NYLEX aims to respond within the following timeframes:
+- Critical issues: Within 24 hours
+- High-priority issues: Within 1–2 business days
+- General support requests: Within 2–3 business days
+- Feature requests: Reviewed without a guaranteed response time
+
+These are target response times and are not guaranteed service-level commitments.
+
+---
+
+5. Remote Support
+
+Where necessary and with the customer's permission, NYLEX may provide remote assistance to diagnose or resolve software-related issues.
+The customer remains responsible for maintaining backups before remote troubleshooting.
+
+---
+
+6. Customer Responsibilities
+
+To receive support, customers should:
+- Use the latest supported version of EasyToBill.
+- Maintain a stable internet connection when required.
+- Keep their Google account accessible.
+- Create regular backups.
+- Provide accurate information about the issue.
+- Cooperate during troubleshooting.
+
+---
+
+7. Issues Covered
+
+Support includes assistance for:
+- Login problems and activation issues.
+- Backup failures and restore failures.
+- Printer configuration.
+- Billing errors caused by software defects.
+- Application crashes or unexpected software behavior.
+- Security-related concerns or data synchronization issues.
+
+---
+
+8. Issues Not Covered
+
+Support does not include:
+- Hardware repairs or printer hardware replacement.
+- Mobile phone repairs.
+- Internet provider issues.
+- Google account recovery.
+- Operating system problems.
+- Third-party application issues.
+- Tax, accounting, or legal advice.
+- Business consultancy.
+- Custom software development unless separately agreed.
+
+---
+
+9. Software Updates
+
+NYLEX may release security updates, bug fixes, performance improvements, compatibility updates, and feature enhancements.
+Customers are encouraged to keep EasyToBill updated for the best experience.
+
+---
+
+10. Feature Requests
+
+Customers may submit suggestions for new features.
+Submission of a feature request does not guarantee that the requested feature will be developed or released. NYLEX reserves sole discretion regarding future product development.
+
+---
+
+11. Support Suspension
+
+Support may be refused or suspended if a customer uses pirated software, shares unauthorized APK files, violates the Terms & Conditions or EULA, abuses support staff, provides false information, or uses EasyToBill for unlawful purposes.
+
+---
+
+12. Limitation of Support
+
+While NYLEX will make reasonable efforts to resolve software issues, we cannot guarantee that every issue can be resolved immediately or that every requested feature will be implemented. Support is provided on a reasonable-efforts basis.
+
+---
+
+13. Changes to this Policy
+
+NYLEX may update this Support Policy from time to time. The latest version will be made available through the EasyToBill application, the official website, or other official communication channels.
+
+---
+
+14. Contact Information
+
+NYLEX
+Email: buildwithnylex@gmail.com
+Phone: +91 8921442748
+Website: https://nylex.online
+Location: Kozhikode, Kerala, India
+
+---
+
+© 2026 NYLEX. All Rights Reserved.

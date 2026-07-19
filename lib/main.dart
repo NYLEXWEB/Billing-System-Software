@@ -11,8 +11,10 @@ import 'providers/cart_provider.dart';
 import 'providers/invoice_provider.dart';
 import 'providers/printer_provider.dart';
 import 'providers/backup_provider.dart';
+import 'providers/consent_provider.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/navigation_shell.dart';
+import 'screens/user_agreement_screen.dart';
 import 'data/db_initializer.dart';
 
 void main() async {
@@ -44,6 +46,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => InvoiceProvider()..loadInvoices()),
         ChangeNotifierProvider(create: (_) => PrinterProvider()),
         ChangeNotifierProvider(create: (_) => BackupProvider()),
+        ChangeNotifierProvider(create: (_) => ConsentProvider()..loadConsentStatus()),
       ],
       child: const MyApp(),
     ),
@@ -253,8 +256,9 @@ class MyApp extends StatelessWidget {
 
   Widget _buildHomeRoute(BuildContext context, BusinessProvider provider) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final consentProvider = Provider.of<ConsentProvider>(context);
 
-    if (!provider.isInitialized) {
+    if (!provider.isInitialized || !consentProvider.isInitialized) {
       // Splash/Loading State
       return Scaffold(
         body: Center(
@@ -276,6 +280,10 @@ class MyApp extends StatelessWidget {
           ),
         ),
       );
+    }
+
+    if (!consentProvider.isAccepted) {
+      return const UserAgreementScreen();
     }
 
     if (!authProvider.isAuthenticated) {

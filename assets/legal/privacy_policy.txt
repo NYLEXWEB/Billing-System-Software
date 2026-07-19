@@ -1,0 +1,442 @@
+EASYTOBILL PRIVACY POLICY
+
+Effective Date: July 18, 2026
+Last Updated: July 18, 2026
+Version: 1.0
+
+---
+
+1. Introduction
+
+Welcome to EasyToBill ("EasyToBill", "App", "Software", "we", "our", or "us"), a billing and business management application developed and operated by NYLEX, an independent software partnership based in Kozhikode, Kerala, India.
+
+This Privacy Policy explains how EasyToBill collects, uses, processes, stores, and protects information when you use our application, website, and related services.
+
+EasyToBill is designed with privacy as a core principle. Business data created within the application primarily remains under the control of the user. Billing records, inventory, reports, and other business information are intended to be stored within the user's own Google Drive backup system rather than on NYLEX-owned servers, except where necessary to provide authentication, analytics, crash reporting, security, and essential application functionality.
+
+By downloading, installing, registering, or using EasyToBill, you acknowledge that you have read, understood, and agreed to this Privacy Policy.
+
+If you do not agree with this Privacy Policy, you must discontinue using the application.
+
+---
+
+2. Definitions
+
+For the purposes of this Privacy Policy:
+"EasyToBill" means the EasyToBill mobile application and all related services.
+"NYLEX" means the software partnership operating EasyToBill.
+"User" means any individual, business owner, organization, or entity using EasyToBill.
+"Account" means the authenticated user profile created through Google Sign-In.
+"Google Account" means the Google account used for authentication.
+"Business Data" includes products, categories, invoices, inventory, sales reports, expenses, transactions, customer information, business settings, and similar records created by the user.
+"Google Drive Backup" means the encrypted backup files stored within the user's own Google Drive account.
+"Personal Information" means information capable of identifying an individual, including but not limited to name, email address, profile information, phone number (if provided), and business information voluntarily submitted by the user.
+"Device Information" means technical information regarding the user's device, operating system, application version, crash reports, diagnostics, and similar technical identifiers.
+"Third-Party Services" means external services integrated into EasyToBill, including but not limited to Google Sign-In, Firebase Authentication, Firebase Analytics, Firebase Crashlytics, and Google Drive APIs.
+
+---
+
+3. Eligibility
+
+EasyToBill is intended for business owners, entrepreneurs, retailers, and authorized business representatives.
+Users must be at least 13 years of age to use the application.
+If applicable law requires a higher minimum age, users must satisfy that legal requirement.
+By using EasyToBill, you represent and warrant that you satisfy these eligibility requirements.
+
+---
+
+4. Information We Collect
+
+Depending on how you use EasyToBill, we may collect the following categories of information.
+
+4.1 Account Information
+When you sign in using Google Sign-In, we may receive:
+- Full Name
+- Email Address
+- Google Account Identifier (UID)
+- Profile Picture (if available)
+- Authentication Tokens necessary for secure login
+
+Authentication is provided through Firebase Authentication.
+EasyToBill does not collect or store your Google account password.
+
+---
+
+4.2 Business Information
+You may voluntarily provide:
+- Shop Name
+- Shop Address (Optional)
+- GST Number (Optional)
+- UPI ID (Optional)
+- Business Preferences
+- Invoice Settings
+- Receipt Customization
+- Logo (Optional)
+
+This information is used solely for providing billing functionality.
+
+---
+
+4.3 Billing Data
+EasyToBill allows users to create and manage:
+- Products
+- Categories
+- Inventory
+- Bills
+- Sales Records
+- Customers
+- Expenses
+- Transactions
+- Reports
+- Invoice History
+
+Subject to the application's design, this information is intended to remain under the user's control and may be backed up to the user's own Google Drive account.
+NYLEX does not intentionally maintain a central database containing users' complete business records for routine operation of the application.
+
+---
+
+4.4 Security Password
+EasyToBill allows users to create an application-specific security password for sensitive actions such as:
+- Backup Restoration
+- Account Deletion
+- Certain security verification processes
+
+This password is separate from the user's Google Account password.
+Users are solely responsible for maintaining the confidentiality of this password.
+Loss of this password may restrict access to certain security features.
+
+---
+
+5. Data Storage
+
+EasyToBill is designed with a user-controlled data storage model.
+Business information created by users, including but not limited to products, categories, inventory records, invoices, transactions, reports, expenses, and business settings, is primarily stored under the user's control and may be backed up to the user's own Google Drive account.
+NYLEX does not intentionally maintain a centralized database containing users' complete business records for routine operation of the application.
+Certain technical information necessary for authentication, analytics, diagnostics, and application security may be processed through Firebase and other authorized third-party services.
+
+---
+
+6. Google Drive Backup
+
+EasyToBill provides secure backup functionality through the user's own Google Drive account.
+
+Automatic Backup: The application may automatically create scheduled backups of eligible business data to the authenticated user's Google Drive account.
+Manual Backup: Users may manually create backups at any time using the "Backup Now" feature.
+Restore: Users may restore previously backed-up information after authentication and security verification using their application security password.
+User Responsibility: Users remain solely responsible for:
+- Maintaining access to their Google Account.
+- Maintaining access to Google Drive.
+- Protecting their Google Account credentials.
+- Protecting their EasyToBill security password.
+- Ensuring sufficient Google Drive storage space.
+
+If a user deletes backup files, removes Google Drive access, deletes their Google Account, or otherwise causes backup data to become unavailable, NYLEX cannot recover such data and shall not be responsible for any resulting loss.
+
+---
+
+7. Data Security
+
+EasyToBill uses commercially reasonable administrative, technical, and organizational safeguards designed to help protect user information.
+These measures may include:
+- Encrypted communications where applicable.
+- Secure authentication through Firebase Authentication.
+- Access verification for sensitive operations.
+- Security password verification for backup restoration and account deletion.
+- Industry-standard security practices where reasonably applicable.
+
+Despite these safeguards, no electronic storage system, internet transmission, or software application can be guaranteed to be completely secure.
+Accordingly, NYLEX cannot guarantee absolute security of user information.
+
+---
+
+8. Firebase Authentication
+
+EasyToBill uses Firebase Authentication to securely authenticate users through Google Sign-In.
+Firebase Authentication may process:
+- Google Account Identifier (UID)
+- Email Address
+- Authentication Tokens
+- Login Status
+- Authentication Events
+
+Authentication services are provided by Google in accordance with Google's applicable policies.
+EasyToBill never receives or stores the user's Google Account password.
+
+---
+
+9. Firebase Analytics
+
+EasyToBill uses Firebase Analytics to better understand application usage and improve product quality.
+Analytics information may include:
+- Device type
+- Device model
+- Operating System version
+- Application version
+- Feature usage
+- Session duration
+- Performance metrics
+- Anonymous usage statistics
+
+Analytics information is used exclusively for improving application performance, reliability, usability, and future development.
+Analytics data is not used to sell personal information.
+
+---
+
+10. Firebase Crashlytics
+
+EasyToBill uses Firebase Crashlytics to identify, diagnose, and resolve software issues.
+Crash reports may include:
+- Application version
+- Device model
+- Android version
+- Stack traces
+- Error logs
+- Performance diagnostics
+- Technical identifiers necessary for debugging
+
+Crash reports help improve application stability and user experience.
+
+---
+
+11. Application Permissions
+
+EasyToBill requests only the permissions reasonably necessary to provide its intended functionality.
+
+Camera Permission: Used exclusively for Barcode scanning and Product identification. The camera is not used for continuous recording or unrelated purposes.
+Bluetooth Permission: Used for connecting Bluetooth receipt printers, printing invoices, and managing printer communication.
+Wi-Fi Permission: Used for connecting supported Wi-Fi printers, network printer communication, and backup synchronization where applicable.
+Storage Permission: Used only where required for backup creation, backup restoration, temporary document handling, receipt generation, and exporting reports.
+Notification Permission: Used for backup reminders, application updates, important system notifications, and service-related alerts. EasyToBill does not use notifications for unsolicited advertising.
+Internet Permission: Internet access is used for Google Sign-In, Firebase Authentication, Firebase Analytics, Firebase Crashlytics, Google Drive Backup, application updates, and security verification. Core billing functionality may continue to operate offline where supported by the application.
+
+---
+
+12. How We Use Information
+
+Information collected through EasyToBill may be used to:
+- Authenticate users.
+- Operate billing features.
+- Maintain application security.
+- Create and restore backups.
+- Improve software quality.
+- Diagnose technical issues.
+- Provide customer support.
+- Develop new features.
+- Prevent fraud and unauthorized use.
+- Comply with applicable legal obligations.
+
+Information is processed only to the extent reasonably necessary to provide the services offered by EasyToBill.
+
+---
+
+13. Third-Party Services
+
+EasyToBill integrates certain trusted third-party services, including but not limited to:
+- Google Sign-In
+- Firebase Authentication
+- Firebase Analytics
+- Firebase Crashlytics
+- Google Drive API
+- Google Play Services
+
+These third-party services operate under their own privacy policies and terms of service.
+NYLEX is not responsible for the privacy practices, security measures, or policies of third-party providers.
+Users are encouraged to review the applicable privacy policies of those providers.
+
+---
+
+14. Data Sharing
+
+EasyToBill respects user privacy.
+NYLEX does not sell, rent, or trade users' personal information or business data.
+Information may only be shared where reasonably necessary:
+- To provide requested services.
+- With authorized third-party infrastructure providers.
+- To comply with applicable law, court orders, or lawful governmental requests.
+- To investigate fraud, security incidents, or abuse.
+- To protect the rights, safety, or property of NYLEX, users, or the public.
+
+Business data stored within the user's own Google Drive account remains under the user's control, subject to Google's applicable policies.
+
+---
+
+15. User Rights
+
+Subject to applicable laws and this Privacy Policy, users may have the right to:
+- Access their account information.
+- Update their profile information.
+- Modify business information.
+- Create manual backups.
+- Restore available backups.
+- Delete their EasyToBill account.
+- Request support regarding account-related issues.
+- Withdraw use of the application at any time by uninstalling it.
+
+Certain information may continue to be retained where required by law or for legitimate security, fraud prevention, or dispute resolution purposes.
+
+---
+
+16. Account Deletion
+
+EasyToBill allows eligible users to permanently delete their account using the in-app Account Deletion feature.
+For security purposes, account deletion requires:
+- Successful Google Sign-In authentication.
+- Verification using the user's EasyToBill security password.
+
+Users are solely responsible for ensuring that all required business data has been backed up before initiating account deletion.
+Once account deletion is completed:
+- User authentication records associated with EasyToBill may be removed where applicable.
+- Access to EasyToBill services may be permanently revoked.
+- Certain technical records may continue to be retained for legal compliance, fraud prevention, security investigations, audit requirements, or as otherwise permitted by applicable law.
+
+Deleted user-generated business data cannot be recovered by NYLEX if no valid backup exists.
+
+---
+
+17. Data Retention
+
+EasyToBill retains information only for as long as reasonably necessary to:
+- Provide the requested services.
+- Maintain application security.
+- Comply with applicable legal obligations.
+- Resolve disputes.
+- Prevent fraud and abuse.
+- Enforce legal agreements.
+
+Business data stored in the user's Google Drive account remains under the user's control and retention preferences.
+
+---
+
+18. Children's Privacy
+
+EasyToBill is intended for business owners and users aged 13 years or older.
+EasyToBill is not directed toward children under 13 years of age.
+If NYLEX becomes aware that information has been collected from a child in violation of applicable law, appropriate steps may be taken to remove such information where reasonably practicable.
+Parents or legal guardians who believe a child has provided personal information may contact NYLEX for assistance.
+
+---
+
+19. Data Ownership
+
+Users retain ownership of all business information they create within EasyToBill, including but not limited to:
+- Products
+- Inventory
+- Bills
+- Customers
+- Expenses
+- Reports
+- Transactions
+- Business settings
+
+EasyToBill does not claim ownership of user-created business data.
+The user remains solely responsible for the accuracy, legality, completeness, and maintenance of such information.
+
+---
+
+20. User Responsibilities
+
+By using EasyToBill, users agree to:
+- Maintain the confidentiality of their Google Account.
+- Protect their EasyToBill security password.
+- Maintain access to their Google Drive account.
+- Create regular backups of important business information.
+- Use the application only for lawful purposes.
+- Keep the application updated through official release channels.
+- Promptly report suspected unauthorized access.
+
+Users are solely responsible for activities performed using their account.
+
+---
+
+21. Security Disclaimer
+
+While EasyToBill implements commercially reasonable security measures, no software application, cloud service, mobile device, or internet transmission can guarantee absolute security.
+Users acknowledge and accept that:
+- No security system is completely immune from cyber threats.
+- Device compromise, malware, unauthorized third-party access, user negligence, or external service failures may impact data security.
+- NYLEX cannot guarantee uninterrupted, error-free, or completely secure operation at all times.
+
+Users should maintain appropriate security practices, including securing their devices and Google Account credentials.
+
+---
+
+22. Limitation of Liability
+
+To the fullest extent permitted by applicable law:
+NYLEX, its partners, developers, affiliates, employees, representatives, licensors, and service providers shall not be liable for any direct, indirect, incidental, consequential, special, exemplary, or punitive damages arising from or related to:
+- Loss of business, profits, revenue, customers, goodwill, or business opportunities.
+- Data corruption or data deletion.
+- Google Drive account issues or Google Account deletion.
+- Device failures or printer failures.
+- Internet connectivity interruptions or third-party service outages.
+- User errors or incorrect business records entered by users.
+- Tax calculation errors resulting from incorrect configuration by the user.
+- Unauthorized account access caused by user negligence.
+
+Users acknowledge that EasyToBill is a software tool intended to assist business operations and that the user remains solely responsible for verifying invoices, tax settings, financial records, statutory compliance, and business decisions.
+Nothing in this Privacy Policy limits liability where such limitation is prohibited by applicable law.
+
+---
+
+23. Third-Party Responsibility
+
+EasyToBill relies upon certain third-party services.
+NYLEX is not responsible for service interruptions, data loss, policy changes, security incidents, pricing changes, or operational failures arising from:
+- Google, Firebase, Google Drive, or Google Play Services.
+- Android Operating System or device manufacturers.
+- Printer manufacturers.
+- Internet Service Providers or mobile network providers.
+
+Such services remain governed by their respective terms and privacy policies.
+
+---
+
+24. Changes to this Privacy Policy
+
+NYLEX reserves the right to modify, update, or replace this Privacy Policy at any time.
+Material changes may be communicated through:
+- Application updates.
+- In-app notifications.
+- Website publication.
+- Other reasonable communication methods.
+
+Continued use of EasyToBill after revised policies become effective constitutes acceptance of the updated Privacy Policy.
+
+---
+
+25. Contact Information
+
+For questions regarding this Privacy Policy, users may contact:
+NYLEX
+Email: buildwithnylex@gmail.com
+Phone: +91 8921442748
+Website: https://nylex.online
+Location: Kozhikode, Kerala, India
+
+---
+
+26. Governing Law
+
+This Privacy Policy shall be governed by and interpreted in accordance with the laws of India.
+Subject to applicable law, disputes arising from or relating to this Privacy Policy shall be subject to the jurisdiction of the competent courts located in Kozhikode, Kerala, India.
+
+---
+
+27. Severability
+
+If any provision of this Privacy Policy is found to be unlawful, invalid, or unenforceable by a court of competent jurisdiction, the remaining provisions shall continue in full force and effect.
+
+---
+
+28. Entire Privacy Policy
+
+This Privacy Policy constitutes the complete understanding regarding privacy matters between NYLEX and users of EasyToBill and supersedes any previous privacy statements relating to the application.
+
+---
+
+29. Copyright Notice
+
+© 2026 NYLEX. All Rights Reserved.
+
+EasyToBill, the EasyToBill name, associated branding, logos, application design, software architecture, graphics, user interface elements, documentation, and related intellectual property are protected under applicable copyright, trademark, and other intellectual property laws.
+Unauthorized copying, reproduction, modification, distribution, reverse engineering, decompilation, resale, or commercial exploitation of any part of EasyToBill is prohibited except as expressly permitted by applicable law or by written authorization from NYLEX.

@@ -1,0 +1,127 @@
+EASYTOBILL ACCOUNT DELETION POLICY
+
+Effective Date: July 18, 2026
+Last Updated: July 18, 2026
+Version: 1.0
+
+---
+
+1. Introduction
+
+This Account Deletion Policy explains how users can permanently delete their EasyToBill account, what data will be deleted, what data may be retained, and the consequences of account deletion.
+
+By using EasyToBill, you acknowledge and agree to this Policy.
+
+---
+
+2. Requesting Account Deletion
+
+Users may request permanent deletion of their EasyToBill account through the application's Account Deletion feature.
+For security purposes, users may be required to:
+- Sign in with their registered Google Account.
+- Enter their EasyToBill security password.
+- Complete any additional identity verification reasonably required by NYLEX.
+
+---
+
+3. What Happens After Deletion
+
+Once an account deletion request is confirmed:
+- The EasyToBill account will be permanently deleted.
+- Access to the application using that account will be removed.
+- User profile information stored by EasyToBill will be deleted, subject to Section 6 of this Policy.
+- Deleted accounts cannot be restored.
+
+---
+
+4. Google Drive Backups
+
+EasyToBill stores backup files in the user's own Google Drive account.
+Deleting an EasyToBill account does not automatically delete backup files stored in Google Drive.
+Users are responsible for deleting any backup files they no longer wish to keep.
+
+---
+
+5. Data That Will Be Deleted
+
+Subject to applicable law, account deletion may permanently remove:
+- Business profile information.
+- Application settings.
+- Product records.
+- Categories.
+- Inventory data.
+- Sales invoices.
+- Transaction history.
+- Expense records.
+- Reports.
+- Printer settings.
+- Other user-generated application data associated with the account.
+
+Once deleted, this information generally cannot be recovered.
+
+---
+
+6. Data That May Be Retained
+
+NYLEX may retain certain limited information where required or permitted by applicable law, including for:
+- Legal compliance.
+- Fraud prevention.
+- Security investigations.
+- Dispute resolution.
+- Enforcement of legal rights.
+- Compliance with court orders or government requests.
+
+Such retained information will be limited to what is reasonably necessary.
+
+---
+
+7. Consequences of Deletion
+
+By deleting an account, the user acknowledges that:
+- Access to EasyToBill will end.
+- Deleted application data cannot normally be recovered.
+- Licenses previously granted may no longer be usable after deletion, unless otherwise required by law or agreed by NYLEX.
+- Certain legal obligations may continue after account deletion.
+
+---
+
+8. User Responsibilities
+
+Before deleting an account, users should:
+- Create a final backup of important business data.
+- Verify that backups are complete.
+- Export any records needed for accounting or legal purposes.
+- Ensure all required business information has been safely retained.
+
+NYLEX is not responsible for data loss resulting from account deletion requested by the user.
+
+---
+
+9. Fraudulent or Unauthorized Requests
+
+NYLEX reserves the right to refuse, delay, or verify account deletion requests where there is reasonable evidence of:
+- Identity fraud.
+- Unauthorized account access.
+- Ongoing security investigations.
+- Legal obligations requiring temporary retention.
+- Court orders or regulatory requirements.
+
+---
+
+10. Changes to this Policy
+
+NYLEX may update this Account Deletion Policy from time to time. The latest version will be made available through the EasyToBill application, the official website, or other official communication channels.
+
+---
+
+11. Contact Information
+
+NYLEX
+Email: buildwithnylex@gmail.com
+Phone: +91 8921442748
+Website: https://nylex.online
+Location: Kozhikode, Kerala, India
+
+---
+
+© 2026 NYLEX. All Rights Reserved.

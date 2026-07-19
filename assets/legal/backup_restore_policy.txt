@@ -1,0 +1,136 @@
+EASYTOBILL DATA BACKUP & RESTORE POLICY
+
+Effective Date: July 18, 2026
+Last Updated: July 18, 2026
+Version: 1.0
+
+---
+
+1. Introduction
+
+This Data Backup & Restore Policy explains how EasyToBill manages the backup and restoration of user business data. It outlines user responsibilities, backup methods, restore procedures, data security, and limitations.
+
+By using EasyToBill, you agree to this Policy.
+
+---
+
+2. Purpose
+
+EasyToBill provides backup and restore functionality to help users protect their business information from accidental loss, device replacement, or application reinstallation.
+Backup is intended as a convenience feature and does not replace the user's responsibility to maintain important business records.
+
+---
+
+3. Data Included in Backups
+
+Depending on the version of the application, backups may include:
+- Business profile
+- Product catalog
+- Categories
+- Inventory records
+- Sales invoices
+- Transaction history
+- Expense records
+- Reports
+- Business settings
+- Printer settings
+- Other application data created by the user
+
+Temporary files, application cache, and system files are generally not included.
+
+---
+
+4. Google Drive Storage
+
+EasyToBill stores backup files in the user's own Google Drive account.
+The backup files remain under the user's Google account and are not stored as business data on NYLEX servers.
+Users are responsible for maintaining access to their Google account.
+
+---
+
+5. Automatic Backup
+
+EasyToBill may automatically create backups at scheduled intervals when enabled.
+Automatic backups may require:
+- Internet connectivity
+- Google Sign-In
+- Available Google Drive storage space
+- Required application permissions
+
+Automatic backups may not occur if these requirements are not met.
+
+---
+
+6. Manual Backup
+
+Users may manually create a backup at any time using the backup feature within EasyToBill.
+NYLEX recommends creating a manual backup before:
+- Updating the application
+- Resetting the device
+- Reinstalling the application
+- Changing devices
+- Performing major business changes
+
+---
+
+7. Restore Process
+
+Users may restore previously created backups after verifying their identity, which may include the application security password and Google account authentication.
+The restore process may overwrite existing application data. Users should ensure they have a current backup before restoring older data.
+
+---
+
+8. User Responsibilities
+
+Users are responsible for:
+- Creating regular backups.
+- Protecting their Google account credentials.
+- Maintaining sufficient Google Drive storage.
+- Verifying backup completion.
+- Keeping their security password confidential.
+- Confirming restored data is accurate.
+
+Failure to maintain backups may result in permanent data loss.
+
+---
+
+9. Data Security
+
+EasyToBill uses reasonable security measures to protect backup operations.
+However, NYLEX cannot guarantee absolute security of data stored in third-party services such as Google Drive.
+Users should also protect their devices with passwords, screen locks, or biometric authentication.
+
+---
+
+10. Data Loss
+
+Although EasyToBill is designed to help protect business data, NYLEX cannot guarantee that backups will always be successful or that data loss will never occur.
+NYLEX is not responsible for data loss resulting from:
+- User error.
+- Deleted backup files.
+- Google account issues.
+- Internet failures.
+- Device damage or theft.
+- Corrupted storage.
+- Third-party service interruptions.
+- Failure to perform backups.
+
+---
+
+11. Changes to this Policy
+
+NYLEX may update this Data Backup & Restore Policy from time to time. The latest version will be published through the EasyToBill application, official website, or other official communication channels.
+
+---
+
+12. Contact Information
+
+NYLEX
+Email: buildwithnylex@gmail.com
+Phone: +91 8921442748
+Website: https://nylex.online
+Location: Kozhikode, Kerala, India
+
+---
+
+© 2026 NYLEX. All Rights Reserved.

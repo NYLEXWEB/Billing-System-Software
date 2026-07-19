@@ -1,0 +1,152 @@
+EASYTOBILL PRINTER WARRANTY POLICY
+
+Effective Date: July 18, 2026
+Last Updated: July 18, 2026
+Version: 1.0
+
+---
+
+1. Introduction
+
+This Printer Warranty Policy explains the warranty terms applicable to receipt printers sold or supplied by NYLEX together with the EasyToBill software.
+This Policy applies only to hardware purchased directly from NYLEX or an authorized reseller.
+
+By purchasing a printer from NYLEX, you agree to this Printer Warranty Policy.
+
+---
+
+2. Warranty Coverage
+
+Unless otherwise stated in writing, eligible receipt printers include a limited manufacturer's warranty of up to one (1) year from the date of purchase, subject to the manufacturer's warranty terms and applicable law.
+The warranty covers manufacturing defects and hardware failures that occur during normal use.
+The exact warranty period may vary depending on the printer manufacturer and model.
+
+---
+
+3. What Is Covered
+
+Subject to inspection and approval, the warranty may cover:
+- Manufacturing defects.
+- Hardware component failures.
+- Factory assembly defects.
+- Power-related defects not caused by misuse.
+- Print mechanism defects caused by manufacturing faults.
+- Mainboard failures resulting from manufacturing defects.
+
+Repair or replacement will be determined according to the manufacturer's warranty policy.
+
+---
+
+4. What Is Not Covered
+
+The warranty does not cover damage resulting from:
+- Physical damage, accidental damage, or liquid exposure.
+- Fire, flood, or electrical surges.
+- Improper installation or unauthorized repair or modification.
+- Normal wear and tear, cosmetic damage, or use of incompatible accessories.
+- Misuse, negligence, or damage caused during transportation after delivery.
+- Damage caused by insects, rodents, or environmental conditions.
+
+Consumable items such as paper rolls, batteries (if applicable), cables, adapters, or accessories may not be covered unless specifically stated by the manufacturer.
+
+---
+
+5. Customer Responsibilities
+
+Customers are responsible for:
+- Using the printer according to the manufacturer's instructions.
+- Keeping the printer clean and properly maintained.
+- Using compatible receipt paper and accessories.
+- Protecting the printer from moisture, dust, and excessive heat.
+- Retaining proof of purchase for warranty claims.
+
+Failure to follow recommended operating procedures may void the warranty.
+
+---
+
+6. Warranty Claim Process
+
+To request warranty service, customers should contact NYLEX using the official support channels and provide:
+- Purchase invoice or receipt.
+- Printer model and serial number (if available).
+- Description of the issue.
+- Photos or videos of the problem, if requested.
+- Any additional information reasonably required for diagnosis.
+
+NYLEX may perform initial troubleshooting before approving warranty service.
+
+---
+
+7. Inspection and Service
+
+Warranty claims are subject to inspection by NYLEX, the manufacturer, or an authorized service center.
+If the issue is determined to be covered under warranty, the printer may be repaired or replaced at the manufacturer's discretion.
+Replacement units may be new or manufacturer-refurbished, where permitted by law.
+
+---
+
+8. Shipping and Transportation
+
+Unless otherwise agreed:
+- Customers are responsible for safely packaging the printer for shipment.
+- Shipping costs to the service center may be the customer's responsibility.
+- Return shipping arrangements will be determined based on the warranty provider's policy.
+
+NYLEX is not responsible for damage caused by improper packaging during shipment.
+
+---
+
+9. Warranty Limitations
+
+This warranty is limited to the repair or replacement of the defective printer.
+To the fullest extent permitted by applicable law, NYLEX shall not be liable for:
+- Business interruption.
+- Loss of profits, revenue, or business opportunities.
+- Loss of customer data.
+- Indirect, incidental, special, or consequential damages arising from printer failure.
+
+Nothing in this Policy excludes rights that cannot legally be excluded under applicable law.
+
+---
+
+10. Out-of-Warranty Repairs
+
+If a printer is found to be outside the warranty period or the issue is not covered by warranty:
+- Repair services may still be available.
+- Charges for parts, labor, and shipping may apply.
+- An estimate may be provided before repairs begin, where practical.
+
+Customers may choose whether to proceed with paid repairs.
+
+---
+
+11. Replacement Policy
+
+A replacement printer may be provided only if:
+- Repair is not reasonably possible.
+- The manufacturer authorizes replacement.
+- A comparable replacement model is available.
+
+The replacement of a printer does not automatically extend the original warranty period unless required by the manufacturer or applicable law.
+
+---
+
+12. Changes to this Policy
+
+NYLEX reserves the right to modify this Printer Warranty Policy at any time.
+The latest version will be made available through the EasyToBill application, the official website, or other official communication channels.
+Continued use of the printer after changes become effective constitutes acceptance of the updated Policy.
+
+---
+
+13. Contact Information
+
+NYLEX
+Email: buildwithnylex@gmail.com
+Phone: +91 8921442748
+Website: https://nylex.online
+Location: Kozhikode, Kerala, India
+
+---
+
+© 2026 NYLEX. All Rights Reserved.
