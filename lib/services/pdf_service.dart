@@ -254,6 +254,12 @@ class PdfService {
                             ),
                           ],
                         ),
+                        pw.SizedBox(height: 4),
+                        pw.Text(
+                          "In Words: ${_numberToWords(invoice.grandTotal)}",
+                          style: pw.TextStyle(font: fontRegular, fontSize: 8, color: PdfColors.grey700, fontStyle: pw.FontStyle.italic),
+                          textAlign: pw.TextAlign.right,
+                        ),
                       ],
                     ),
                   ),
@@ -584,5 +590,60 @@ class PdfService {
       bytes: pdfBytes,
       filename: 'SalesReport_$rangeStr.pdf',
     );
+  }
+
+  // Converts numbers to words (Indian numbering system: Rupees, Lakhs, Crores)
+  static String _numberToWords(double amount) {
+    if (amount <= 0) return "Zero Rupees Only";
+
+    final int rupees = amount.floor();
+    final int paise = ((amount - rupees) * 100).round();
+
+    String rupeesInWords = _convertIntegerToWords(rupees);
+    if (rupeesInWords.isEmpty) rupeesInWords = "Zero";
+
+    String result = "$rupeesInWords ${rupees == 1 ? 'Rupee' : 'Rupees'}";
+
+    if (paise > 0) {
+      String paiseInWords = _convertIntegerToWords(paise);
+      result += " and $paiseInWords Paise";
+    }
+
+    return "$result Only";
+  }
+
+  static String _convertIntegerToWords(int number) {
+    if (number == 0) return "";
+
+    const units = [
+      "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+      "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+      "Seventeen", "Eighteen", "Nineteen"
+    ];
+
+    const tens = [
+      "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+    ];
+
+    if (number < 20) return units[number];
+    if (number < 100) {
+      final unit = number % 10;
+      return "${tens[number ~/ 10]}${unit > 0 ? ' ${units[unit]}' : ''}";
+    }
+    if (number < 1000) {
+      final rem = number % 100;
+      return "${units[number ~/ 100]} Hundred${rem > 0 ? ' ${_convertIntegerToWords(rem)}' : ''}";
+    }
+    if (number < 100000) {
+      final rem = number % 1000;
+      return "${_convertIntegerToWords(number ~/ 1000)} Thousand${rem > 0 ? ' ${_convertIntegerToWords(rem)}' : ''}";
+    }
+    if (number < 10000000) {
+      final rem = number % 100000;
+      return "${_convertIntegerToWords(number ~/ 100000)} Lakh${rem > 0 ? ' ${_convertIntegerToWords(rem)}' : ''}";
+    }
+
+    final rem = number % 10000000;
+    return "${_convertIntegerToWords(number ~/ 10000000)} Crore${rem > 0 ? ' ${_convertIntegerToWords(rem)}' : ''}";
   }
 }

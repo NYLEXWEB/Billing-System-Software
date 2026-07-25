@@ -275,6 +275,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 ),
                               ],
                             ),
+
+                            // Test Active Printer Option
+                            if (printerProvider.activePrinter != null) ...[
+                              const SizedBox(height: 10),
+                              SizedBox(
+                                width: double.infinity,
+                                child: OutlinedButton.icon(
+                                  onPressed: () async {
+                                    final businessProvider = Provider.of<BusinessProvider>(context, listen: false);
+                                    final business = businessProvider.business ?? Business(name: "Sample Store", phone: "", email: "", address: "", gstOrTin: "", upiId: "", currency: "₹");
+                                    AppToast.showInfo(context, "Testing printer connection...");
+                                    final success = await printerProvider.testPrintActivePrinter(business);
+                                    if (context.mounted) {
+                                      if (success) {
+                                        AppToast.showSuccess(context, "Test receipt printed successfully!");
+                                      } else {
+                                        AppToast.showError(context, "Test print failed. Ensure Bluetooth is ON and paired.");
+                                      }
+                                    }
+                                  },
+                                  icon: const Icon(Icons.print_outlined, size: 16),
+                                  label: const Text("Test Active Printer", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: const Color(0xFF10B981),
+                                    side: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),

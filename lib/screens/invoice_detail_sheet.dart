@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/invoice.dart';
 import '../models/product.dart';
+import '../models/business.dart';
 import '../providers/business_provider.dart';
 import '../providers/printer_provider.dart';
 import '../providers/invoice_provider.dart';
@@ -506,13 +507,26 @@ class InvoiceDetailSheet extends StatelessWidget {
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: () async {
-                      if (shop == null) return;
-                      final success = await printerProvider.printInvoice(invoice, shop);
+                      final businessObj = shop ?? Business(
+                        name: "EasyToBill Store",
+                        phone: "",
+                        email: "",
+                        address: "",
+                        gstOrTin: "",
+                        upiId: "",
+                        currency: "₹",
+                      );
+                      if (printerProvider.activePrinter == null) {
+                        AppToast.showError(context, "No active printer! Please select a printer in Settings.");
+                        return;
+                      }
+                      AppToast.showInfo(context, "Connecting & printing receipt...");
+                      final success = await printerProvider.printInvoice(invoice, businessObj);
                       if (context.mounted) {
                         if (success) {
                           AppToast.showSuccess(context, "Receipt printed successfully!");
                         } else {
-                          AppToast.showError(context, "Printing failed. Check printer connection.");
+                          AppToast.showError(context, "Printing failed. Ensure Bluetooth is ON & printer is paired.");
                         }
                       }
                     },
