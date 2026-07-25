@@ -49,6 +49,20 @@ class CartProvider extends ChangeNotifier {
     return true;
   }
 
+  // Add Custom Item directly to cart
+  void addCustomItem(String name, double price, int quantity) {
+    // Generate a unique negative ID using the current timestamp to avoid database collisions
+    final customId = -1 * DateTime.now().millisecondsSinceEpoch;
+    _items.add(InvoiceItem(
+      productId: customId,
+      productName: name,
+      price: price,
+      quantity: quantity,
+      subtotal: price * quantity,
+    ));
+    notifyListeners();
+  }
+
   // Update quantity of an item
   bool updateQuantity(int productId, int quantity, Product product) {
     if (quantity <= 0) {

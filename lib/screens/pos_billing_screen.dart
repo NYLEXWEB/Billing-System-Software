@@ -334,13 +334,30 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
     }
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: cart.items.length,
+      itemCount: cart.items.length + 1,
       itemBuilder: (context, index) {
+        if (index == cart.items.length) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: Center(
+              child: OutlinedButton.icon(
+                onPressed: () => _showAddCustomProductDialog(context, cart),
+                icon: const Icon(Icons.add_box_outlined),
+                label: const Text("Add Custom Product"),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  side: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                ),
+              ),
+            ),
+          );
+        }
         final item = cart.items[index];
         final productProvider = Provider.of<ProductProvider>(context, listen: false);
         final product = productProvider.products.firstWhere(
           (p) => p.id == item.productId,
-          orElse: () => Product(id: item.productId, name: item.productName, barcode: '', price: item.price),
+          orElse: () => Product(id: item.productId, name: item.productName, barcode: '', price: item.price, isTracked: false),
         );
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
@@ -1009,6 +1026,99 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
             style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF2563EB), foregroundColor: Colors.white),
             child: const Text("Set"),
           )
+        ],
+      ),
+    );
+  }
+
+  void _showAddCustomProductDialog(BuildContext context, CartProvider cart) {
+    final formKey = GlobalKey<FormState>();
+    final nameController = TextEditingController();
+    final priceController = TextEditingController();
+    final quantityController = TextEditingController(text: "1");
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text("Add Custom Product", style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: "Product Name *",
+                  hintText: "e.g., Custom Item",
+                ),
+                validator: (val) => val == null || val.trim().isEmpty ? "Name is required" : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  labelText: "Price *",
+                  prefixText: "₹ ",
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return "Price is required";
+                  final p = double.tryParse(val);
+                  if (p == null || p < 0) return "Must be a valid positive number";
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: quantityController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: "Quantity *",
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return "Quantity is required";
+                  final q = int.tryParse(val);
+                  if (q == null || q < 1) return "Must be at least 1";
+                  return null;
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel", style: TextStyle(color: isDark ? Colors.white70 : const Color(0xFF64748B))),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                final name = nameController.text.trim();
+                final price = double.parse(priceController.text);
+                final qty = int.parse(quantityController.text);
+                
+                cart.addCustomItem(name, price, qty);
+                Navigator.pop(context);
+                
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text("Added '$name' to cart"),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: theme.colorScheme.primary,
+              foregroundColor: theme.colorScheme.onPrimary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text("Add"),
+          ),
         ],
       ),
     );

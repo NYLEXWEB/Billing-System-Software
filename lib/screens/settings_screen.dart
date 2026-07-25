@@ -19,6 +19,9 @@ import '../utils/crypto_utils.dart';
 import '../services/analytics_service.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../providers/consent_provider.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
+import '../widgets/app_toast.dart';
 import 'legal_menu_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -693,6 +696,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ],
                         ),
                       ),
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF1E293B) : const Color(0xFFE2E8F0),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2563EB).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.headset_mic_rounded, color: Color(0xFF2563EB), size: 24),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: const [
+                                  Text("Help & Customer Support", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "Phone / WhatsApp: +91 8921442748\nEmail: buildwithnylex@gmail.com",
+                                    style: TextStyle(fontSize: 12, height: 1.45, color: Color(0xFF475569)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => _showContactSupportModal(context),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2563EB),
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              child: const Text("Contact", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -721,7 +773,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 80), // Extra bottom padding for FAB
           ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => _showContactSupportModal(context),
+        backgroundColor: const Color(0xFF2563EB),
+        foregroundColor: Colors.white,
+        elevation: 6,
+        icon: const Icon(Icons.headset_mic_rounded, size: 20),
+        label: const Text(
+          "Help & Support",
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.3),
         ),
       ),
     );
@@ -1176,7 +1240,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               );
 
               if (ok) {
-                const storage = FlutterSecureStorage();
+                final storage = const FlutterSecureStorage();
                 await storage.write(key: 'recovery_passphrase', value: password);
               }
 
@@ -1255,7 +1319,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
 
     if (ok) {
-      const storage = FlutterSecureStorage();
+      final storage = const FlutterSecureStorage();
       await storage.write(key: 'recovery_passphrase', value: password);
     }
 
@@ -1805,6 +1869,368 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: const Text("Delete Account"),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showContactSupportModal(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final queryController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.85,
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF0F172A) : Colors.white,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                children: [
+                  // Top Drag handle & Header bar
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 12, 12, 12),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2563EB).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.headset_mic_rounded, color: Color(0xFF2563EB), size: 22),
+                            ),
+                            const SizedBox(width: 12),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Customer Support & FAQs",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                                const Text(
+                                  "EasyToBill Support Desk",
+                                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        IconButton(
+                          icon: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF1F5F9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.close_rounded, size: 18, color: isDark ? Colors.white70 : const Color(0xFF475569)),
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.all(20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // 1. Direct Contact Cards
+                          Text(
+                            "DIRECT CONTACT CHANNELS",
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.8,
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                // Phone / WhatsApp Row
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF10B981).withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(Icons.phone_in_talk_rounded, color: Color(0xFF10B981), size: 22),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "Phone & WhatsApp",
+                                            style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            "+91 8921442748",
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    TextButton.icon(
+                                      onPressed: () {
+                                        Clipboard.setData(const ClipboardData(text: "+918921442748"));
+                                        AppToast.showSuccess(context, "Phone number copied: +91 8921442748");
+                                      },
+                                      icon: const Icon(Icons.copy_rounded, size: 14),
+                                      label: const Text("Copy", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: const Color(0xFF10B981),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 10),
+                                  child: Divider(height: 1),
+                                ),
+                                // Support Email Row
+                                Row(
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF2563EB).withOpacity(0.12),
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: const Icon(Icons.email_rounded, color: Color(0xFF2563EB), size: 22),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          const Text(
+                                            "Support Email",
+                                            style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            "buildwithnylex@gmail.com",
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                                            ),
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    TextButton.icon(
+                                      onPressed: () {
+                                        Clipboard.setData(const ClipboardData(text: "buildwithnylex@gmail.com"));
+                                        AppToast.showSuccess(context, "Email copied: buildwithnylex@gmail.com");
+                                      },
+                                      icon: const Icon(Icons.copy_rounded, size: 14),
+                                      label: const Text("Copy", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                      style: TextButton.styleFrom(
+                                        foregroundColor: const Color(0xFF2563EB),
+                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+
+                          // 2. Interactive FAQ Assistant
+                          Text(
+                            "FREQUENTLY ASKED QUESTIONS",
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.8,
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          _buildFaqTile(
+                            isDark: isDark,
+                            question: "How do I connect my Bluetooth thermal printer?",
+                            answer: "1. Turn on your Bluetooth printer.\n2. Pair the printer in your phone's Bluetooth settings.\n3. In EasyToBill Settings, go to 'Hardware & Device Configuration' -> tap 'Bluetooth Scan'.\n4. Select your printer and tap 'Active'.",
+                          ),
+                          _buildFaqTile(
+                            isDark: isDark,
+                            question: "How do I back up my billing data to Google Drive?",
+                            answer: "1. In EasyToBill Settings, scroll down to 'Account & Device Sessions'.\n2. Tap 'Sign in with Google' and authorize your account.\n3. Under 'Database Cloud Storage', tap 'Backup Now' and enter your passphrase.",
+                          ),
+                          _buildFaqTile(
+                            isDark: isDark,
+                            question: "How do I add custom one-off items during checkout?",
+                            answer: "1. Go to POS Checkout.\n2. Tap 'VIEW CART'.\n3. Scroll down to the bottom of the items list and tap 'Add Custom Product'.\n4. Enter the item name, price, and quantity.",
+                          ),
+                          _buildFaqTile(
+                            isDark: isDark,
+                            question: "How do I change my shop name, phone, or receipt logo?",
+                            answer: "In Settings, tap the Edit button on your Business Profile Card at the top. You can update shop name, address, phone number, currency symbol, and shop logo.",
+                          ),
+                          _buildFaqTile(
+                            isDark: isDark,
+                            question: "How do I apply discounts or Tax/GST to a bill?",
+                            answer: "In POS Checkout, tap 'VIEW CART'. Use the 'Apply Discount' or 'Add Tax/GST' buttons at the bottom before proceeding to payment.",
+                          ),
+                          _buildFaqTile(
+                            isDark: isDark,
+                            question: "Is my business data safe offline?",
+                            answer: "Yes! EasyToBill is 100% offline-first. All your sales, products, and invoices are stored locally on your device. Cloud backup is optional and encrypted.",
+                          ),
+                          const SizedBox(height: 24),
+
+                          // 3. Ask Support a Custom Question Box
+                          Text(
+                            "ASK CUSTOM QUESTION / REPORT ISSUE",
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.8,
+                              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                TextField(
+                                  controller: queryController,
+                                  maxLines: 3,
+                                  style: TextStyle(fontSize: 13, color: isDark ? Colors.white : const Color(0xFF0F172A)),
+                                  decoration: InputDecoration(
+                                    hintText: "Describe your question or issue...",
+                                    hintStyle: const TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                                    fillColor: isDark ? const Color(0xFF0F172A) : Colors.white,
+                                    filled: true,
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(color: isDark ? const Color(0xFF334155) : const Color(0xFFCBD5E1)),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    final query = queryController.text.trim();
+                                    final fullMessage = "EasyToBill Support Query:\n\n${query.isNotEmpty ? query : "Need technical assistance with EasyToBill app."}\n\nApp Version: 1.0.0\nDevice: ${Platform.operatingSystem}\nContact Support: +91 8921442748 | buildwithnylex@gmail.com";
+                                    Clipboard.setData(ClipboardData(text: fullMessage));
+                                    Share.share(fullMessage);
+                                    AppToast.showSuccess(context, "Support message formatted & ready to share!");
+                                  },
+                                  icon: const Icon(Icons.send_rounded, size: 16),
+                                  label: const Text("Send Query to Support", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF2563EB),
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 12),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildFaqTile({
+    required bool isDark,
+    required String question,
+    required String answer,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E293B) : const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? const Color(0xFF334155) : const Color(0xFFE2E8F0),
+        ),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        child: ExpansionTile(
+          iconColor: const Color(0xFF2563EB),
+          collapsedIconColor: const Color(0xFF64748B),
+          title: Text(
+            question,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white : const Color(0xFF0F172A),
+            ),
+          ),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+              child: Text(
+                answer,
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.5,
+                  color: isDark ? const Color(0xFFCBD5E1) : const Color(0xFF475569),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
