@@ -200,6 +200,28 @@ class PrinterProvider extends ChangeNotifier {
     return left + (' ' * spaceCount) + right;
   }
 
+  // Helper for 3-column ESC/POS formatting: Item (Left), Qty (Center), Total (Right)
+  String _formatThreeColumns(String left, String center, String right, int totalWidth) {
+    final int leftWidth = totalWidth == 48 ? 26 : 16;
+    final int centerWidth = totalWidth == 48 ? 8 : 6;
+    final int rightWidth = totalWidth == 48 ? 14 : 10;
+
+    String l = left.length > leftWidth ? left.substring(0, leftWidth) : left.padRight(leftWidth);
+
+    String c;
+    if (center.length >= centerWidth) {
+      c = center.substring(0, centerWidth);
+    } else {
+      final leftPad = (centerWidth - center.length) ~/ 2;
+      final rightPad = centerWidth - center.length - leftPad;
+      c = (' ' * leftPad) + center + (' ' * rightPad);
+    }
+
+    String r = right.length > rightWidth ? right.substring(0, rightWidth) : right.padLeft(rightWidth);
+
+    return "$l$c$r";
+  }
+
   // Sanitizes text strings to 100% compatible ASCII for thermal printers
   String _cleanText(String input) {
     return input
@@ -340,48 +362,25 @@ class PrinterProvider extends ChangeNotifier {
 
     bytes += generator.text("-" * width);
 
-    // 3. Table Header & Items List (Pure ASCII Formatting)
-    if (width == 48) {
-      // 80mm paper (48 cols)
-      bytes += generator.text(
-        "ITEM                     QTY     PRICE      TOTAL",
-        styles: const PosStyles(bold: true),
-      );
-      bytes += generator.text("-" * width);
+    // 3. Table Header & Items List (Pure ASCII 3-Column Layout: ITEM | QTY | TOTAL)
+    bytes += generator.text(
+      _formatThreeColumns("ITEM", "QTY", "TOTAL", width),
+      styles: const PosStyles(bold: true),
+    );
+    bytes += generator.text("-" * width);
 
-      for (var item in invoice.items) {
-        final cleanName = _cleanText(item.productName);
-        final name = cleanName.length > 22 ? cleanName.substring(0, 22) : cleanName.padRight(22);
-        final qty = item.quantity.toString().padLeft(6);
-        final price = item.price.toStringAsFixed(2).padLeft(9);
-        final total = item.subtotal.toStringAsFixed(2).padLeft(11);
-        bytes += generator.text("$name$qty$price$total");
-      }
-    } else {
-      // 58mm paper (32 cols)
-      bytes += generator.text(
-        _formatTwoColumns("ITEM (QTY)", "TOTAL", 32),
-        styles: const PosStyles(bold: true),
-      );
-      bytes += generator.text("-" * width);
+    final int maxNameLen = width == 48 ? 26 : 16;
 
-      for (var item in invoice.items) {
-        final cleanName = _cleanText(item.productName);
-        final String qtyPrice = "${item.quantity}x$currencySym${item.price.toStringAsFixed(2)}";
-        final String totalStr = "$currencySym${item.subtotal.toStringAsFixed(2)}";
+    for (var item in invoice.items) {
+      final cleanName = _cleanText(item.productName);
+      final String qtyStr = item.quantity.toString();
+      final String totalStr = item.subtotal.toStringAsFixed(2);
 
-        if (cleanName.length > 16) {
-          bytes += generator.text(cleanName);
-          bytes += generator.text(_formatTwoColumns("  $qtyPrice", totalStr, 32));
-        } else {
-          final String itemHeader = "$cleanName ($qtyPrice)";
-          if (itemHeader.length + totalStr.length + 1 <= 32) {
-            bytes += generator.text(_formatTwoColumns(itemHeader, totalStr, 32));
-          } else {
-            bytes += generator.text(cleanName);
-            bytes += generator.text(_formatTwoColumns("  $qtyPrice", totalStr, 32));
-          }
-        }
+      if (cleanName.length > maxNameLen) {
+        bytes += generator.text(cleanName);
+        bytes += generator.text(_formatThreeColumns("", qtyStr, totalStr, width));
+      } else {
+        bytes += generator.text(_formatThreeColumns(cleanName, qtyStr, totalStr, width));
       }
     }
 
