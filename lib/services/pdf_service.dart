@@ -646,4 +646,159 @@ class PdfService {
     final rem = number % 10000000;
     return "${_convertIntegerToWords(number ~/ 10000000)} Crore${rem > 0 ? ' ${_convertIntegerToWords(rem)}' : ''}";
   }
+
+  // ==========================================
+  // BARCODE THERMAL STICKER PDF GENERATOR
+  // ==========================================
+
+  static Future<Uint8List> buildBarcodeStickersPdf({
+    required String productName,
+    required String barcode,
+    required double price,
+    required String currency,
+    required int labelLayout, // 1, 2, or 4 barcodes per sticker label
+    required int quantity,    // Total label stickers to print
+  }) async {
+    final pdf = pw.Document();
+    final fontRegular = await PdfGoogleFonts.interRegular();
+    final fontBold = await PdfGoogleFonts.interBold();
+
+    final String currencySym = (currency.isEmpty || currency == '₹') ? 'Rs.' : currency;
+
+    // Standard 50mm x 25mm label size in PDF points (1mm = 2.83465 pt)
+    final pageFormat = const PdfPageFormat(141.73, 70.87, marginAll: 2);
+
+    for (int i = 0; i < quantity; i++) {
+      pdf.addPage(
+        pw.Page(
+          pageFormat: pageFormat,
+          build: (context) {
+            if (labelLayout == 1) {
+              return pw.Container(
+                width: double.infinity,
+                height: double.infinity,
+                padding: const pw.EdgeInsets.all(2),
+                child: pw.Column(
+                  mainAxisAlignment: pw.MainAxisAlignment.center,
+                  crossAxisAlignment: pw.CrossAxisAlignment.center,
+                  children: [
+                    pw.Text(
+                      productName.toUpperCase(),
+                      style: pw.TextStyle(font: fontBold, fontSize: 8),
+                      maxLines: 1,
+                    ),
+                    pw.SizedBox(height: 2),
+                    pw.Container(
+                      height: 24,
+                      child: pw.BarcodeWidget(
+                        barcode: pw.Barcode.code128(),
+                        data: barcode.isEmpty ? "00000000" : barcode,
+                        drawText: false,
+                      ),
+                    ),
+                    pw.SizedBox(height: 2),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text(barcode, style: pw.TextStyle(font: fontRegular, fontSize: 6)),
+                        pw.Text("$currencySym${price.toStringAsFixed(2)}", style: pw.TextStyle(font: fontBold, fontSize: 8)),
+                      ],
+                    ),
+                  ],
+                ),
+              );
+            } else if (labelLayout == 2) {
+              return pw.Row(
+                children: List.generate(
+                  2,
+                  (_) => pw.Expanded(
+                    child: pw.Container(
+                      margin: const pw.EdgeInsets.all(1),
+                      padding: const pw.EdgeInsets.all(1),
+                      child: pw.Column(
+                        mainAxisAlignment: pw.MainAxisAlignment.center,
+                        children: [
+                          pw.Text(productName, style: pw.TextStyle(font: fontBold, fontSize: 5), maxLines: 1),
+                          pw.SizedBox(height: 1),
+                          pw.Container(
+                            height: 16,
+                            child: pw.BarcodeWidget(
+                              barcode: pw.Barcode.code128(),
+                              data: barcode.isEmpty ? "00000000" : barcode,
+                              drawText: false,
+                            ),
+                          ),
+                          pw.SizedBox(height: 1),
+                          pw.Text("$currencySym${price.toStringAsFixed(2)}", style: pw.TextStyle(font: fontBold, fontSize: 6)),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            } else {
+              return pw.Column(
+                children: List.generate(
+                  2,
+                  (_) => pw.Expanded(
+                    child: pw.Row(
+                      children: List.generate(
+                        2,
+                        (_) => pw.Expanded(
+                          child: pw.Container(
+                            margin: const pw.EdgeInsets.all(1),
+                            padding: const pw.EdgeInsets.all(1),
+                            child: pw.Column(
+                              mainAxisAlignment: pw.MainAxisAlignment.center,
+                              children: [
+                                pw.Text(productName, style: pw.TextStyle(font: fontBold, fontSize: 4), maxLines: 1),
+                                pw.Container(
+                                  height: 10,
+                                  child: pw.BarcodeWidget(
+                                    barcode: pw.Barcode.code128(),
+                                    data: barcode.isEmpty ? "00000000" : barcode,
+                                    drawText: false,
+                                  ),
+                                ),
+                                pw.Text("$currencySym${price.toStringAsFixed(2)}", style: pw.TextStyle(font: fontBold, fontSize: 5)),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+          },
+        ),
+      );
+    }
+
+    return pdf.save();
+  }
+
+  static Future<void> generateAndShareBarcodeStickerPdf({
+    required String productName,
+    required String barcode,
+    required double price,
+    required String currency,
+    required int labelLayout,
+    required int quantity,
+  }) async {
+    final pdfBytes = await buildBarcodeStickersPdf(
+      productName: productName,
+      barcode: barcode,
+      price: price,
+      currency: currency,
+      labelLayout: labelLayout,
+      quantity: quantity,
+    );
+
+    await Printing.layoutPdf(
+      onLayout: (PdfPageFormat format) async => pdfBytes,
+      name: "Stickers_${productName.replaceAll(' ', '_')}.pdf",
+    );
+  }
 }

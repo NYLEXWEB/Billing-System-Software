@@ -58,6 +58,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } catch (e) {
       debugPrint("Failed to set Crashlytics keys: $e");
     }
+
+    if (mounted) {
+      Provider.of<PrinterProvider>(context, listen: false).checkActivePrinterConnectionStatus();
+    }
   }
 
   @override
@@ -179,9 +183,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                       const Text("Receipt Printer Setup", style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
                                       Text(
                                         printerProvider.activePrinter != null
-                                            ? "Active: ${printerProvider.activePrinter!.name} (${printerProvider.activePrinter!.paperWidth}mm)"
+                                            ? (printerProvider.isConnected
+                                                ? "Connected: ${printerProvider.activePrinter!.name} (${printerProvider.activePrinter!.paperWidth}mm)"
+                                                : "Active (Disconnected): ${printerProvider.activePrinter!.name} (${printerProvider.activePrinter!.paperWidth}mm)")
                                             : "No active printer selected",
-                                        style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: printerProvider.activePrinter != null
+                                              ? (printerProvider.isConnected ? const Color(0xFF10B981) : const Color(0xFFF59E0B))
+                                              : const Color(0xFF64748B),
+                                          fontWeight: printerProvider.activePrinter != null ? FontWeight.w600 : FontWeight.normal,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -226,10 +238,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                           decoration: BoxDecoration(
-                                            color: const Color(0xFFEFF6FF),
+                                            color: printerProvider.isConnected
+                                                ? const Color(0xFFD1FAE5)
+                                                : const Color(0xFFFEF3C7),
                                             borderRadius: BorderRadius.circular(6),
                                           ),
-                                          child: const Text("Active", style: TextStyle(fontSize: 10, color: Color(0xFF2563EB), fontWeight: FontWeight.bold)),
+                                          child: Text(
+                                            printerProvider.isConnected ? "Connected" : "Disconnected",
+                                            style: TextStyle(
+                                              fontSize: 10,
+                                              color: printerProvider.isConnected
+                                                  ? const Color(0xFF059669)
+                                                  : const Color(0xFFD97706),
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
                                         ),
                                       IconButton(
                                         icon: const Icon(Icons.delete_outline, color: Colors.red, size: 18),

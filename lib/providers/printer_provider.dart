@@ -54,9 +54,31 @@ class PrinterProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> checkActivePrinterConnectionStatus() async {
+    if (_activePrinter == null) {
+      _isConnected = false;
+      notifyListeners();
+      return false;
+    }
+
+    if (_activePrinter!.type == 'bluetooth') {
+      try {
+        final bool status = await PrintBluetoothThermal.connectionStatus;
+        _isConnected = status;
+      } catch (e) {
+        _isConnected = false;
+      }
+    } else {
+      _isConnected = true;
+    }
+
+    notifyListeners();
+    return _isConnected;
+  }
+
   void setActivePrinter(PrinterSettings printer) {
     _activePrinter = printer;
-    notifyListeners();
+    checkActivePrinterConnectionStatus();
   }
 
   Future<bool> addPrinter(PrinterSettings printer) async {
@@ -512,6 +534,89 @@ class PrinterProvider extends ChangeNotifier {
     }
 
     return printResult;
+  }
+
+  // ==========================================
+  // THERMAL BARCODE STICKER PRINTER
+  // ==========================================
+
+  Future<bool> printBarcodeStickers({
+    required String productName,
+    required String barcode,
+    required double price,
+    required String currency,
+    required int labelLayout,
+    required int quantity,
+  }) async {
+    if (_activePrinter == null) {
+      debugPrint("No active printer selected");
+      return false;
+    }
+
+    final profile = await CapabilityProfile.load();
+    final PaperSize size = _activePrinter!.paperWidth == 80 ? PaperSize.mm80 : PaperSize.mm58;
+    final generator = Generator(size, profile);
+    List<int> bytes = [];
+
+    bytes += generator.reset();
+    final String currencySym = (currency.isEmpty || currency == '₹') ? 'Rs.' : _cleanText(currency);
+
+    for (int i = 0; i < quantity; i++) {
+      if (labelLayout == 1) {
+        bytes += generator.text(
+          _cleanText(productName).toUpperCase(),
+          styles: const PosStyles(align: PosAlign.center, bold: true),
+        );
+        if (barcode.isNotEmpty) {
+          try {
+            bytes += generator.barcode(
+              Barcode.code128(barcode),
+              height: 40,
+              align: PosAlign.center,
+            );
+          } catch (_) {
+            bytes += generator.text("BC: $barcode", styles: const PosStyles(align: PosAlign.center));
+          }
+        }
+        bytes += generator.text(
+          "PRICE: $currencySym${price.toStringAsFixed(2)}",
+          styles: const PosStyles(align: PosAlign.center, bold: true),
+        );
+        bytes += generator.feed(1);
+      } else if (labelLayout == 2) {
+        bytes += generator.text(
+          "${_cleanText(productName)} - $currencySym${price.toStringAsFixed(2)}",
+          styles: const PosStyles(align: PosAlign.center, bold: true),
+        );
+        if (barcode.isNotEmpty) {
+          try {
+            bytes += generator.barcode(
+              Barcode.code128(barcode),
+              height: 30,
+              align: PosAlign.center,
+            );
+          } catch (_) {
+            bytes += generator.text(barcode, styles: const PosStyles(align: PosAlign.center));
+          }
+        }
+        bytes += generator.feed(1);
+      } else {
+        bytes += generator.text(
+          _cleanText(productName),
+          styles: const PosStyles(align: PosAlign.center, bold: true),
+        );
+        bytes += generator.text(
+          "$barcode | $currencySym${price.toStringAsFixed(2)}",
+          styles: const PosStyles(align: PosAlign.center),
+        );
+        bytes += generator.feed(1);
+      }
+    }
+
+    bytes += generator.feed(2);
+    bytes += generator.cut();
+
+    return await _sendBytesToActivePrinter(bytes);
   }
 
   Future<bool> testPrintActivePrinter(Business business) async {

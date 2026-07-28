@@ -9,6 +9,7 @@ import '../models/product.dart';
 import '../models/category.dart';
 import 'barcode_scanner_screen.dart';
 import 'inventory_screen.dart';
+import 'barcode_sticker_screen.dart';
 
 class ProductManagementScreen extends StatefulWidget {
   const ProductManagementScreen({super.key});
@@ -72,6 +73,16 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
         title: const Text("Catalog Management", style: TextStyle(fontWeight: FontWeight.bold)),
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_2_rounded),
+            tooltip: "Print Barcode Stickers",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const BarcodeStickerScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.history_toggle_off_outlined),
             tooltip: "Stock Control Logs",
@@ -602,6 +613,21 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                           ),
                         ),
                       ],
+                      const SizedBox(height: 4),
+                      IconButton(
+                        icon: const Icon(Icons.qr_code_2_rounded, color: Color(0xFF8B5CF6), size: 22),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        tooltip: "Print Barcode Sticker",
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BarcodeStickerScreen(initialProduct: product),
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                 ],
@@ -926,21 +952,37 @@ class _ProductManagementScreenState extends State<ProductManagementScreen> with 
                           controller: barcodeController,
                           decoration: InputDecoration(
                             labelText: "Barcode / SKU (Optional)",
-                            hintText: "Scan or enter barcode",
+                            hintText: "Scan, enter, or auto-generate",
                             prefixIcon: const Icon(Icons.qr_code),
-                            suffixIcon: IconButton(
-                              icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
-                              onPressed: () async {
-                                final scannedCode = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (context) => const BarcodeScannerScreen()),
-                                );
-                                if (scannedCode != null && scannedCode.isNotEmpty) {
-                                  setModalState(() {
-                                    barcodeController.text = scannedCode;
-                                  });
-                                }
-                              },
+                            suffixIcon: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.auto_awesome_rounded, color: Color(0xFF8B5CF6)),
+                                  tooltip: "Auto-Generate Unique Barcode",
+                                  onPressed: () {
+                                    final generated = provider.generateUniqueBarcode();
+                                    setModalState(() {
+                                      barcodeController.text = generated;
+                                    });
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.qr_code_scanner_rounded, color: Color(0xFF2563EB)),
+                                  tooltip: "Scan Barcode",
+                                  onPressed: () async {
+                                    final scannedCode = await Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => const BarcodeScannerScreen()),
+                                    );
+                                    if (scannedCode != null && scannedCode.isNotEmpty) {
+                                      setModalState(() {
+                                        barcodeController.text = scannedCode;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         ),

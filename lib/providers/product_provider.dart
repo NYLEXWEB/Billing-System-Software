@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import '../data/db_helper.dart';
 import '../models/product.dart';
@@ -14,6 +15,25 @@ class ProductProvider extends ChangeNotifier {
   List<Product> get products => _products;
   List<Category> get categories => _categories;
   bool get isLoading => _isLoading;
+
+  // Generates a unique 12-digit EAN/Code128 barcode avoiding existing DB collisions
+  String generateUniqueBarcode() {
+    final random = Random();
+    String candidate;
+    int attempts = 0;
+    do {
+      final String timePart = DateTime.now().millisecondsSinceEpoch.toString();
+      final String subTime = timePart.length >= 8 ? timePart.substring(timePart.length - 8) : timePart.padLeft(8, '0');
+      final String randPart = (10 + random.nextInt(90)).toString(); // 2 random digits
+      candidate = "200$subTime$randPart"; // 3 + 8 + 2 = 13 digits
+      attempts++;
+      if (attempts > 100) {
+        candidate = "200${DateTime.now().microsecondsSinceEpoch.toString().substring(5, 15)}";
+        break;
+      }
+    } while (_products.any((p) => p.barcode == candidate));
+    return candidate;
+  }
 
   // Filter states
   String _searchQuery = '';
