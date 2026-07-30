@@ -1,7 +1,10 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
+import 'package:image/image.dart' as img;
+import 'package:printing/printing.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:intl/intl.dart';
 import '../data/db_helper.dart';
@@ -9,6 +12,7 @@ import '../models/printer_settings.dart';
 import '../models/business.dart';
 import '../models/invoice.dart';
 import '../services/analytics_service.dart';
+import '../services/pdf_service.dart';
 
 class PrinterProvider extends ChangeNotifier {
   final DbHelper _dbHelper = DbHelper();
@@ -553,70 +557,58 @@ class PrinterProvider extends ChangeNotifier {
       return false;
     }
 
-    final profile = await CapabilityProfile.load();
-    final PaperSize size = _activePrinter!.paperWidth == 80 ? PaperSize.mm80 : PaperSize.mm58;
-    final generator = Generator(size, profile);
-    List<int> bytes = [];
+    try {
+      final profile = await CapabilityProfile.load();
+      final PaperSize size = _activePrinter!.paperWidth == 80 ? PaperSize.mm80 : PaperSize.mm58;
+      final generator = Generator(size, profile);
+      List<int> bytes = [];
 
-    bytes += generator.reset();
-    final String currencySym = (currency.isEmpty || currency == '₹') ? 'Rs.' : _cleanText(currency);
+      bytes += generator.reset();
 
-    for (int i = 0; i < quantity; i++) {
-      if (labelLayout == 1) {
-        bytes += generator.text(
-          _cleanText(productName).toUpperCase(),
-          styles: const PosStyles(align: PosAlign.center, bold: true),
-        );
-        if (barcode.isNotEmpty) {
-          try {
-            bytes += generator.barcode(
-              Barcode.code128(barcode),
-              height: 40,
-              align: PosAlign.center,
-            );
-          } catch (_) {
-            bytes += generator.text("BC: $barcode", styles: const PosStyles(align: PosAlign.center));
-          }
-        }
-        bytes += generator.text(
-          "PRICE: $currencySym${price.toStringAsFixed(2)}",
-          styles: const PosStyles(align: PosAlign.center, bold: true),
-        );
-        bytes += generator.feed(1);
-      } else if (labelLayout == 2) {
-        bytes += generator.text(
-          "${_cleanText(productName)} - $currencySym${price.toStringAsFixed(2)}",
-          styles: const PosStyles(align: PosAlign.center, bold: true),
-        );
-        if (barcode.isNotEmpty) {
-          try {
-            bytes += generator.barcode(
-              Barcode.code128(barcode),
-              height: 30,
-              align: PosAlign.center,
-            );
-          } catch (_) {
-            bytes += generator.text(barcode, styles: const PosStyles(align: PosAlign.center));
-          }
-        }
-        bytes += generator.feed(1);
-      } else {
-        bytes += generator.text(
-          _cleanText(productName),
-          styles: const PosStyles(align: PosAlign.center, bold: true),
-        );
-        bytes += generator.text(
-          "$barcode | $currencySym${price.toStringAsFixed(2)}",
-          styles: const PosStyles(align: PosAlign.center),
-        );
-        bytes += generator.feed(1);
+      // Generate single sticker label PDF containing crisp black barcode lines (pw.BarcodeWidget)
+      final Uint8List singleStickerPdf = await PdfService.buildBarcodeStickersPdf(
+        productName: productName,
+        barcode: barcode,
+        price: price,
+        currency: currency,
+        labelLayout: labelLayout,
+        quantity: 1,
+      );
+
+      // Rasterize 50mm x 25mm PDF page at 203 DPI (8 dots/mm thermal standard) into PNG bitmap
+      img.Image? stickerImage;
+      final rasterStream = Printing.raster(singleStickerPdf, pages: [0], dpi: 203);
+      await for (final page in rasterStream) {
+        final pngBytes = await page.toPng();
+        stickerImage = img.decodePng(pngBytes);
+        break;
       }
+
+      if (stickerImage != null) {
+        // Send rasterized bitmap (with black barcode lines, name, and price) to printer
+        for (int i = 0; i < quantity; i++) {
+          bytes += generator.image(stickerImage);
+          bytes += generator.feed(1);
+        }
+      } else {
+        // Text fallback
+        final String currencySym = (currency.isEmpty || currency == '₹') ? 'Rs.' : _cleanText(currency);
+        for (int i = 0; i < quantity; i++) {
+          bytes += generator.text(_cleanText(productName).toUpperCase(), styles: const PosStyles(align: PosAlign.center, bold: true));
+          bytes += generator.text("BC: $barcode", styles: const PosStyles(align: PosAlign.center));
+          bytes += generator.text("PRICE: $currencySym${price.toStringAsFixed(2)}", styles: const PosStyles(align: PosAlign.center, bold: true));
+          bytes += generator.feed(1);
+        }
+      }
+
+      bytes += generator.feed(2);
+      bytes += generator.cut();
+
+      return await _sendBytesToActivePrinter(bytes);
+    } catch (e) {
+      debugPrint("Error printing barcode stickers: $e");
+      return false;
     }
-
-    bytes += generator.feed(2);
-    bytes += generator.cut();
-
-    return await _sendBytesToActivePrinter(bytes);
   }
 
   Future<bool> testPrintActivePrinter(Business business) async {
