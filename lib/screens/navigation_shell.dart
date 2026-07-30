@@ -38,21 +38,9 @@ class _NavigationShellState extends State<NavigationShell> {
     if (product.id != -1) {
       final success = cart.addItem(product);
       if (success) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Added ${product.name} to Billing cart!"),
-            backgroundColor: Colors.green,
-            action: SnackBarAction(
-              label: "VIEW CART",
-              textColor: Colors.white,
-              onPressed: () {
-                setState(() {
-                  _selectedIndex = 0; // Go to Billing
-                });
-              },
-            ),
-          ),
-        );
+        setState(() {
+          _selectedIndex = 0; // Go directly to POS Billing / Checkout Cart
+        });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

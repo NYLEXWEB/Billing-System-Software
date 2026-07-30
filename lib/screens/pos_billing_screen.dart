@@ -86,6 +86,7 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
       setState(() {
         _searchResults = [];
         _isSearching = false;
+        _viewingCart = true; // Redirect directly to Checkout Cart view
       });
     }
   }
