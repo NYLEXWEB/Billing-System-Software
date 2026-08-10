@@ -1038,12 +1038,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     showModalBottomSheet(
       context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setSheetState) {
             final devProvider = Provider.of<PrinterProvider>(context);
 
             return Container(
+              height: MediaQuery.of(context).size.height * 0.55,
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -1052,47 +1057,184 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text("Scan Bluetooth Printers", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      const Text("Select Bluetooth Printer", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                       if (devProvider.isScanning)
-                        const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                        const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2.5))
                       else
                         IconButton(
-                          icon: const Icon(Icons.refresh),
+                          icon: const Icon(Icons.refresh_rounded, color: Color(0xFF2563EB)),
+                          tooltip: "Refresh Devices",
                           onPressed: () => devProvider.scanBluetoothPrinters(),
                         ),
                     ],
                   ),
-                  const Divider(),
-                  if (devProvider.discoveredDevices.isEmpty && !devProvider.isScanning)
-                    const Center(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 20.0),
-                        child: Text("No paired bluetooth printers found. Pair in settings first.", style: TextStyle(color: Colors.grey)),
+                  const SizedBox(height: 4),
+                  const Text("Showing Bluetooth devices paired with this phone", style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                  const Divider(height: 24),
+                  if (devProvider.isScanning)
+                    const Expanded(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text("Scanning paired Bluetooth devices...", style: TextStyle(color: Color(0xFF64748B))),
+                          ],
+                        ),
+                      ),
+                    )
+                  else if (devProvider.discoveredDevices.isEmpty)
+                    Expanded(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.bluetooth_disabled_rounded, size: 54, color: Color(0xFF94A3B8)),
+                            const SizedBox(height: 12),
+                            const Text("No Paired Devices Found", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            const SizedBox(height: 6),
+                            const Text(
+                              "Please pair your Bluetooth printer in Phone Settings first, then tap Scan Again.",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () => devProvider.scanBluetoothPrinters(),
+                              icon: const Icon(Icons.refresh_rounded, size: 18),
+                              label: const Text("Scan Again"),
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   else
                     Expanded(
-                      child: ListView.builder(
+                      child: ListView.separated(
                         itemCount: devProvider.discoveredDevices.length,
+                        separatorBuilder: (context, index) => const Divider(height: 1),
                         itemBuilder: (context, index) {
                           final dev = devProvider.discoveredDevices[index];
+                          final devName = dev.name.isNotEmpty ? dev.name : "Bluetooth Printer / Device";
                           return ListTile(
-                            title: Text(dev.name.isNotEmpty ? dev.name : "Unknown Device"),
-                            subtitle: Text(dev.macAdress),
-                            trailing: const Icon(Icons.bluetooth),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF2563EB).withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(Icons.print_rounded, color: Color(0xFF2563EB)),
+                            ),
+                            title: Text(devName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                            subtitle: Text("MAC: ${dev.macAdress}", style: const TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                            trailing: const Icon(Icons.add_circle_outline_rounded, color: Color(0xFF2563EB)),
                             onTap: () {
-                              _showAddBluetoothDetailsDialog(context, provider, dev.name, dev.macAdress);
+                              Navigator.pop(context);
+                              _showAddBluetoothDetailsDialog(context, provider, devName, dev.macAdress);
                             },
                           );
                         },
                       ),
                     ),
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _showManualMacAddressDialog(context, provider);
+                    },
+                    icon: const Icon(Icons.edit_note_rounded, size: 20),
+                    label: const Text("Enter MAC Address Manually"),
+                  ),
                 ],
               ),
             );
           },
         );
       },
+    );
+  }
+
+  void _showManualMacAddressDialog(BuildContext context, PrinterProvider provider) {
+    final nameController = TextEditingController(text: "Thermal Printer");
+    final macController = TextEditingController();
+    int paperSize = 58;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text("Add Printer via MAC Address"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: "Printer Name",
+                  hintText: "e.g. POS-58 Thermal",
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: macController,
+                decoration: const InputDecoration(
+                  labelText: "Bluetooth MAC Address",
+                  hintText: "e.g. 00:11:22:33:44:55",
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text("Paper Width:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+              Row(
+                children: [
+                  Radio<int>(
+                    value: 58,
+                    groupValue: paperSize,
+                    onChanged: (val) => setDialogState(() => paperSize = val!),
+                  ),
+                  const Text("58mm"),
+                  const SizedBox(width: 16),
+                  Radio<int>(
+                    value: 80,
+                    groupValue: paperSize,
+                    onChanged: (val) => setDialogState(() => paperSize = val!),
+                  ),
+                  const Text("80mm"),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final mac = macController.text.trim();
+                final name = nameController.text.trim();
+                if (mac.isEmpty) return;
+                Navigator.pop(context);
+                final newPrinter = PrinterSettings(
+                  name: name.isEmpty ? "Thermal Printer" : name,
+                  type: 'bluetooth',
+                  address: mac,
+                  paperWidth: paperSize,
+                );
+                await provider.addPrinter(newPrinter);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Added Printer: $name ($mac)")),
+                  );
+                }
+              },
+              child: const Text("Save Printer"),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

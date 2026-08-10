@@ -126,30 +126,34 @@ class PrinterProvider extends ChangeNotifier {
     if (!Platform.isAndroid && !Platform.isIOS) return true;
 
     try {
-      // Check device bluetooth toggle state
-      final bool btEnabled = await PrintBluetoothThermal.bluetoothEnabled;
+      // 1. Request runtime permissions FIRST on Android before calling Bluetooth native APIs!
+      if (Platform.isAndroid) {
+        final Map<Permission, PermissionStatus> statuses = await [
+          Permission.bluetoothConnect,
+          Permission.bluetoothScan,
+          Permission.location,
+        ].request();
+
+        debugPrint("Android Bluetooth permission request statuses: $statuses");
+      }
+
+      // 2. NOW check device bluetooth toggle state safely on Android 13/14
+      bool btEnabled = true;
+      try {
+        btEnabled = await PrintBluetoothThermal.bluetoothEnabled;
+      } catch (e) {
+        debugPrint("Error checking bluetoothEnabled: $e");
+      }
+
       if (!btEnabled) {
         debugPrint("Bluetooth is turned off on device");
         return false;
       }
 
-      // Request runtime permissions on Android 12+ (API 31+)
-      if (Platform.isAndroid) {
-        final statusConnect = await Permission.bluetoothConnect.status;
-        if (!statusConnect.isGranted) {
-          await Permission.bluetoothConnect.request();
-        }
-        final statusScan = await Permission.bluetoothScan.status;
-        if (!statusScan.isGranted) {
-          await Permission.bluetoothScan.request();
-        }
-      }
-
-      final bool hasPermission = await PrintBluetoothThermal.isPermissionBluetoothGranted;
-      return hasPermission;
+      return true;
     } catch (e) {
       debugPrint("Error checking bluetooth permissions: $e");
-      return false;
+      return true;
     }
   }
 
@@ -158,15 +162,26 @@ class PrinterProvider extends ChangeNotifier {
     _discoveredDevices = [];
     notifyListeners();
     try {
-      final bool hasPermission = await checkAndRequestBluetoothPermissions();
-      if (!hasPermission) {
-        debugPrint("Bluetooth permission not granted or Bluetooth turned off");
+      final bool btOk = await checkAndRequestBluetoothPermissions();
+      if (!btOk) {
+        debugPrint("Bluetooth is turned off on device");
         _isScanning = false;
         notifyListeners();
         return;
       }
 
-      final List<BluetoothInfo> pairedList = await PrintBluetoothThermal.pairedBluetooths;
+      // Multi-attempt retry loop for OS permission propagation (Android 13/14 compatibility)
+      List<BluetoothInfo> pairedList = [];
+      for (int attempt = 0; attempt < 3; attempt++) {
+        try {
+          pairedList = await PrintBluetoothThermal.pairedBluetooths;
+          if (pairedList.isNotEmpty) break;
+        } catch (err) {
+          debugPrint("Attempt $attempt reading paired bluetooths error: $err");
+        }
+        await Future.delayed(Duration(milliseconds: 250 * (attempt + 1)));
+      }
+
       _discoveredDevices = pairedList;
     } catch (e) {
       debugPrint("Error scanning bluetooth: $e");
