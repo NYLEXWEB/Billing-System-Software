@@ -127,6 +127,11 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
         elevation: 0,
         actions: [
           IconButton(
+            icon: const Icon(Icons.flash_on_rounded, color: Colors.amber, size: 26),
+            tooltip: "Quick Custom Item",
+            onPressed: () => _showAddCustomProductDialog(context, cartProvider),
+          ),
+          IconButton(
             icon: const Icon(Icons.qr_code_scanner_rounded, size: 26),
             tooltip: "Scan Barcode",
             onPressed: () async {
@@ -520,25 +525,104 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (cart.items.isEmpty) ...[
+          // 1. Quick Custom Item Banner (Enables instant billing with 0 catalog products!)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+            child: InkWell(
+              onTap: () => _showAddCustomProductDialog(context, cart),
+              borderRadius: BorderRadius.circular(16),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF2563EB), Color(0xFF1D4ED8)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2563EB).withOpacity(0.3),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.flash_on_rounded, color: Colors.white, size: 24),
+                    ),
+                    const SizedBox(width: 14),
+                    const Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Quick Bill / Custom Item",
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                          SizedBox(height: 2),
+                          Text(
+                            "Enter price & name directly without catalog setup",
+                            style: TextStyle(color: Colors.white70, fontSize: 11),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.add_circle_rounded, color: Colors.white, size: 28),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          if (cart.items.isEmpty && popularProducts.isEmpty) ...[
             const SizedBox(height: 32),
             Center(
-              child: Column(
-                children: [
-                  Icon(Icons.shopping_cart_outlined, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.3)),
-                  const SizedBox(height: 12),
-                  const Text(
-                    "Your checkout cart is empty",
-                    style: TextStyle(color: Color(0xFF64748B), fontSize: 14, fontWeight: FontWeight.w500),
-                  ),
-                ],
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    Icon(Icons.receipt_long_rounded, size: 64, color: const Color(0xFF94A3B8).withOpacity(0.4)),
+                    const SizedBox(height: 12),
+                    const Text(
+                      "No Products in Catalog Yet",
+                      style: TextStyle(color: Color(0xFF0F172A), fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      "You can create instant bills using Quick Custom Item above, or add products to inventory catalog below.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton.icon(
+                      onPressed: () => _showAddCustomProductDialog(context, cart),
+                      icon: const Icon(Icons.flash_on_rounded, size: 18),
+                      label: const Text("Create Quick Custom Bill"),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF2563EB),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
+
           if (popularProducts.isNotEmpty) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: [
                   Text(
@@ -548,11 +632,11 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 mainAxisSpacing: 10,
@@ -933,31 +1017,118 @@ class _PosBillingScreenState extends State<PosBillingScreen> {
             ),
             const SizedBox(height: 16),
 
-            ElevatedButton(
-              onPressed: () => _showCheckoutModal(cart, invoiceProvider, shop, currency, theme),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: theme.colorScheme.onPrimary,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 18),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "PROCEED TO PAYMENT",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, letterSpacing: 0.8),
+            Row(
+              children: [
+                // 1. FAST PRINT & BILL BUTTON (High-speed 1-tap checkout for rush hours!)
+                Expanded(
+                  flex: 3,
+                  child: ElevatedButton(
+                    onPressed: () => _executeFastCheckoutAndPrint(cart, invoiceProvider, shop),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF10B981),
+                      foregroundColor: Colors.white,
+                      elevation: 2,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.print_rounded, size: 20),
+                        SizedBox(width: 6),
+                        Flexible(
+                          child: Text(
+                            "FAST PRINT & BILL",
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 0.5),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  SizedBox(width: 8),
-                  Icon(Icons.arrow_forward_rounded, size: 18),
-                ],
-              ),
+                ),
+                const SizedBox(width: 10),
+                // 2. MORE PAYMENT OPTIONS (Card, UPI, Customer info, Tax, Discount)
+                Expanded(
+                  flex: 2,
+                  child: OutlinedButton(
+                    onPressed: () => _showCheckoutModal(cart, invoiceProvider, shop, currency, theme),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      side: BorderSide(color: theme.colorScheme.primary, width: 1.5),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                    ),
+                    child: Text(
+                      "MORE OPTIONS",
+                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: theme.colorScheme.primary),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _executeFastCheckoutAndPrint(
+    CartProvider cart,
+    InvoiceProvider invoiceProvider,
+    dynamic shop,
+  ) async {
+    if (cart.items.isEmpty) return;
+
+    try {
+      final invoiceNum = _generateInvoiceNumber();
+      final invoice = Invoice(
+        invoiceNumber: invoiceNum,
+        customerName: "Walk-in Customer",
+        customerPhone: "",
+        items: List.from(cart.items),
+        totalAmount: cart.totalAmount,
+        discountAmount: cart.discountAmount,
+        taxAmount: cart.taxAmount,
+        grandTotal: cart.grandTotal,
+        paymentMethod: "Cash",
+        createdAt: DateTime.now(),
+      );
+
+      final invoiceId = await invoiceProvider.checkout(invoice);
+
+      if (invoiceId > 0 && context.mounted) {
+        Provider.of<ProductProvider>(context, listen: false).loadProducts();
+        final finalInvoice = await DbHelper().getInvoiceById(invoiceId);
+
+        cart.clear();
+        setState(() {
+          _viewingCart = false;
+        });
+
+        if (finalInvoice != null) {
+          AppToast.showSuccess(context, "Bill Completed!");
+
+          // Auto-trigger thermal printing immediately if active printer is connected
+          final printerProvider = Provider.of<PrinterProvider>(context, listen: false);
+          if (printerProvider.activePrinter != null && shop != null) {
+            final printed = await printerProvider.printInvoice(finalInvoice, shop);
+            if (printed && context.mounted) {
+              AppToast.showSuccess(context, "Receipt Printed!");
+            }
+          } else if (context.mounted) {
+            // If printer not active, show invoice detail sheet preview
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => InvoiceDetailSheet(invoice: finalInvoice),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint("Error in fast checkout: $e");
+    }
   }
 
   void _showDiscountDialog(CartProvider cart) {
